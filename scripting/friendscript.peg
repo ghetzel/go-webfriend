@@ -1,0 +1,298 @@
+package scripting
+
+type Friendscript Peg {
+  runtime
+}
+
+Friendscript       <- _ SHEBANG? _ Block* !.
+
+# Syntactic Punctuation
+# --------------------------------------------------------------------------------------------------
+_       <- [ \t\r\n]*
+__      <- [ \t\r\n]+
+ASSIGN  <- _ '->' _
+BEGIN   <- _ 'begin'
+BREAK   <- _ 'break' _
+CLOSE   <- _ '}' _
+COLON   <- _ ':' _
+COMMA   <- _ ',' _
+Comment <- _ '#' [^\n]*
+CONT    <- _ 'continue' _
+COUNT   <- _ 'count' _
+DECLARE <- _ 'declare' __
+DOT     <- '.'
+ELSE    <- _ 'else' _
+END     <- _ 'end' _
+IF      <- _ 'if' _
+IN      <- __ 'in' __
+INCLUDE <- _ 'include' __
+LOOP    <- _ 'loop' _
+NOOP    <- SEMI
+NOT     <- _ 'not' __
+OPEN    <- _ '{' _
+SCOPE   <- '::'
+SEMI    <- _ ';' _
+SHEBANG <- '#!' [^\n]+ [\n]
+SKIPVAR <- _ '_' _
+UNSET   <- _ 'unset' __
+
+# Operators
+# --------------------------------------------------------------------------------------------------
+Operator     <- _ ( Exponentiate
+                  / Multiply
+                  / Divide
+                  / Modulus
+                  / Add
+                  / Subtract
+                  / BitwiseAnd
+                  / BitwiseOr
+                  / BitwiseNot
+                  / BitwiseXor
+                  ) _
+
+
+Exponentiate <- _ '**' _
+Multiply     <- _ '*' _
+Divide       <- _ '/' _
+Modulus      <- _ '%' _
+Add          <- _ '+' _
+Subtract     <- _ '-' _
+BitwiseAnd   <- _ '&' _
+BitwiseOr    <- _ '|' _
+BitwiseNot   <- _ '~' _
+BitwiseXor   <- _ '^' _
+
+MatchOperator
+             <- ( Match / Unmatch )
+Unmatch      <- _ '!~' _
+Match        <- _ '=~' _
+
+# Assignment Operators
+# --------------------------------------------------------------------------------------------------
+AssignmentOperator <- _ ( AssignEq
+                        / StarEq
+                        / DivEq
+                        / PlusEq
+                        / MinusEq
+                        / AndEq
+                        / OrEq
+                        / Append
+                        ) _
+
+AssignEq           <- _ '='  _
+StarEq             <- _ '*=' _
+DivEq              <- _ '/=' _
+PlusEq             <- _ '+=' _
+MinusEq            <- _ '-=' _
+AndEq              <- _ '&=' _
+OrEq               <- _ '|=' _
+Append             <- _ '<<' _
+
+# Comparison Operators
+# --------------------------------------------------------------------------------------------------
+ComparisonOperator <- _ ( Equality
+                        / NonEquality
+                        / GreaterEqual
+                        / LessEqual
+                        / GreaterThan
+                        / LessThan
+                        / Membership
+                        / NonMembership
+                        ) _
+
+Equality           <- _ '==' _
+NonEquality        <- _ '!=' _
+GreaterThan        <- _ '>'  _
+GreaterEqual       <- _ '>=' _
+LessEqual          <- _ '<=' _
+LessThan           <- _ '<'  _
+Membership         <- _ 'in' _
+NonMembership      <- _ 'not' __ 'in' _
+
+# Language Constructs
+# --------------------------------------------------------------------------------------------------
+Variable
+    <- ( '$' VariableNameSequence / SKIPVAR )
+
+VariableNameSequence
+    <- ( VariableName DOT )* VariableName
+
+VariableName
+    <- Identifier ( '[' _ VariableIndex _ ']' )?
+
+VariableIndex
+    <- Expression
+
+Block
+    <- _ ( Comment / FlowControlWord / StatementBlock ) SEMI? _
+
+FlowControlWord
+    <- ( FlowControlBreak
+       / FlowControlContinue
+       )
+
+FlowControlBreak
+    <- BREAK PositiveInteger?
+
+FlowControlContinue
+    <- CONT PositiveInteger?
+
+StatementBlock
+    <- ( NOOP / Assignment / Directive / Conditional / Loop / Command )
+
+# Assignment
+# -------------------------------------------------------------------------------------------------
+Assignment
+    <-  AssignmentLHS AssignmentOperator AssignmentRHS
+
+AssignmentLHS
+    <- VariableSequence
+
+AssignmentRHS
+    <- ExpressionSequence
+
+VariableSequence
+    <- ( Variable COMMA )* Variable
+
+ExpressionSequence
+    <- (Expression COMMA)* Expression
+
+Expression
+    <- _ ExpressionLHS ExpressionRHS? _
+
+ExpressionLHS
+    <- ValueYielding
+
+ExpressionRHS
+    <- ( Operator Expression )
+
+ValueYielding
+    <- ( Type / Variable )
+
+# Directive
+# -------------------------------------------------------------------------------------------------
+Directive
+    <- ( DirectiveUnset / DirectiveInclude / DirectiveDeclare )
+
+DirectiveUnset
+    <- UNSET VariableSequence
+
+DirectiveInclude
+    <- INCLUDE String
+
+DirectiveDeclare
+    <- DECLARE VariableSequence
+
+# Command
+# -------------------------------------------------------------------------------------------------
+Command
+    <- _ CommandName __ (
+                          CommandFirstArg __ CommandSecondArg
+                        / CommandFirstArg
+                        / CommandSecondArg
+                        )? ( _ CommandResultAssignment )?
+
+CommandName
+    <- ( Identifier SCOPE )? Identifier
+
+CommandFirstArg
+    <- ( Variable / ScalarType )
+
+CommandSecondArg
+    <- Object
+
+CommandResultAssignment
+    <- ASSIGN Variable
+
+
+# Conditional (if/else if/else)
+# -------------------------------------------------------------------------------------------------
+Conditional
+    <- IfStanza ElseIfStanza* ElseStanza?
+
+IfStanza
+    <- IF ConditionalExpression OPEN Block* CLOSE
+
+ElseIfStanza
+    <- ELSE IfStanza
+
+ElseStanza
+    <- ELSE OPEN Block* CLOSE
+
+# Loop
+# -------------------------------------------------------------------------------------------------
+Loop
+    <- LOOP ( OPEN Block* CLOSE
+            / LoopConditionFixedLength OPEN Block* CLOSE
+            / LoopConditionIterable    OPEN Block* CLOSE
+            / LoopConditionBounded     OPEN Block* CLOSE
+            / LoopConditionTruthy      OPEN Block* CLOSE
+            )
+
+LoopConditionFixedLength
+    <- COUNT ( Integer / Variable )
+
+LoopConditionIterable
+    <- LoopIterableLHS IN LoopIterableRHS
+
+LoopIterableLHS
+    <- VariableSequence
+
+LoopIterableRHS
+    <- ( Command / Variable )
+
+LoopConditionBounded
+    <- Command SEMI ConditionalExpression SEMI Command
+
+LoopConditionTruthy
+    <- ConditionalExpression
+
+ConditionalExpression
+    <- NOT? ( ConditionWithAssignment
+            / ConditionWithCommand
+            / ConditionWithRegex
+            / ConditionWithComparator
+            )
+
+ConditionWithAssignment
+    <- Assignment SEMI ConditionalExpression
+
+ConditionWithCommand
+    <- Command ( SEMI ConditionalExpression )?
+
+ConditionWithRegex
+    <- Expression MatchOperator RegularExpression
+
+ConditionWithComparator
+    <- ConditionWithComparatorLHS ConditionWithComparatorRHS?
+
+ConditionWithComparatorLHS
+    <- Expression
+
+ConditionWithComparatorRHS
+    <- ( ComparisonOperator Expression )
+
+
+ScalarType         <- ( Boolean / Float / Integer / String / NullValue )
+Identifier         <- [[a-z_]][[a-z0-9_]]*
+Float              <- Integer ( '.' [0-9]+ )?
+Boolean            <- ('true' / 'false')
+Integer            <- '-'? PositiveInteger
+PositiveInteger    <- [0-9]+
+String             <- ( StringLiteral / StringInterpolated / Heredoc )
+StringLiteral      <- "'" [^']* "'"
+StringInterpolated <- '"' [^"]* '"'
+Heredoc            <- BEGIN "\n" HeredocBody END
+HeredocBody        <- (!END .)*
+NullValue          <- 'null'
+Object             <- OPEN ( _ KeyValuePair _ )* CLOSE
+Array              <- '[' _ ExpressionSequence COMMA? ']'
+RegularExpression  <- '/' [^/]+ '/' [ilmsu]*
+KeyValuePair       <- Key COLON KValue COMMA?
+Key                <- Identifier
+KValue             <- ( Array / Object / Expression )
+Type               <- ( Array
+                      / Object
+                      / RegularExpression
+                      / ScalarType
+                      )

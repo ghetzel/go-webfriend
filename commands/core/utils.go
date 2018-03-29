@@ -1,0 +1,96 @@
+package core
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+
+	"github.com/ghetzel/go-stockutil/typeutil"
+	"github.com/ghetzel/go-webfriend/browser"
+)
+
+type EnvArgs struct {
+	// The value to return if the environment variable does not exist, or
+	// (optionally) is empty.
+	Fallback interface{} `json:"fallback"` // null
+
+	// Whether empty values should be ignored or not.
+	IgnoreEmpty bool `json:"ignore_empty"` // true
+
+	// Whether automatic type detection should be performed or not.
+	DetectType bool `json:"detect_type"` // true
+
+	// If specified, this string will be used to split matching values into a
+	// list of values. This is useful for environment variables that contain
+	// multiple values joined by a separator (e.g: the PATH variable.)
+	Joiner string `json:"joiner"` // null
+}
+
+// Retrieves a system environment variable and returns the value of it, or a
+// fallback value if the variable does not exist or (optionally) is empty.
+func (self *Commands) Env(name string, args *EnvArgs) (interface{}, error) {
+	return nil, fmt.Errorf(`NI`)
+}
+
+// Immediately exit the script in an error-like fashion with a specific message.
+func (self *Commands) Fail(message string) error {
+	if message == `` {
+		message = `Unspecified error`
+	}
+
+	return errors.New(message)
+}
+
+// Directly call an RPC method with the given parameters.
+func (self *Commands) Rpc(method string, args map[string]interface{}) (interface{}, error) {
+	return nil, fmt.Errorf(`NI`)
+}
+
+// Outputs a line to the log.
+func (self *Commands) Log(message interface{}, level string) (interface{}, error) {
+	if typeutil.IsScalar(message) {
+		fmt.Printf("%v\n", message)
+	} else if data, err := json.MarshalIndent(message, ``, `  `); err == nil {
+		fmt.Printf(string(data) + "\n")
+	} else {
+		log.Errorf("Failed to log message: %v", err)
+		return message, err
+	}
+
+	return message, nil
+}
+
+// Store a value in the current scope. Strings will be automatically converted
+// into the appropriate data types (float, int, bool) if possible.
+func (self *Commands) Put(value interface{}) (interface{}, error) {
+	log.Debugf("put %T(%v)", value, value)
+	return value, nil
+}
+
+type RunArgs struct {
+	Data          interface{} `json:"data"`           // null
+	Isolated      bool        `json:"isolated"`       // true
+	PreserveState bool        `json:"preserve_state"` // true
+	MergeScopes   bool        `json:"merge_scopes"`   // false
+	ResultKey     string      `json:"result_key"`     // result
+}
+
+// Evaluates another Friendscript loaded from another file. The filename is the
+// absolute path or basename of the file to search for in the WEBFRIEND_PATH
+// environment variable to load and evaluate. The WEBFRIEND_PATH variable
+// behaves like the the traditional *nix PATH variable, wherein multiple paths
+// can be specified as a colon-separated (:) list. The current working directory
+// will always be checked first.
+//
+// Returns: The value of the variable named by result_key at the end of the
+// evaluated script's execution.
+//
+func (self *Commands) Run(filename string, args *RunArgs) (interface{}, error) {
+	return nil, fmt.Errorf(`NI`)
+}
+
+// Change the current selector scope to be rooted at the given element. If
+// selector is empty, the scope is set to the document element (i.e.: global).
+func (self *Commands) SwitchRoot(selector browser.Selector) error {
+	return fmt.Errorf(`NI`)
+}
