@@ -18,5 +18,6 @@ type SelectArgs struct {
 // element will be found and returned within the given timeout, or a
 // TimeoutError will be returned.
 func (self *Commands) Select(selector browser.Selector, args *SelectArgs) ([]browser.Element, error) {
+	self.browser.Tab().DOM().PrintTree()
 	return nil, nil
 }

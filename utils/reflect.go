@@ -8,7 +8,13 @@ import (
 var errorInterface = reflect.TypeOf((*error)(nil)).Elem()
 
 func GetFunctionByName(from interface{}, name string) (reflect.Value, error) {
-	fromV := reflect.ValueOf(from)
+	var fromV reflect.Value
+
+	if fV, ok := from.(reflect.Value); ok {
+		fromV = fV
+	} else {
+		fromV = reflect.ValueOf(from)
+	}
 
 	if methodV := fromV.MethodByName(name); methodV.IsValid() && methodV.Kind() == reflect.Func {
 		return methodV, nil

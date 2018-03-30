@@ -10,7 +10,6 @@ import (
 
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/stringutil"
-	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/gobwas/glob"
 	"github.com/mafredri/cdp/rpcc"
 )
@@ -52,7 +51,7 @@ func (self *Event) String() string {
 	if self.Error != nil {
 		return self.Error.Error()
 	} else {
-		return fmt.Sprintf("%v %v", self.Name, typeutil.Dump(self.Params))
+		return fmt.Sprintf("%v", self.Name)
 	}
 }
 
@@ -136,6 +135,9 @@ func (self *rpccStreamIntercept) WriteRequest(req *rpcc.Request) error {
 	if _, err := self.conn.Write(buf.Bytes()); err != nil {
 		return err
 	}
+
+	// log.Debugf("[proto] WROTE: %v", buf.String())
+
 	return nil
 }
 
@@ -145,6 +147,8 @@ func (self *rpccStreamIntercept) ReadResponse(resp *rpcc.Response) error {
 	if err := json.NewDecoder(io.TeeReader(self.conn, &buf)).Decode(resp); err != nil {
 		return err
 	}
+
+	// log.Debugf("[proto] READ: %v", buf.String())
 
 	if event, err := eventFromRpcResponse(resp); err == nil {
 		self.events <- event

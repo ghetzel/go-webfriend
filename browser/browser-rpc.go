@@ -11,10 +11,27 @@ import (
 
 var rpcConnectTimeout = (10 * time.Second)
 var rpcConnectRetryInterval = (125 * time.Millisecond)
+var rpcConnectMaxRetries = 40
 
 func (self *Browser) connectRPC(address string) error {
 	self.devtools = devtool.New(fmt.Sprintf("http://%v", address))
-	return self.syncState()
+	connected := false
+
+	for i := 0; i < rpcConnectMaxRetries; i++ {
+		if version, err := self.devtools.Version(self.ctx()); err == nil {
+			connected = true
+			log.Debugf("Connected to %v; protocol %v", version.Browser, version.Protocol)
+			break
+		} else {
+			time.Sleep(rpcConnectRetryInterval)
+		}
+	}
+
+	if connected {
+		return self.syncState()
+	} else {
+		return fmt.Errorf("Failed to connect to RPC interface after %d attempts", rpcConnectMaxRetries)
+	}
 }
 
 func (self *Browser) syncState() error {

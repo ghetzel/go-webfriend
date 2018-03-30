@@ -9,9 +9,11 @@ import (
 
 	"github.com/fatih/structs"
 	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/utils"
+	"github.com/gobwas/glob"
 	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/mafredri/cdp/rpcc"
@@ -31,6 +33,7 @@ type Tab struct {
 	waiters         sync.Map
 	networkRequests []*Event
 	netreqLock      sync.Mutex
+	accumulators    sync.Map
 }
 
 func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
@@ -73,6 +76,22 @@ func (self *Tab) getModule(module string) (*structs.Field, bool) {
 	return structs.New(self.rpc).FieldOk(module)
 }
 
+func (self *Tab) CreateAccumulator(filter string) (*eventAccumulator, error) {
+	if pattern, err := glob.Compile(filter); err == nil {
+		acc := &eventAccumulator{
+			id:     stringutil.UUID().String(),
+			tab:    self,
+			filter: pattern,
+			Events: make([]*Event, 0),
+		}
+
+		self.accumulators.Store(acc.id, acc)
+		return acc, nil
+	} else {
+		return nil, err
+	}
+}
+
 func (self *Tab) RPC(module string, method string, args map[string]interface{}) (map[string]interface{}, error) {
 	if mod, ok := self.getModule(module); ok {
 		if fn, err := utils.GetFunctionByName(mod.Value(), method); err == nil {
@@ -91,24 +110,57 @@ func (self *Tab) RPC(module string, method string, args map[string]interface{}) 
 						argT = argT.Elem()
 					}
 
-					argStruct := reflect.New(argT).Interface()
+					if argT.Kind() != reflect.Struct {
+						return nil, fmt.Errorf("Expected second argument to be a configuration struct, got %v", argT)
+					}
+
+					argStruct := reflect.New(argT)
 
 					if len(args) > 0 {
-						// for each field in the argstruct
-						for _, field := range structs.New(argStruct).Fields() {
-							keyName := field.Tag(`json`)
+						fieldNames := make([]string, 0)
 
-							if keyName == `` {
-								keyName = field.Name()
+						for i := 0; i < argT.NumField(); i++ {
+							fieldNames = append(fieldNames, argT.Field(i).Name)
+						}
+
+						for key, _ := range args {
+							if sliceutil.ContainsString(fieldNames, key) {
+								continue
+							} else if _, err := utils.GetFunctionByName(argStruct, fmt.Sprintf("Set%v", key)); err == nil {
+								continue
+							} else {
+								return nil, fmt.Errorf("Could not find field or setter function for parameter '%v'", key)
 							}
+						}
+
+						// for each field in the argstruct
+						for i := 0; i < argT.NumField(); i++ {
+							field := argStruct.Elem().Field(i)
+							keyName := argT.Field(i).Name
 
 							// if there is a key with this name in the arg map
 							if value, ok := args[keyName]; ok {
-								// attempt to directly set the value
-								if err := field.Set(value); err != nil {
+								valueV := reflect.ValueOf(value)
+								didSet := false
+
+								if field.CanSet() {
+									// convert if necessary
+									if !valueV.Type().AssignableTo(field.Type()) {
+										if valueV.Type().ConvertibleTo(field.Type()) {
+											valueV = valueV.Convert(field.Type())
+										}
+									}
+
+									if valueV.Type().AssignableTo(field.Type()) {
+										field.Set(valueV)
+										didSet = true
+									}
+								}
+
+								if !didSet {
 									// if we couldn't set the value, look for a setter function
 									// with the format Set<FieldName>().
-									fnName := fmt.Sprintf("Set%v", field.Name())
+									fnName := fmt.Sprintf("Set%v", keyName)
 
 									if setter, err := utils.GetFunctionByName(argStruct, fnName); err == nil {
 										setterT := setter.Type()
@@ -128,6 +180,7 @@ func (self *Tab) RPC(module string, method string, args map[string]interface{}) 
 											}
 
 											// call the setter function
+
 											setter.Call([]reflect.Value{
 												valueV,
 											})
@@ -142,13 +195,13 @@ func (self *Tab) RPC(module string, method string, args map[string]interface{}) 
 						}
 					}
 
-					arguments[i] = reflect.ValueOf(argStruct)
+					arguments[i] = argStruct
 				default:
 					return nil, fmt.Errorf("Unsupported number of arguments; expected [0,1], got %d", len(arguments))
 				}
 			}
 
-			log.Debugf("CALL %v.%v", module, method)
+			// log.Debugf("CALL %v.%v", module, method)
 			results := fn.Call(arguments)
 
 			switch len(results) {
@@ -161,11 +214,7 @@ func (self *Tab) RPC(module string, method string, args map[string]interface{}) 
 					output := structs.Map(rv)
 
 					for key, value := range output {
-						if vI := reflect.ValueOf(value); vI.Kind() == reflect.Ptr {
-							if typeutil.IsScalar(value) {
-								output[key] = stringutil.Autotype(typeutil.ResolveValue(value))
-							}
-						}
+						output[key] = stringutil.Autotype(typeutil.ResolveValue(value))
 					}
 
 					return output, nil
@@ -214,12 +263,22 @@ func (self *Tab) startEventReceiver() {
 	for event := range self.events {
 		// log.Debugf("[event] %v", event)
 
+		// dispatch events to waiters
 		self.waiters.Range(func(_ interface{}, waiterI interface{}) bool {
 			if waiter, ok := waiterI.(*eventWaiter); ok {
 				if waiter.Match(event) {
 					waiter.Events <- event
 					return false
 				}
+			}
+
+			return true
+		})
+
+		// add events to matching event accumulators
+		self.accumulators.Range(func(_ interface{}, accI interface{}) bool {
+			if accumulator, ok := accI.(*eventAccumulator); ok {
+				accumulator.AppendIfMatch(event)
 			}
 
 			return true

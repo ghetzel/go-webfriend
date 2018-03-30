@@ -23,7 +23,7 @@ import (
 
 var log = logging.MustGetLogger(`webfriend/browser`)
 
-var rpcGlobalTimeout = (10 * time.Second)
+var rpcGlobalTimeout = (60 * time.Second)
 var DefaultStartWait = time.Duration(500) * time.Millisecond
 
 type Browser struct {

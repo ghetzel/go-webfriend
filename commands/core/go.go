@@ -67,7 +67,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 	defaults.SetDefaults(args)
 
 	if args.Timeout == 0 {
-		args.Timeout = time.Duration(30)* time.Second
+		args.Timeout = time.Duration(30) * time.Second
 	}
 
 	// if specified as random, generate a referrer with a UUID in the url
@@ -86,7 +86,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 
 	if u, err := url.Parse(uri); err == nil {
 		if rv, err := self.browser.Tab().RPC(`Page`, `Navigate`, map[string]interface{}{
-			`url`: u.String(),
+			`URL`: u.String(),
 		}); err == nil {
 			if args.WaitForLoad {
 				// wait for the first event matching the given pattern
