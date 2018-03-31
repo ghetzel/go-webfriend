@@ -58,7 +58,7 @@ type Browser struct {
 func NewBrowser() *Browser {
 	return &Browser{
 		Command:             argonaut.CommandName(LocateChromeExecutable()),
-		Headless:            true,
+		Headless:            false,
 		RemoteDebuggingPort: 0,
 		Preferences:         GetDefaultPreferences(),
 		StartWait:           DefaultStartWait,

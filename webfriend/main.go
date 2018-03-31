@@ -1,14 +1,15 @@
 package main
 
 import (
+	"io"
 	"os"
 	"os/signal"
+
+	"github.com/ghetzel/go-stockutil/fileutil"
 
 	"github.com/ghetzel/cli"
 	"github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
-	// "github.com/ghetzel/go-webfriend"
-
 	"github.com/op/go-logging"
 )
 
@@ -51,18 +52,27 @@ func main() {
 			})
 
 			script := webfriend.NewEnvironment(browser)
+			var input io.Reader
 
-			if file, err := os.Open(c.Args().First()); err == nil {
-				if scope, err := script.EvaluateReader(file); err == nil {
-					log.Debugf("Final scope: %v", scope)
-					log.Infof("Done")
-					browser.Stop()
-					os.Exit(0)
+			if c.NArg() > 0 {
+				if file, err := os.Open(c.Args().First()); err == nil {
+					input = file
 				} else {
-					log.Fatalf("runtime error: %v", err)
+					log.Fatalf("file error: %v", err)
 				}
+			} else if fileutil.IsTerminal() {
+				input = os.Stdin
 			} else {
-				log.Fatalf("file error: %v", err)
+				log.Fatal("Must specify a file to execute or Friendscript via standard input")
+			}
+
+			if scope, err := script.EvaluateReader(input); err == nil {
+				log.Debugf("Final scope: %v", scope)
+				log.Infof("Done")
+				browser.Stop()
+				os.Exit(0)
+			} else {
+				log.Fatalf("runtime error: %v", err)
 			}
 		} else {
 			log.Fatalf("could not launch browser: %v", err)
