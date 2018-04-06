@@ -364,8 +364,6 @@ func (self *Tab) WaitFor(eventGlob string, timeout time.Duration) (*Event, error
 		case <-time.After(timeout):
 			return nil, fmt.Errorf("timeout")
 		}
-
-		return nil, fmt.Errorf("unspecified error")
 	} else {
 		return nil, err
 	}

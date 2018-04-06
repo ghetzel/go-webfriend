@@ -58,7 +58,7 @@ type Browser struct {
 func NewBrowser() *Browser {
 	return &Browser{
 		Command:             argonaut.CommandName(LocateChromeExecutable()),
-		Headless:            false,
+		Headless:            true,
 		RemoteDebuggingPort: 0,
 		Preferences:         GetDefaultPreferences(),
 		StartWait:           DefaultStartWait,
@@ -69,28 +69,27 @@ func NewBrowser() *Browser {
 
 func Start() (*Browser, error) {
 	browser := NewBrowser()
-
-	if browser.UserDataDirectory == `` {
-		if userDataDir, err := ioutil.TempDir(``, `webfriend-`); err == nil {
-			browser.UserDataDirectory = userDataDir
-			browser.isTempUserDataDir = true
-		} else {
-			return nil, err
-		}
-	}
-
-	if browser.RemoteDebuggingPort <= 0 {
-		if port, err := freeport.GetFreePort(); err == nil {
-			browser.RemoteDebuggingPort = port
-		} else {
-			return nil, err
-		}
-	}
-
 	return browser, browser.Launch()
 }
 
 func (self *Browser) Launch() error {
+	if self.UserDataDirectory == `` {
+		if userDataDir, err := ioutil.TempDir(``, `webfriend-`); err == nil {
+			self.UserDataDirectory = userDataDir
+			self.isTempUserDataDir = true
+		} else {
+			return err
+		}
+	}
+
+	if self.RemoteDebuggingPort <= 0 {
+		if port, err := freeport.GetFreePort(); err == nil {
+			self.RemoteDebuggingPort = port
+		} else {
+			return err
+		}
+	}
+
 	if err := self.preparePaths(); err != nil {
 		return err
 	}

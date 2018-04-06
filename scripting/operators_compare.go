@@ -61,11 +61,11 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 	var rverr error
 
 	if lhs == nil {
-		panic("malformed expression: missing left-hand side")
+		log.Fatal("malformed expression: missing left-hand side")
 	} else if v, err := lhs.Value(); err == nil {
 		lvv = v
 	} else {
-		panic(fmt.Errorf("invalid expression result: %v", err))
+		log.Fatalf("invalid expression result: %v", err)
 	}
 
 	if rhs == nil {
@@ -73,7 +73,7 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 	} else if v, err := rhs.Value(); err == nil {
 		rvv = v
 	} else {
-		panic(fmt.Errorf("invalid expression result: %v", err))
+		log.Fatalf("invalid expression result: %v", err)
 	}
 
 	lv, lverr = stringutil.ConvertToFloat(lvv)
@@ -84,41 +84,47 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 		if res, err := stringutil.RelaxedEqual(lvv, rvv); err == nil {
 			return res
 		} else {
-			panic(fmt.Errorf("incomparable types %T, %T: %v", lvv, rvv, err))
+			log.Fatalf("incomparable types %T, %T: %v", lvv, rvv, err)
+			return false
 		}
 	case cmpNonEquality:
 		if res, err := stringutil.RelaxedEqual(lvv, rvv); err == nil {
 			return !res
 		} else {
-			panic(fmt.Errorf("incomparable types %T, %T: %v", lvv, rvv, err))
+			log.Fatalf("incomparable types %T, %T: %v", lvv, rvv, err)
+			return false
 		}
 
 	case cmpGreaterThan:
 		if lverr == nil && rverr == nil {
 			return (lv > rv)
 		} else {
-			panic(fmt.Errorf("incomparable types %T, %T", lvv, rvv))
+			log.Fatalf("incomparable types %T, %T", lvv, rvv)
+			return false
 		}
 
 	case cmpGreaterEqual:
 		if lverr == nil && rverr == nil {
 			return (lv >= rv)
 		} else {
-			panic(fmt.Errorf("incomparable types %T, %T", lvv, rvv))
+			log.Fatalf("incomparable types %T, %T", lvv, rvv)
+			return false
 		}
 
 	case cmpLessEqual:
 		if lverr == nil && rverr == nil {
 			return (lv <= rv)
 		} else {
-			panic(fmt.Errorf("incomparable types %T, %T", lvv, rvv))
+			log.Fatalf("incomparable types %T, %T", lvv, rvv)
+			return false
 		}
 
 	case cmpLessThan:
 		if lverr == nil && rverr == nil {
 			return (lv < rv)
 		} else {
-			panic(fmt.Errorf("incomparable types %T, %T", lvv, rvv))
+			log.Fatalf("incomparable types %T, %T", lvv, rvv)
+			return false
 		}
 
 	case cmpMembership:

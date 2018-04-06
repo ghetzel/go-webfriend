@@ -294,8 +294,6 @@ func (self *Statement) parseValue(node *node32) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("unhandled rule %v", rul3s[value.rule()])
 	}
-
-	return nil, fmt.Errorf("Unrecognized value type")
 }
 
 func (self *Statement) resolveVariableKey(node *node32) (string, error) {
@@ -364,7 +362,7 @@ func (self *Statement) makeAssignment(node *node32) *Assignment {
 				if key, err := self.resolveVariableKey(varNode); err == nil {
 					names = append(names, key)
 				} else {
-					panic(fmt.Errorf("unable to resolve variable name: %v", err))
+					log.Fatalf("unable to resolve variable name: %v", err)
 				}
 			}
 
@@ -379,9 +377,10 @@ func (self *Statement) makeAssignment(node *node32) *Assignment {
 				statement:     self,
 			}
 		} else {
-			panic(fmt.Errorf("invalid assignment operator: %v", err))
+			log.Fatalf("invalid assignment operator: %v", err)
 		}
 	}
 
-	panic("cannot build Assignment from given node")
+	log.Fatal("cannot build Assignment from given node")
+	return nil
 }

@@ -29,6 +29,10 @@ func main() {
 			Value:  `debug`,
 			EnvVar: `LOGLEVEL`,
 		},
+		cli.BoolFlag{
+			Name:  `debug, D`,
+			Usage: `Whether to open the browser in a non-headless mode for debugging purposes.`,
+		},
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -45,8 +49,10 @@ func main() {
 
 	app.Action = func(c *cli.Context) {
 		log.Infof("Starting %s %s", c.App.Name, c.App.Version)
+		browser := browser.NewBrowser()
+		browser.Headless = !c.Bool(`debug`)
 
-		if browser, err := browser.Start(); err == nil {
+		if err := browser.Launch(); err == nil {
 			defer handleSignals(func() {
 				browser.Stop()
 			})

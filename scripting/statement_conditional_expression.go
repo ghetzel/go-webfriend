@@ -1,8 +1,6 @@
 package scripting
 
 import (
-	"fmt"
-
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 )
@@ -27,7 +25,7 @@ func (self *ConditionalExpression) IsTrue() bool {
 		if value, err := NewExpression(self.statement, exprNodes[0]).Value(); err == nil {
 			return isTruthy(value)
 		} else {
-			panic(fmt.Errorf("malformed conditional expression: %v", err))
+			log.Fatalf("malformed conditional expression: %v", err)
 		}
 
 	case 2:
@@ -37,18 +35,20 @@ func (self *ConditionalExpression) IsTrue() bool {
 				NewExpression(self.statement, exprNodes[1]),
 			)
 		} else {
-			panic(fmt.Errorf("malformed conditional expression: %v", err))
+			log.Fatalf("malformed conditional expression: %v", err)
 		}
 	}
 
-	panic("malformed conditional expression")
+	log.Fatal("malformed conditional expression")
+	return false
 }
 
 func isTruthy(value interface{}) bool {
 	if v, err := exprToValue(value); err == nil {
 		value = v
 	} else {
-		panic(err)
+		log.Fatal(err)
+		return false
 	}
 
 	if typeutil.IsEmpty(value) || typeutil.IsZero(value) {

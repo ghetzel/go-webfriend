@@ -8,7 +8,7 @@ import (
 
 type FieldArgs struct {
 	// Whether to clear the existing contents of the field before entering new data.
-	Autoclear bool `json:autoclear"` // true
+	Autoclear bool `json:"autoclear"` // true
 }
 
 // Locate and enter data into a form input field.

@@ -64,7 +64,8 @@ func (self *Conditional) WithAssignment() (*Assignment, *ConditionalExpression) 
 		return assignment, condition
 	}
 
-	panic("malformed conditional statement")
+	log.Fatal("malformed conditional statement")
+	return nil, nil
 }
 
 // Return the objects necessary to execute a command then evaluate an expression
@@ -80,7 +81,8 @@ func (self *Conditional) WithCommand() (*Command, *ConditionalExpression) {
 		return command, condition
 	}
 
-	panic("malformed conditional statement")
+	log.Fatal("malformed conditional statement")
+	return nil, nil
 }
 
 // Return the expression, operator, and regular expression in a regex if-test
@@ -96,14 +98,15 @@ func (self *Conditional) WithRegex() (*Expression, MatchOperator, *regexp.Regexp
 			if cmp, err := parseMatchComparator(matchNode); err == nil {
 				return expr, cmp, rx
 			} else {
-				panic(fmt.Sprintf("malformed match operator: %v", err))
+				log.Fatalf("malformed match operator: %v", err)
 			}
 		} else {
-			panic(fmt.Sprintf("malformed regular expression: %v", err))
+			log.Fatalf("malformed regular expression: %v", err)
 		}
 	}
 
-	panic("malformed conditional statement")
+	log.Fatal("malformed conditional statement")
+	return nil, -1, nil
 }
 
 // Return the the left- and right-hand sides of an if-test, joined by the comparator.
@@ -115,7 +118,7 @@ func (self *Conditional) WithComparator() (*Expression, Comparator, *Expression)
 		rhsNode = condType.first(ruleConditionWithComparatorRHS)
 
 		if lhsNode == nil {
-			panic("malformed conditional statement: missing left-hand side expression")
+			log.Fatal("malformed conditional statement: missing left-hand side expression")
 		}
 
 		if rhsNode == nil {
@@ -129,12 +132,13 @@ func (self *Conditional) WithComparator() (*Expression, Comparator, *Expression)
 					return lhs, cmp, rhs
 				}
 			} else {
-				panic("malformed conditional statement: missing comparator")
+				log.Fatal("malformed conditional statement: missing comparator")
 			}
 		}
 	}
 
-	panic("malformed conditional statement")
+	log.Fatal("malformed conditional statement")
+	return nil, -1, nil
 }
 
 func (self *Conditional) node() *node32 {

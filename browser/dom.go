@@ -114,13 +114,14 @@ func (self *Document) Root() *Element {
 					break
 				}
 			}
+
 		} else {
-			panic(fmt.Errorf("Failed to get root element: %v", err))
+			log.Fatalf("Failed to get root element: %v", err)
 		}
 	}
 
 	if self.root == nil {
-		panic("Failed to locate root element")
+		log.Fatalf("Failed to locate root element")
 	}
 
 	return self.root

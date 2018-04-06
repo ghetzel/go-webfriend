@@ -35,7 +35,7 @@ func (self MatchOperator) Evaluate(pattern *regexp.Regexp, want interface{}) boo
 	if v, err := exprToValue(want); err == nil {
 		want = v
 	} else {
-		panic(fmt.Errorf("malformed expression: %v", err))
+		log.Fatalf("malformed expression: %v", err)
 	}
 
 	log.Debugf("RXMO(%v) %v match %v -> %v", self, pattern, want, pattern.MatchString(fmt.Sprintf("%v", want)))

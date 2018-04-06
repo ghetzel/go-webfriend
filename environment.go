@@ -102,7 +102,8 @@ func (self *Environment) scope() *scripting.Scope {
 	if len(self.stack) > 0 {
 		return self.stack[len(self.stack)-1]
 	} else {
-		panic("illegal scope retrieval from empty stack")
+		log.Fatal("illegal scope retrieval from empty stack")
+		return nil
 	}
 }
 
@@ -121,7 +122,8 @@ func (self *Environment) popScope() *scripting.Scope {
 	} else if len(self.stack) == 1 {
 		return self.stack[0]
 	} else {
-		panic("attempted pop on an empty scope stack")
+		log.Fatal("attempted pop on an empty scope stack")
+		return nil
 	}
 }
 
@@ -374,7 +376,8 @@ func (self *Environment) evaluateConditionalGetBranch(conditional *scripting.Con
 					break
 				}
 			} else {
-				panic(err)
+				log.Fatal(err)
+				return nil, false
 			}
 		}
 

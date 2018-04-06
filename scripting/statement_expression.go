@@ -12,7 +12,8 @@ type Expression struct {
 
 func NewExpression(statement *Statement, node *node32) *Expression {
 	if node == nil || node.first(ruleValueYielding) == nil {
-		panic("expression node must have a ValueYielding child")
+		log.Fatal("expression node must have a ValueYielding child")
+		return nil
 	}
 
 	return &Expression{
@@ -51,8 +52,6 @@ func (self *Expression) Value() (interface{}, error) {
 	} else {
 		return nil, fmt.Errorf("left-hand side of expression did not yield a value")
 	}
-
-	return new(emptyValue), nil
 }
 
 func (self *Expression) resolveValue(node *node32) (interface{}, error) {

@@ -141,7 +141,7 @@ func (self *Scope) set(key string, value interface{}) {
 	} else if v, err := exprToValue(value); err == nil {
 		value = v
 	} else {
-		panic(fmt.Errorf("Cannot set %v: %v", key, err))
+		log.Fatalf("Cannot set %v: %v", key, err)
 	}
 
 	value = intIfYouCan(value)
