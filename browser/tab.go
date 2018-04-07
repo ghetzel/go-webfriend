@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/fatih/structs"
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
-	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/utils"
 	"github.com/gobwas/glob"
 	"github.com/mafredri/cdp"
@@ -211,13 +211,7 @@ func (self *Tab) RPC(module string, method string, args map[string]interface{}) 
 			case 2:
 				if err := fnOutputVarToError(results[1]); err == nil {
 					rv := results[0].Interface()
-					output := structs.Map(rv)
-
-					for key, value := range output {
-						output[key] = stringutil.Autotype(typeutil.ResolveValue(value))
-					}
-
-					return output, nil
+					return structs.Map(rv), nil
 				} else {
 					return nil, err
 				}

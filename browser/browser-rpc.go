@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/mafredri/cdp/devtool"
 )

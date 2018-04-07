@@ -45,7 +45,7 @@ type GoArgs struct {
 	ContinueOnTimeout bool `json:"continue_on_timeout" default:"false"`
 
 	// The RPC event to wait for before proceeding to the next command.
-	LoadEventName string `json:"load_event_name" default:"Page.loadEventFired"`
+	LoadEventName string `json:"load_event_name" default:"Page.domContentEventFired"`
 }
 
 type GoResponse struct {

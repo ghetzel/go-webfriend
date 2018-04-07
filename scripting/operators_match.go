@@ -3,6 +3,8 @@ package scripting
 import (
 	"fmt"
 	"regexp"
+
+	"github.com/ghetzel/go-stockutil/log"
 )
 
 type MatchOperator int

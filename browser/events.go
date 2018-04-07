@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/gobwas/glob"

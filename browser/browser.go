@@ -14,14 +14,12 @@ import (
 
 	"github.com/ghetzel/argonaut"
 	"github.com/ghetzel/go-stockutil/httputil"
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/pathutil"
 	"github.com/husobee/vestigo"
 	"github.com/mafredri/cdp/devtool"
-	"github.com/op/go-logging"
 	"github.com/phayes/freeport"
 )
-
-var log = logging.MustGetLogger(`webfriend/browser`)
 
 var rpcGlobalTimeout = (60 * time.Second)
 var DefaultStartWait = time.Duration(500) * time.Millisecond

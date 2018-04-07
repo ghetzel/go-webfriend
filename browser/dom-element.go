@@ -22,12 +22,28 @@ type Element struct {
 	loadedChildren bool
 }
 
+func (self *Element) Parent() *Element {
+	if parent, ok := self.document.Element(self.parent); ok {
+		return parent
+	}
+
+	return nil
+}
+
 func (self *Element) String() string {
 	return fmt.Sprintf("[NODE %v] %v", self.id, self.name)
 }
 
-func (self *Element) ID() string {
-	return fmt.Sprintf("%d", self.id)
+func (self *Element) Text() string {
+	return self.value
+}
+
+func (self *Element) Attributes() map[string]interface{} {
+	return maputil.DeepCopy(self.attributes)
+}
+
+func (self *Element) ID() int {
+	return self.id
 }
 
 // Loads all child elements under this element.
@@ -62,10 +78,12 @@ func (self *Element) Children() []*Element {
 }
 
 // Prints this element and all subelements.
-func (self *Element) PrintTree(depth int) {
+func (self *Element) TreeString(depth int) string {
+	output := ``
+
 	switch self.name {
 	case `#text`:
-		log.Info(strings.Repeat(`  `, depth) + strings.TrimSpace(self.value))
+		output += strings.Repeat(`  `, depth) + strings.TrimSpace(self.value) + "\n"
 
 	default:
 		attrs := []string{}
@@ -99,10 +117,12 @@ func (self *Element) PrintTree(depth int) {
 		line += color.RedString(self.name)
 		line += color.MagentaString(`>`)
 
-		log.Info(line)
+		output += line + "\n"
 	}
 
 	for _, child := range self.Children() {
-		child.PrintTree(depth + 1)
+		output += child.TreeString(depth + 1)
 	}
+
+	return output
 }

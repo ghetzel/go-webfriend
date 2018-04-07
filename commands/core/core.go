@@ -4,10 +4,7 @@ import (
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/utils"
-	"github.com/op/go-logging"
 )
-
-var log = logging.MustGetLogger(`webfriend`)
 
 type Commands struct {
 	browser *browser.Browser

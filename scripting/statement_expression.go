@@ -3,6 +3,8 @@ package scripting
 import (
 	"fmt"
 	"strings"
+
+	"github.com/ghetzel/go-stockutil/log"
 )
 
 type Expression struct {

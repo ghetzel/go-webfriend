@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
@@ -15,10 +16,7 @@ import (
 	"github.com/ghetzel/go-webfriend/commands/core"
 	"github.com/ghetzel/go-webfriend/commands/page"
 	"github.com/ghetzel/go-webfriend/scripting"
-	logging "github.com/op/go-logging"
 )
-
-var log = logging.MustGetLogger(`webfriend`)
 
 type Environment struct {
 	Core    *core.Commands

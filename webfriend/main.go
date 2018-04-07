@@ -5,15 +5,12 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/ghetzel/go-stockutil/fileutil"
-
 	"github.com/ghetzel/cli"
+	"github.com/ghetzel/go-stockutil/fileutil"
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/op/go-logging"
 )
-
-var log = logging.MustGetLogger(`webfriend`)
 
 func main() {
 	app := cli.NewApp()
@@ -36,14 +33,7 @@ func main() {
 	}
 
 	app.Before = func(c *cli.Context) error {
-		logging.SetFormatter(logging.MustStringFormatter(`%{color}%{level:.4s}%{color:reset}[%{id:04d}] %{message}`))
-
-		if level, err := logging.LogLevel(c.String(`log-level`)); err == nil {
-			logging.SetLevel(level, ``)
-		} else {
-			return err
-		}
-
+		log.SetLevelString(c.String(`log-level`))
 		return nil
 	}
 

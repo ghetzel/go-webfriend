@@ -13,10 +13,8 @@ import (
 	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
-	logging "github.com/op/go-logging"
 )
 
-var log = logging.MustGetLogger(`webfriend/scripting`)
 var rxPegContext = regexp.MustCompile(`(?P<message>.*) \(line (?P<line>\d+) symbol (?P<symbol>\d+)(?: - line (?P<eline>\d+) symbol (?P<esymbol>\d+))?`)
 var errContextLinesBefore = 3
 var errContextLinesAfter = 3

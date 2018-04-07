@@ -6,8 +6,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
+	"github.com/ghetzel/go-stockutil/typeutil"
 )
 
 type Document struct {
@@ -99,6 +101,7 @@ func (self *Document) Element(id int) (*Element, bool) {
 // Return the root element of the current document.
 func (self *Document) Root() *Element {
 	if self.root == nil {
+
 		if rv, err := self.tab.RPC(`DOM`, `GetDocument`, map[string]interface{}{
 			`Pierce`: true,
 			`Depth`:  1,
@@ -127,11 +130,44 @@ func (self *Document) Root() *Element {
 	return self.root
 }
 
+// Select one or more elements from the current DOM.
+func (self *Document) Query(selector Selector, queryRoot *Element) ([]Element, error) {
+	if queryRoot == nil {
+		queryRoot = self.Root()
+	}
+
+	if rv, err := self.tab.RPC(`DOM`, `QuerySelectorAll`, map[string]interface{}{
+		`NodeID`:   queryRoot.ID(),
+		`Selector`: selector,
+	}); err == nil {
+		results := make([]Element, 0)
+
+		for _, nid := range maputil.M(rv).Slice(`nodeIds`) {
+			if element, ok := self.Element(int(nid.Int())); ok {
+				results = append(results, *element)
+			} else {
+				log.Warningf(
+					"Element %d was returned in a query, but not found in the local DOM cache",
+					nid.Int(),
+				)
+			}
+		}
+
+		return results, nil
+	} else {
+		return nil, err
+	}
+}
+
 // Recursively print the entire document tree, retrieving elements as neccessary.
 func (self *Document) PrintTree() {
 	start := time.Now()
 
-	self.Root().PrintTree(0)
+	for _, line := range strings.Split(self.Root().TreeString(0), "\n") {
+		if !typeutil.IsEmpty(line) {
+			log.Info(line)
+		}
+	}
 
 	log.Debugf("Finished, took %v", time.Since(start))
 }
