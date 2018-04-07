@@ -81,11 +81,11 @@ func (self *Environment) Evaluate(script *scripting.Friendscript, scope ...*scri
 }
 
 func (self *Environment) pushScope(scope *scripting.Scope) {
-	if len(self.stack) > 0 {
-		log.Debugf("PUSH scope(%d) is masked", self.scope().Level())
-	} else {
-		log.Debugf("PUSH scope(%d) is ROOT", scope.Level())
-	}
+	// if len(self.stack) > 0 {
+	// 	log.Debugf("PUSH scope(%d) is masked", self.scope().Level())
+	// } else {
+	// 	log.Debugf("PUSH scope(%d) is ROOT", scope.Level())
+	// }
 
 	self.stack = append(self.stack, scope)
 
@@ -93,7 +93,7 @@ func (self *Environment) pushScope(scope *scripting.Scope) {
 		scripting.SetScope(self.scope())
 	}
 
-	log.Debugf("PUSH scope(%d) is active", self.scope().Level())
+	// log.Debugf("PUSH scope(%d) is active", self.scope().Level())
 }
 
 func (self *Environment) scope() *scripting.Scope {
@@ -114,7 +114,7 @@ func (self *Environment) popScope() *scripting.Scope {
 			scripting.SetScope(self.scope())
 		}
 
-		log.Debugf("POP  scope(%d) is active", self.scope().Level())
+		// log.Debugf("POP  scope(%d) is active", self.scope().Level())
 
 		return top
 	} else if len(self.stack) == 1 {

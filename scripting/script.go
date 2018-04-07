@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/fatih/structs"
-	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/mathutil"
 	"github.com/ghetzel/go-stockutil/rxutil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
@@ -280,6 +279,7 @@ func mapifyStruct(in interface{}) interface{} {
 	if typeutil.IsArray(in) {
 		elems := make([]interface{}, sliceutil.Len(in))
 
+		// work a little to get structs/mappable objects turned into maps
 		sliceutil.Each(in, func(i int, elem interface{}) error {
 			if m, ok := elem.(mappable); ok {
 				elems[i] = m.ToMap()
@@ -291,8 +291,6 @@ func mapifyStruct(in interface{}) interface{} {
 
 			return nil
 		})
-
-		log.Debugf("mapify %T(%v)", elems, elems)
 
 		return elems
 	} else if typeutil.IsStruct(in) {

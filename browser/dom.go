@@ -19,6 +19,16 @@ type Document struct {
 	elements sync.Map
 }
 
+func IsElementNotFoundErr(err error) bool {
+	if err != nil {
+		if strings.Contains(err.Error(), `Could not find node with given id`) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func NewDocument(tab *Tab, parent *Document) *Document {
 	doc := &Document{
 		tab:    tab,
@@ -112,8 +122,6 @@ func (self *Document) Element(id int) (*Element, bool) {
 
 // Return the root element of the current document.
 func (self *Document) Root() *Element {
-	log.Debugf("resolve root %p %s", self, self.root)
-
 	if self.root == nil {
 		if rv, err := self.tab.RPC(`DOM`, `GetDocument`, map[string]interface{}{
 			`Pierce`: true,

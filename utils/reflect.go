@@ -27,7 +27,7 @@ func CallCommandFunction(from interface{}, name string, first interface{}, rest 
 	if fn, err := GetFunctionByName(from, name); err == nil {
 		arguments := make([]reflect.Value, fn.Type().NumIn())
 		firstV := reflect.ValueOf(first)
-		// restV := reflect.ValueOf(rest)
+		restV := reflect.ValueOf(rest)
 
 		for i := 0; i < len(arguments); i++ {
 			argT := fn.Type().In(i)
@@ -42,6 +42,8 @@ func CallCommandFunction(from interface{}, name string, first interface{}, rest 
 				}
 				// } else if argT.Kind() == reflect.Ptr && argT.Elem().Kind() == reflect.Struct {
 
+			} else if len(rest) > 0 {
+				arguments[i] = restV
 			} else {
 				if argT.Kind() == reflect.Ptr {
 					argT = argT.Elem()

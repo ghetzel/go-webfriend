@@ -4,33 +4,69 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"reflect"
+	"strings"
 
 	"github.com/ghetzel/go-stockutil/log"
+	"github.com/ghetzel/go-stockutil/sliceutil"
+	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
+	defaults "github.com/mcuadros/go-defaults"
 )
 
 type EnvArgs struct {
 	// The value to return if the environment variable does not exist, or
 	// (optionally) is empty.
-	Fallback interface{} `json:"fallback"` // null
+	Fallback interface{} `json:"fallback"`
 
 	// Whether empty values should be ignored or not.
-	IgnoreEmpty bool `json:"ignore_empty"` // true
+	IgnoreEmpty bool `json:"ignore_empty" default:"true"`
 
 	// Whether automatic type detection should be performed or not.
-	DetectType bool `json:"detect_type"` // true
+	DetectType bool `json:"detect_type" default:"true"`
 
 	// If specified, this string will be used to split matching values into a
 	// list of values. This is useful for environment variables that contain
 	// multiple values joined by a separator (e.g: the PATH variable.)
-	Joiner string `json:"joiner"` // null
+	Joiner string `json:"joiner"`
 }
 
 // Retrieves a system environment variable and returns the value of it, or a
 // fallback value if the variable does not exist or (optionally) is empty.
 func (self *Commands) Env(name string, args *EnvArgs) (interface{}, error) {
-	return nil, fmt.Errorf(`NI`)
+	if args == nil {
+		args = &EnvArgs{}
+	}
+
+	defaults.SetDefaults(args)
+
+	if ev := os.Getenv(name); ev != `` {
+		var rv interface{}
+
+		if args.Joiner != `` {
+			rv = strings.Split(ev, args.Joiner)
+		}
+
+		// perform type detection
+		if args.DetectType {
+			// for arrays, autotype each element
+			if typeutil.IsArray(rv) {
+				rv = sliceutil.Autotype(rv)
+			} else {
+				rv = stringutil.Autotype(ev)
+			}
+		} else {
+			rv = ev
+		}
+
+		return rv, nil
+	} else if !args.IgnoreEmpty {
+		return nil, fmt.Errorf("Environment variable %q was not specified", name)
+	} else {
+		return nil, nil
+	}
 }
 
 // Immediately exit the script in an error-like fashion with a specific message.
@@ -44,12 +80,14 @@ func (self *Commands) Fail(message string) error {
 
 // Directly call an RPC method with the given parameters.
 func (self *Commands) Rpc(method string, args map[string]interface{}) (interface{}, error) {
-	return nil, fmt.Errorf(`NI`)
+	mod, meth := stringutil.SplitPair(method, `::`)
+
+	return self.browser.Tab().RPC(mod, meth, args)
 }
 
 // Outputs a line to the log.
-func (self *Commands) Log(message interface{}, level string) (interface{}, error) {
-	if typeutil.IsScalar(message) {
+func (self *Commands) Log(message interface{}) (interface{}, error) {
+	if typeutil.IsScalar(reflect.ValueOf(message)) {
 		fmt.Printf("%v\n", message)
 	} else if data, err := json.MarshalIndent(message, ``, `  `); err == nil {
 		fmt.Printf(string(data) + "\n")
@@ -87,11 +125,11 @@ type RunArgs struct {
 // evaluated script's execution.
 //
 func (self *Commands) Run(filename string, args *RunArgs) (interface{}, error) {
-	return nil, fmt.Errorf(`NI`)
+	return nil, fmt.Errorf(`Not Implemented Yet`)
 }
 
 // Change the current selector scope to be rooted at the given element. If
 // selector is empty, the scope is set to the document element (i.e.: global).
 func (self *Commands) SwitchRoot(selector browser.Selector) error {
-	return fmt.Errorf(`NI`)
+	return fmt.Errorf(`Not Implemented Yet`)
 }

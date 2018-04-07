@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"os/signal"
@@ -47,6 +48,14 @@ func main() {
 				browser.Stop()
 			})
 
+			defer func() {
+				if r := recover(); r != nil {
+					log.Fatalf("Emergency Stop: %v", r)
+					browser.Stop()
+					os.Exit(127)
+				}
+			}()
+
 			script := webfriend.NewEnvironment(browser)
 			var input io.Reader
 
@@ -63,9 +72,9 @@ func main() {
 			}
 
 			if scope, err := script.EvaluateReader(input); err == nil {
-				log.Debugf("Final scope: %v", scope)
 				log.Infof("Done")
 				browser.Stop()
+				fmt.Println(scope)
 				os.Exit(0)
 			} else {
 				log.Fatalf("runtime error: %v", err)

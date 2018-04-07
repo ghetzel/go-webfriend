@@ -79,6 +79,10 @@ func (self *Tab) connect() error {
 }
 
 func (self *Tab) getModule(module string) (*structs.Field, bool) {
+	if module == `` {
+		module = `core`
+	}
+
 	return structs.New(self.rpc).FieldOk(module)
 }
 
