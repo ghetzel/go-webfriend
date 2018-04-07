@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/stringutil"
 )
 
@@ -95,7 +94,7 @@ func (self *Block) Statements() []*Statement {
 			block: self,
 		}
 
-		log.Debugf("STMT %v", strings.TrimSpace(statement.raw(node)))
+		// log.Debugf("STMT %v", strings.TrimSpace(statement.raw(node)))
 		statements = append(statements, statement)
 	}
 

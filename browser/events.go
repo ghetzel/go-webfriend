@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"strings"
 	"time"
 
 	"github.com/ghetzel/go-stockutil/log"
@@ -42,8 +41,8 @@ func (self *eventWaiter) Match(event *Event) bool {
 type Event struct {
 	ID        int
 	Name      string
-	Result    map[string]interface{}
-	Params    map[string]interface{}
+	Result    *maputil.Map
+	Params    *maputil.Map
 	Error     error
 	Timestamp time.Time
 }
@@ -52,33 +51,7 @@ func (self *Event) String() string {
 	if self.Error != nil {
 		return self.Error.Error()
 	} else {
-		return fmt.Sprintf("%v", self.Name)
-	}
-}
-
-func (self *Event) Get(key string, fallbacks ...interface{}) interface{} {
-	return maputil.DeepGet(self.Params, strings.Split(key, `.`), fallbacks...)
-}
-
-func (self *Event) GetString(key string, fallbacks ...string) string {
-	return fmt.Sprintf("%v", self.Get(key, ``))
-}
-
-func (self *Event) GetBool(key string) bool {
-	if v := self.Get(key); stringutil.IsBoolean(v) {
-		return stringutil.MustBool(v)
-	} else {
-		return false
-	}
-}
-
-func (self *Event) GetInt(key string, fallbacks ...int64) int64 {
-	if v := self.Get(key); stringutil.IsInteger(v) {
-		return stringutil.MustInteger(v)
-	} else if len(fallbacks) > 0 {
-		return fallbacks[0]
-	} else {
-		return -1
+		return self.Name
 	}
 }
 
@@ -86,19 +59,28 @@ func eventFromRpcResponse(resp *rpcc.Response) (*Event, error) {
 	event := &Event{
 		ID:        int(resp.ID),
 		Name:      resp.Method,
-		Result:    make(map[string]interface{}),
-		Params:    make(map[string]interface{}),
+		Result:    maputil.M(nil),
+		Params:    maputil.M(nil),
 		Timestamp: time.Now(),
 	}
 
-	if len(resp.Result) > 0 {
-		if err := json.Unmarshal(resp.Result, &event.Result); err != nil {
+	// an empty result will be the literal "{}", so len>2 means there's actual data in there
+	if len(resp.Result) > 2 {
+		m := make(map[string]interface{})
+
+		if err := json.Unmarshal(resp.Result, &m); err == nil {
+			event.Result = maputil.M(m)
+		} else {
 			return nil, err
 		}
 	}
 
 	if len(resp.Args) > 0 {
-		if err := json.Unmarshal(resp.Args, &event.Params); err != nil {
+		m := make(map[string]interface{})
+
+		if err := json.Unmarshal(resp.Args, &m); err == nil {
+			event.Params = maputil.M(m)
+		} else {
 			return nil, err
 		}
 	}

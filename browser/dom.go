@@ -31,60 +31,72 @@ func NewDocument(tab *Tab, parent *Document) *Document {
 	return doc
 }
 
+func (self *Document) Reset() {
+	self.elements = sync.Map{}
+	self.root = nil
+	self.parent = nil
+	self.Root()
+}
+
 // Create an element from a maputil.Map of element properties and add it to the
 // document's element index.
 func (self *Document) addElementFromResult(node *maputil.Map) *Element {
-	nodeId := int(node.Int(`nodeId`))
-	var element *Element
-	var children = node.Slice(`children`)
+	if nodeId := int(node.Int(`nodeId`)); nodeId > 0 {
+		var element *Element
+		var children = node.Slice(`children`)
 
-	if el, ok := self.elements.Load(nodeId); ok {
-		element = el.(*Element)
+		// load the various properties from the given node map into a new elements
+		if el, ok := self.elements.Load(nodeId); ok {
+			element = el.(*Element)
+		} else {
+			// build the element
+			element = &Element{
+				document:   self,
+				name:       sliceutil.OrString(node.String(`localName`), node.String(`nodeName`)),
+				attributes: make(map[string]interface{}),
+				value:      node.String(`nodeValue`),
+				backendId:  int(node.Int(`backendNodeId`)),
+				id:         nodeId,
+			}
+		}
+
+		attrpairs := node.Slice(`attributes`)
+
+		for i := 0; i < len(attrpairs); i += 2 {
+			if (i + 1) < len(attrpairs) {
+				element.attributes[attrpairs[i].String()] = attrpairs[i+1].Auto()
+			}
+		}
+
+		collapsed := false
+
+		if len(children) == 1 {
+			child := maputil.M(children[0])
+
+			if child.Int(`nodeType`) == 3 {
+				element.value = strings.TrimSpace(child.String(`nodeValue`))
+				collapsed = true
+			}
+		}
+
+		self.elements.Store(nodeId, element)
+
+		if !collapsed {
+			for _, child := range children {
+				self.addElementFromResult(maputil.M(child))
+			}
+		}
+
+		// // if this element's parent already exists, and we're not in it...TODO, this is a TODO
+		// if parent, ok := self.elements.Load(node.Int(`parentId`)); ok {
+		//   TODO: big ol' todo
+		// }
+
+		return element
 	} else {
-		// build the element
-		element = &Element{
-			document:   self,
-			name:       sliceutil.OrString(node.String(`localName`), node.String(`nodeName`)),
-			attributes: make(map[string]interface{}),
-			value:      node.String(`nodeValue`),
-			backendId:  int(node.Int(`backendNodeId`)),
-			id:         nodeId,
-		}
+		log.Fatalf("Received invalid node")
+		return nil
 	}
-
-	attrpairs := node.Slice(`attributes`)
-
-	for i := 0; i < len(attrpairs); i += 2 {
-		if i < len(attrpairs) {
-			element.attributes[attrpairs[i].String()] = attrpairs[i+1].Auto()
-		}
-	}
-
-	collapsed := false
-
-	if len(children) == 1 {
-		child := maputil.M(children[0])
-
-		if child.Int(`nodeType`) == 3 {
-			element.value = strings.TrimSpace(child.String(`nodeValue`))
-			collapsed = true
-		}
-	}
-
-	self.elements.Store(nodeId, element)
-
-	if !collapsed {
-		for _, child := range children {
-			self.addElementFromResult(maputil.M(child))
-		}
-	}
-
-	// // if this element's parent already exists, and we're not in it...TODO, this is a TODO
-	// if parent, ok := self.elements.Load(node.Int(`parentId`)); ok {
-	//   TODO: big ol' todo
-	// }
-
-	return element
 }
 
 // Retrieve a known element by its Node ID
@@ -100,8 +112,9 @@ func (self *Document) Element(id int) (*Element, bool) {
 
 // Return the root element of the current document.
 func (self *Document) Root() *Element {
-	if self.root == nil {
+	log.Debugf("resolve root %p %s", self, self.root)
 
+	if self.root == nil {
 		if rv, err := self.tab.RPC(`DOM`, `GetDocument`, map[string]interface{}{
 			`Pierce`: true,
 			`Depth`:  1,
@@ -131,7 +144,7 @@ func (self *Document) Root() *Element {
 }
 
 // Select one or more elements from the current DOM.
-func (self *Document) Query(selector Selector, queryRoot *Element) ([]Element, error) {
+func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, error) {
 	if queryRoot == nil {
 		queryRoot = self.Root()
 	}
@@ -140,11 +153,11 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]Element, e
 		`NodeID`:   queryRoot.ID(),
 		`Selector`: selector,
 	}); err == nil {
-		results := make([]Element, 0)
+		results := make([]*Element, 0)
 
 		for _, nid := range maputil.M(rv).Slice(`nodeIds`) {
 			if element, ok := self.Element(int(nid.Int())); ok {
-				results = append(results, *element)
+				results = append(results, element)
 			} else {
 				log.Warningf(
 					"Element %d was returned in a query, but not found in the local DOM cache",

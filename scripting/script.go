@@ -3,11 +3,11 @@ package scripting
 import (
 	"errors"
 	"fmt"
-	"reflect"
 	"regexp"
 	"strings"
 
 	"github.com/fatih/structs"
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/mathutil"
 	"github.com/ghetzel/go-stockutil/rxutil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
@@ -18,6 +18,10 @@ import (
 var rxPegContext = regexp.MustCompile(`(?P<message>.*) \(line (?P<line>\d+) symbol (?P<symbol>\d+)(?: - line (?P<eline>\d+) symbol (?P<esymbol>\d+))?`)
 var errContextLinesBefore = 3
 var errContextLinesAfter = 3
+
+type mappable interface {
+	ToMap() map[string]interface{}
+}
 
 //go:generate peg -inline friendscript.peg
 
@@ -273,7 +277,25 @@ func intIfYouCan(in interface{}) interface{} {
 
 // if the input is a struct, convert it into a map
 func mapifyStruct(in interface{}) interface{} {
-	if typeutil.IsKind(in, reflect.Struct) {
+	if typeutil.IsArray(in) {
+		elems := make([]interface{}, sliceutil.Len(in))
+
+		sliceutil.Each(in, func(i int, elem interface{}) error {
+			if m, ok := elem.(mappable); ok {
+				elems[i] = m.ToMap()
+			} else if typeutil.IsStruct(elem) {
+				elems[i] = structs.Map(elem)
+			} else {
+				elems[i] = elem
+			}
+
+			return nil
+		})
+
+		log.Debugf("mapify %T(%v)", elems, elems)
+
+		return elems
+	} else if typeutil.IsStruct(in) {
 		return structs.Map(in)
 	} else {
 		return in

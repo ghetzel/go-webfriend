@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/utils"
@@ -45,7 +46,7 @@ type GoArgs struct {
 	ContinueOnTimeout bool `json:"continue_on_timeout" default:"false"`
 
 	// The RPC event to wait for before proceeding to the next command.
-	LoadEventName string `json:"load_event_name" default:"Page.domContentEventFired"`
+	LoadEventName string `json:"load_event_name" default:"Page.loadEventFired"`
 }
 
 type GoResponse struct {
@@ -90,7 +91,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 		}); err == nil {
 			if args.WaitForLoad {
 				// wait for the first event matching the given pattern
-				if _, err := self.browser.Tab().WaitFor(args.LoadEventName, args.Timeout); err != nil {
+				if event, err := self.browser.Tab().WaitFor(args.LoadEventName, args.Timeout); err != nil {
 					if utils.IsTimeoutErr(err) {
 						if !args.ContinueOnTimeout {
 							return nil, fmt.Errorf("timed out waiting for event %s", args.LoadEventName)
@@ -98,60 +99,49 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 					} else {
 						return nil, err
 					}
+				} else {
+					log.Debugf("core::go proceeding: got event %v", event.Name)
 				}
 			}
 
+			rvM := maputil.M(rv)
+
 			// locate the network request, response/error that resulted from the page navigation call
 			if req, res, rerr := self.browser.Tab().GetLoaderRequest(
-				fmt.Sprintf(
-					"%v",
-					maputil.Get(rv, `loaderId`, maputil.Get(rv, `frameId`)),
-				),
+				rvM.String(`loaderId`, rvM.String(`frameId`)),
 			); req != nil {
 				cmdresp := &GoResponse{}
 
 				if res != nil {
-					// log.Debug(typeutil.Dump(res))
-
-					if v := res.GetInt(`response.status`); v >= 0 {
+					if v := res.Params.Int(`response.status`); v >= 0 {
 						if v >= 400 && !args.ContinueOnError {
 							return nil, fmt.Errorf("HTTP %v", v)
 						}
 
 						cmdresp.Status = int(v)
-						cmdresp.URL = res.GetString(`response.url`)
-						cmdresp.MimeType = res.GetString(`response.mimeType`)
-						cmdresp.Protocol = res.GetString(`response.protocol`)
+						cmdresp.URL = res.Params.String(`response.url`)
+						cmdresp.MimeType = res.Params.String(`response.mimeType`)
+						cmdresp.Protocol = res.Params.String(`response.protocol`)
 						cmdresp.RemoteAddress = fmt.Sprintf(
 							"%v:%v",
-							res.GetString(`response.remoteIPAddress`),
-							res.GetInt(`response.remotePort`, 80),
+							res.Params.String(`response.remoteIPAddress`),
+							res.Params.Int(`response.remotePort`, 80),
 						)
 						cmdresp.TimingDetails = make(map[string]float64)
 						cmdresp.Headers = make(map[string]string)
 
 						// build timing
-						maputil.Walk(res.Get(`response.timing`), func(value interface{}, path []string, isLeaf bool) error {
-							if isLeaf {
-								if vF, err := stringutil.ConvertToFloat(value); err == nil {
-									cmdresp.TimingDetails[strings.Join(path, `.`)] = vF
-								}
-							}
-
-							return nil
-						})
+						for key, value := range res.Params.Map(`response.timing`) {
+							cmdresp.TimingDetails[key.String()] = value.Float()
+						}
 
 						// build headers
-						maputil.Walk(res.Get(`response.headers`), func(value interface{}, path []string, isLeaf bool) error {
-							if isLeaf {
-								cmdresp.Headers[strings.Join(path, `.`)] = fmt.Sprintf("%v", value)
-							}
-
-							return nil
-						})
+						for key, value := range res.Params.Map(`response.headers`) {
+							cmdresp.Headers[key.String()] = value.String()
+						}
 					}
 				} else if rerr != nil && !args.ContinueOnError {
-					return nil, fmt.Errorf("Request error: %v", rerr.Get(`errorText`, `Unknown Error`))
+					return nil, fmt.Errorf("Request error: %v", rerr.Params.String(`errorText`, `Unknown Error`))
 				}
 
 				return cmdresp, nil

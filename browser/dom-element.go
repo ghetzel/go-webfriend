@@ -30,6 +30,24 @@ func (self *Element) Parent() *Element {
 	return nil
 }
 
+func (self *Element) ToMap() map[string]interface{} {
+	output := map[string]interface{}{
+		`id`:         self.id,
+		`name`:       self.name,
+		`attributes`: self.attributes,
+	}
+
+	if l := len(self.Children()); l > 0 {
+		output[`child_count`] = l
+	}
+
+	if self.value != `` {
+		output[`text`] = self.value
+	}
+
+	return output
+}
+
 func (self *Element) String() string {
 	return fmt.Sprintf("[NODE %v] %v", self.id, self.name)
 }

@@ -160,18 +160,12 @@ func (self *Environment) evaluateStatement(statement *scripting.Statement) error
 	case scripting.DirectiveStatement:
 		return self.evaluateDirective(statement.Directive())
 
-	case scripting.ExpressionStatement:
-		fmt.Println("  ExpressionStatement")
-
 	case scripting.ConditionalStatement:
 		_, err := self.evaluateConditional(statement.Conditional())
 		return err
 
 	case scripting.LoopStatement:
 		return self.evaluateLoop(statement.Loop())
-
-	case scripting.FlowControlStatement:
-		fmt.Println("  FlowControlStatement")
 
 	case scripting.CommandStatement:
 		_, err := self.evaluateCommand(statement.Command(), false)
@@ -183,12 +177,10 @@ func (self *Environment) evaluateStatement(statement *scripting.Statement) error
 	default:
 		return fmt.Errorf("Unrecognized statement: %v", statement.Type())
 	}
-
-	return nil
 }
 
 func (self *Environment) evaluateAssignment(assignment *scripting.Assignment, forceDeclare bool) error {
-	log.Debugf("ASSN %v", assignment)
+	// log.Debugf("ASSN %v", assignment)
 
 	if assignment.Operator.ShouldPreclear() {
 		// clear out all the left-hand side variables
@@ -263,7 +255,7 @@ func (self *Environment) evaluateCommand(command *scripting.Command, forceDeclar
 	if first, rest, err := command.Args(); err == nil {
 		// locate the module this command belongs to
 		if module, ok := self.modules[modname]; ok {
-			log.Debugf("CMND called %T(%v), %T(%v)", first, first, rest, rest)
+			// log.Debugf("CMND called %T(%v), %T(%v)", first, first, rest, rest)
 
 			// tell that module to execute the command, giving it the name and arguments
 			if result, err := module.ExecuteCommand(name, first, rest); err == nil {
@@ -303,7 +295,6 @@ func (self *Environment) evaluateConditional(conditional *scripting.Conditional)
 		assignment, condition := conditional.WithAssignment()
 
 		if err := self.evaluateAssignment(assignment, true); err == nil {
-			log.Debugf("IFWA evaluate condition")
 			result := condition.IsTrue()
 			blocks, trueBranch = self.evaluateConditionalGetBranch(conditional, result)
 		} else {
@@ -312,8 +303,6 @@ func (self *Environment) evaluateConditional(conditional *scripting.Conditional)
 
 	case scripting.ConditionWithCommand:
 		command, condition := conditional.WithCommand()
-
-		log.Debugf("IFWC execute command")
 
 		if _, err := self.evaluateCommand(command, true); err == nil {
 			result := condition.IsTrue()
@@ -324,14 +313,10 @@ func (self *Environment) evaluateConditional(conditional *scripting.Conditional)
 
 	case scripting.ConditionWithRegex:
 		expression, matchOp, rx := conditional.WithRegex()
-		log.Debugf("IFRX parse regex")
-
 		result := matchOp.Evaluate(rx, expression)
 		blocks, trueBranch = self.evaluateConditionalGetBranch(conditional, result)
 
 	case scripting.ConditionWithComparator:
-		log.Debugf("IFCM do compare")
-
 		lhs, cmp, rhs := conditional.WithComparator()
 
 		result := cmp.Evaluate(lhs, rhs)
@@ -359,16 +344,16 @@ func (self *Environment) evaluateConditionalGetBranch(conditional *scripting.Con
 	}
 
 	if result {
-		log.Debugf("IF branch")
+		// log.Debugf("IF branch")
 		blocks = conditional.IfBlocks()
 		trueBranch = true
 	} else {
 		var tookElifBranch bool
 
-		for ei, elif := range conditional.ElseIfConditions() {
+		for _, elif := range conditional.ElseIfConditions() {
 			if t, err := self.evaluateConditional(elif); err == nil {
 				if t {
-					log.Debugf("ELSE-IF %d branch", ei)
+					// log.Debugf("ELSE-IF %d branch", ei)
 					tookElifBranch = true
 					blocks = elif.IfBlocks()
 					break
@@ -380,7 +365,7 @@ func (self *Environment) evaluateConditionalGetBranch(conditional *scripting.Con
 		}
 
 		if !tookElifBranch {
-			log.Debugf("ELSE branch")
+			// log.Debugf("ELSE branch")
 			blocks = conditional.ElseBlocks()
 		}
 	}
@@ -411,7 +396,7 @@ func (self *Environment) evaluateLoop(loop *scripting.Loop) error {
 		}
 	}
 
-	log.Debugf("LOOP BEGIN")
+	// log.Debugf("LOOP BEGIN")
 
 LoopEval:
 	for loop.ShouldContinue() {

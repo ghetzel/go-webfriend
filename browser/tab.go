@@ -21,6 +21,7 @@ import (
 
 var netTrackingEvents = `Network.{requestWillBeSent,responseReceived,loadingFailed}`
 var domTrackingEvents = `DOM.*`
+var consoleEvents = `Console.messageAdded`
 
 type TabID string
 
@@ -34,6 +35,7 @@ type Tab struct {
 	networkRequests []*Event
 	netreqLock      sync.Mutex
 	accumulators    sync.Map
+	currentDocument *Document
 }
 
 func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
@@ -56,7 +58,11 @@ func (self *Tab) Disconnect() error {
 }
 
 func (self *Tab) DOM() *Document {
-	return NewDocument(self, nil)
+	if self.currentDocument == nil {
+		self.currentDocument = NewDocument(self, nil)
+	}
+
+	return self.currentDocument
 }
 
 func (self *Tab) connect() error {
@@ -255,7 +261,7 @@ func (self *Tab) setupEvents() error {
 
 func (self *Tab) startEventReceiver() {
 	for event := range self.events {
-		// log.Debugf("[event] %v", event)
+		// log.Dumpf("[event] %v", event)
 
 		// dispatch events to waiters
 		self.waiters.Range(func(_ interface{}, waiterI interface{}) bool {
@@ -281,6 +287,10 @@ func (self *Tab) startEventReceiver() {
 }
 
 func (self *Tab) registerInternalEvents() {
+	self.RegisterEventHandler(consoleEvents, func(event *Event) {
+
+	})
+
 	self.RegisterEventHandler(netTrackingEvents, func(event *Event) {
 		self.netreqLock.Lock()
 		defer self.netreqLock.Unlock()
@@ -289,11 +299,18 @@ func (self *Tab) registerInternalEvents() {
 
 	self.RegisterEventHandler(domTrackingEvents, func(event *Event) {
 		// log.Debugf("evt %v", event)
+		dom := self.DOM()
 
-		// switch event.Name {
-		// case `DOM.documentUpdated`:
-		// 	self.DOM().Reset()
-		// }
+		switch event.Name {
+		case `DOM.documentUpdated`:
+			dom.Reset()
+		case `DOM.setChildNodes`:
+			for _, node := range event.Params.Slice(`nodes`) {
+				dom.addElementFromResult(
+					maputil.M(node),
+				)
+			}
+		}
 	})
 }
 
@@ -308,16 +325,24 @@ func (self *Tab) GetLoaderRequest(id string) (request *Event, response *Event, r
 	defer self.netreqLock.Unlock()
 
 	for _, event := range self.networkRequests {
-		if fmt.Sprintf("%v", maputil.Get(event.Params, `requestId`)) == id {
+		reqId := event.Params.String(`loaderId`, event.Params.String(`frameId`))
+
+		if reqId == id {
 			switch event.Name {
 			case `Network.requestWillBeSent`:
-				request = event
+				if request == nil {
+					request = event
+				}
 			case `Network.responseReceived`:
-				response = event
-				break
+				if response == nil {
+					response = event
+					break
+				}
 			case `Network.loadingFailed`:
-				reqerr = event
-				break
+				if reqerr == nil {
+					reqerr = event
+					break
+				}
 			}
 		}
 	}
@@ -354,6 +379,7 @@ func (self *Tab) WaitFor(eventGlob string, timeout time.Duration) (*Event, error
 
 		select {
 		case event := <-waiter.Events:
+			log.Debugf("[rpc] Wait over; got %v", event)
 			return event, nil
 		case <-time.After(timeout):
 			return nil, fmt.Errorf("timeout")
