@@ -1,10 +1,11 @@
 package core
 
 import (
-	"fmt"
+	"math/rand"
 	"time"
 
-	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-stockutil/typeutil"
+	defaults "github.com/mcuadros/go-defaults"
 )
 
 type TypeArgs struct {
@@ -17,13 +18,13 @@ type TypeArgs struct {
 	IsKeypad bool `json:"is_keypad"`
 
 	// How long that each individual keystroke will remain down for.
-	KeyDownTime time.Duration `json:"key_down_time"`
+	KeyDownTime time.Duration `json:"key_down_time" default:"30ms"`
 
 	// An amount of time to randomly vary the key_down_time duration from within each keystroke.
 	KeyDownJitter time.Duration `json:"key_down_jitter"`
 
 	// How long to wait between issuing individual keystrokes.
-	Delay time.Duration `json:"delay"`
+	Delay time.Duration `json:"delay" default:"50ms"`
 
 	// An amount of time to randomly vary the delay duration from between keystrokes.
 	DelayJitter time.Duration `json:"delay_jitter"`
@@ -31,6 +32,44 @@ type TypeArgs struct {
 
 // Input the given textual data as keyboard input into the currently focused
 // page element.
-func (self *Commands) Type(input interface{}, args *TypeArgs) (*browser.Element, error) {
-	return nil, fmt.Errorf(`NI`)
+func (self *Commands) Type(input interface{}, args *TypeArgs) (string, error) {
+	if args == nil {
+		args = &TypeArgs{}
+	}
+
+	text := typeutil.V(input).String()
+	defaults.SetDefaults(args)
+
+	for _, char := range text {
+		// send the keyDown event
+		if _, err := self.browser.Tab().RPC(`Input`, `dispatchKeyEvent`, map[string]interface{}{
+			`Type`:     `keyDown`,
+			`Text`:     string(char),
+			`IsKeypad`: args.IsKeypad,
+		}); err == nil {
+			if args.KeyDownTime > 0 {
+				time.Sleep(
+					args.KeyDownTime + (time.Duration(float64(args.KeyDownJitter)*rand.Float64()) * time.Millisecond),
+				)
+			}
+		} else {
+			return ``, err
+		}
+
+		// send the keyUp event
+		if _, err := self.browser.Tab().RPC(`Input`, `dispatchKeyEvent`, map[string]interface{}{
+			`Type`: `keyUp`,
+		}); err != nil {
+			return ``, err
+		}
+
+		// simulate the time between key presses
+		if args.Delay > 0 {
+			time.Sleep(
+				args.Delay + (time.Duration(float64(args.DelayJitter)*rand.Float64()) * time.Millisecond),
+			)
+		}
+	}
+
+	return text, nil
 }

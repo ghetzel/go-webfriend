@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/timeutil"
 )
@@ -22,6 +23,7 @@ func (self *Commands) Wait(delay interface{}) error {
 		return fmt.Errorf("invalid duration: %v", err)
 	}
 
+	log.Infof("Waiting for %v", duration)
 	time.Sleep(duration)
 	return nil
 }

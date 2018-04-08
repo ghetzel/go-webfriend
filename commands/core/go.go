@@ -86,7 +86,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 	}
 
 	if u, err := url.Parse(uri); err == nil {
-		if rv, err := self.browser.Tab().RPC(`Page`, `Navigate`, map[string]interface{}{
+		if rv, err := self.browser.Tab().RPC(`Page`, `navigate`, map[string]interface{}{
 			`URL`: u.String(),
 		}); err == nil {
 			if args.WaitForLoad {

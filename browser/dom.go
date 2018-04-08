@@ -70,14 +70,7 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 			}
 		}
 
-		attrpairs := node.Slice(`attributes`)
-
-		for i := 0; i < len(attrpairs); i += 2 {
-			if (i + 1) < len(attrpairs) {
-				element.attributes[attrpairs[i].String()] = attrpairs[i+1].Auto()
-			}
-		}
-
+		element.setAttributesFromInterleavedArray(node.Slice(`attributes`))
 		collapsed := false
 
 		if len(children) == 1 {
@@ -123,7 +116,7 @@ func (self *Document) Element(id int) (*Element, bool) {
 // Return the root element of the current document.
 func (self *Document) Root() *Element {
 	if self.root == nil {
-		if rv, err := self.tab.RPC(`DOM`, `GetDocument`, map[string]interface{}{
+		if rv, err := self.tab.RPC(`DOM`, `getDocument`, map[string]interface{}{
 			`Pierce`: true,
 			`Depth`:  1,
 		}); err == nil {
@@ -157,7 +150,7 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 		queryRoot = self.Root()
 	}
 
-	if rv, err := self.tab.RPC(`DOM`, `QuerySelectorAll`, map[string]interface{}{
+	if rv, err := self.tab.RPC(`DOM`, `querySelectorAll`, map[string]interface{}{
 		`NodeID`:   queryRoot.ID(),
 		`Selector`: selector,
 	}); err == nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -104,7 +105,9 @@ func (self *Tab) CreateAccumulator(filter string) (*eventAccumulator, error) {
 
 func (self *Tab) RPC(module string, method string, args map[string]interface{}) (map[string]interface{}, error) {
 	if mod, ok := self.getModule(module); ok {
-		if fn, err := utils.GetFunctionByName(mod.Value(), method); err == nil {
+		// titleize the incoming method name because the DevTools protcol has them as camelCase (which we
+		// want to accept for clarity), but the function we're looking for will be in PascalCase.
+		if fn, err := utils.GetFunctionByName(mod.Value(), strings.Title(method)); err == nil {
 			ctx := self.browser.ctx()
 			arguments := make([]reflect.Value, fn.Type().NumIn())
 
@@ -292,7 +295,30 @@ func (self *Tab) startEventReceiver() {
 
 func (self *Tab) registerInternalEvents() {
 	self.RegisterEventHandler(consoleEvents, func(event *Event) {
+		switch event.Name {
+		case `Console.messageAdded`:
+			var level log.Level
 
+			switch event.Params.String(`message.level`) {
+			case `warning`:
+				level = log.WARNING
+			case `error`:
+				level = log.ERROR
+			case `debug`:
+				level = log.DEBUG
+			case `info`:
+				level = log.INFO
+			default:
+				level = log.NOTICE
+			}
+
+			log.Logf(
+				level,
+				"[CONSOLE %s] %v",
+				event.Params.String(`message.source`),
+				event.Params.String(`message.text`),
+			)
+		}
 	})
 
 	self.RegisterEventHandler(netTrackingEvents, func(event *Event) {
@@ -313,6 +339,15 @@ func (self *Tab) registerInternalEvents() {
 				dom.addElementFromResult(
 					maputil.M(node),
 				)
+			}
+
+		case `DOM.attributeModified`, `DOM.attributeRemoved`:
+			nid := int(event.Params.Int(`nodeId`))
+
+			if element, ok := dom.Element(nid); ok {
+				element.RefreshAttributes()
+			} else {
+				log.Warningf("Got attribute update event for unknown node %d", nid)
 			}
 		}
 	})

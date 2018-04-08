@@ -6,6 +6,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/typeutil"
 )
 
 type Selector string
@@ -72,7 +73,7 @@ func (self *Element) Children() []*Element {
 		accumulator, _ := self.document.tab.CreateAccumulator(`DOM.setChildNodes`)
 		defer accumulator.Destroy()
 
-		if _, err := self.document.tab.RPC(`DOM`, `RequestChildNodes`, map[string]interface{}{
+		if _, err := self.document.tab.RPC(`DOM`, `requestChildNodes`, map[string]interface{}{
 			`NodeID`: self.id,
 			`Pierce`: true,
 			`Depth`:  1,
@@ -93,6 +94,38 @@ func (self *Element) Children() []*Element {
 	}
 
 	return self.children
+}
+
+// Retrieve the current attributes on this node and update our local copy.
+func (self *Element) RefreshAttributes() error {
+	if rv, err := self.document.tab.RPC(`DOM`, `getAttributes`, map[string]interface{}{
+		`NodeID`: self.ID(),
+	}); err == nil {
+		self.setAttributesFromInterleavedArray(maputil.M(rv).Slice(`attributes`))
+		return nil
+	} else {
+		return err
+	}
+}
+
+// Set the given named attribute to the stringified output of value.
+func (self *Element) SetAttribute(attrName string, value interface{}) error {
+	_, err := self.document.tab.RPC(`DOM`, `setAttributeValue`, map[string]interface{}{
+		`NodeID`: self.ID(),
+		`Name`:   attrName,
+		`Value`:  typeutil.V(value).String(),
+	})
+
+	return err
+}
+
+// Focus the current element.
+func (self *Element) Focus() error {
+	_, err := self.document.tab.RPC(`DOM`, `focus`, map[string]interface{}{
+		`NodeID`: self.ID(),
+	})
+
+	return err
 }
 
 // Prints this element and all subelements.
@@ -143,4 +176,16 @@ func (self *Element) TreeString(depth int) string {
 	}
 
 	return output
+}
+
+func (self *Element) setAttributesFromInterleavedArray(attrpairs []typeutil.Variant) {
+	attributes := make(map[string]interface{})
+
+	for i := 0; i < len(attrpairs); i += 2 {
+		if (i + 1) < len(attrpairs) {
+			attributes[attrpairs[i].String()] = attrpairs[i+1].Auto()
+		}
+	}
+
+	self.attributes = attributes
 }
