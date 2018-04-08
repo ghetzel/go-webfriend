@@ -128,6 +128,49 @@ func (self *Element) Focus() error {
 	return err
 }
 
+// Click on the current element.
+func (self *Element) Click() error {
+	// if _, err := self.browser.Tab().RPC()
+	return fmt.Errorf(`NI`)
+}
+
+// Evaluate the given JavaScript as an anonymous function on the current element.
+func (self *Element) Evaluate(script string) (interface{}, error) {
+	if rv, err := self.document.tab.RPC(`DOM`, `resolveNode`, map[string]interface{}{
+		`NodeID`: self.ID(),
+	}); err == nil {
+		remoteObject := maputil.M(rv)
+
+		if oid := remoteObject.String(`object.objectId`); oid != `` {
+			if rv, err := self.document.tab.RPC(`Runtime`, `callFunctionOn`, map[string]interface{}{
+				`ObjectID`:            oid,
+				`FunctionDeclaration`: fmt.Sprintf("function(){ %s }", script),
+				`ReturnByValue`:       false,
+			}); err == nil {
+				out := maputil.M(rv)
+
+				// return runtime exceptions as errors
+				if exc := out.Get(`exceptionDetails`); !exc.IsZero() {
+					excM := maputil.M(exc)
+
+					return nil, fmt.Errorf(
+						"Evaluation error: %v",
+						excM.String(`exception.description`, excM.String(`text`)),
+					)
+				} else {
+					return self.document.tab.getJavascriptResponse(out.String(`result.objectId`))
+				}
+			} else {
+				return nil, err
+			}
+		} else {
+			return nil, fmt.Errorf("Unable to determine RemoteObjectID for node %d", self.ID())
+		}
+	} else {
+		return nil, err
+	}
+}
+
 // Prints this element and all subelements.
 func (self *Element) TreeString(depth int) string {
 	output := ``

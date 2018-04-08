@@ -19,16 +19,6 @@ type Document struct {
 	elements sync.Map
 }
 
-func IsElementNotFoundErr(err error) bool {
-	if err != nil {
-		if strings.Contains(err.Error(), `Could not find node with given id`) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func NewDocument(tab *Tab, parent *Document) *Document {
 	doc := &Document{
 		tab:    tab,

@@ -1,9 +1,8 @@
 package core
 
 import (
-	"fmt"
-
 	"github.com/ghetzel/go-webfriend/browser"
+	defaults "github.com/mcuadros/go-defaults"
 )
 
 type FieldArgs struct {
@@ -16,6 +15,12 @@ type FieldArgs struct {
 
 // Locate and enter data into a form input field.
 func (self *Commands) Field(selector browser.Selector, args *FieldArgs) (string, error) {
+	if args == nil {
+		args = &FieldArgs{}
+	}
+
+	defaults.SetDefaults(args)
+
 	if elements, err := self.Select(selector, nil); err == nil && len(elements) == 1 {
 		field := elements[0]
 
@@ -30,7 +35,7 @@ func (self *Commands) Field(selector browser.Selector, args *FieldArgs) (string,
 		_, err := self.Type(args.Value, nil)
 		return field.Text(), err
 	} else if l := len(elements); l > 1 {
-		return ``, fmt.Errorf("Too many elements matched %q; expected 1, got %d", selector, l)
+		return ``, browser.TooManyMatchesErr(selector, 1, l)
 	} else {
 		return ``, err
 	}

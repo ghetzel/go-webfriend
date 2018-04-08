@@ -272,7 +272,7 @@ func (self *Tab) startEventReceiver() {
 
 		// dispatch events to waiters
 		self.waiters.Range(func(_ interface{}, waiterI interface{}) bool {
-			if waiter, ok := waiterI.(*eventWaiter); ok {
+			if waiter, ok := waiterI.(*EventWaiter); ok {
 				if waiter.Match(event) {
 					waiter.Events <- event
 					return false
@@ -409,29 +409,32 @@ func (self *Tab) GetLoaderRequest(id string) (request *Event, response *Event, r
 	return
 }
 
+func (self *Tab) CreateEventWaiter(eventGlob string) (*EventWaiter, error) {
+	if waiter, err := NewEventWaiter(self, eventGlob); err == nil {
+		self.waiters.Store(waiter.id, waiter)
+		return waiter, nil
+	} else {
+		return nil, err
+	}
+}
+
+func (self *Tab) RemoveWaiter(id string) {
+	self.waiters.Delete(id)
+}
+
 func (self *Tab) WaitFor(eventGlob string, timeout time.Duration) (*Event, error) {
-	if waiter, err := newEventWaiter(eventGlob); err == nil {
-		self.waiters.Store(waiter.ID, waiter)
-		defer self.waiters.Delete(waiter.ID)
+	if waiter, err := self.CreateEventWaiter(eventGlob); err == nil {
+		defer self.RemoveWaiter(waiter.id)
 
 		log.Debugf("[rpc] Waiting for %v for up to %v", eventGlob, timeout)
-
-		select {
-		case event := <-waiter.Events:
-			log.Debugf("[rpc] Wait over; got %v", event)
-			return event, nil
-		case <-time.After(timeout):
-			return nil, fmt.Errorf("timeout")
-		}
+		return waiter.Wait(timeout)
 	} else {
 		return nil, err
 	}
 }
 
 func (self *Tab) RegisterEventHandler(eventGlob string, callback EventCallbackFunc) (string, error) {
-	if waiter, err := newEventWaiter(eventGlob); err == nil {
-		self.waiters.Store(waiter.ID, waiter)
-
+	if waiter, err := self.CreateEventWaiter(eventGlob); err == nil {
 		log.Debugf("[rpc] Registered persistent handler for %v", eventGlob)
 
 		go func() {
@@ -440,8 +443,22 @@ func (self *Tab) RegisterEventHandler(eventGlob string, callback EventCallbackFu
 			}
 		}()
 
-		return waiter.ID, nil
+		return waiter.id, nil
 	} else {
 		return ``, err
 	}
+}
+
+func (self *Tab) getJavascriptResponse(oid string) (interface{}, error) {
+	if rv, err := self.RPC(`Runtime`, `getProperties`, map[string]interface{}{
+		`ObjectID`:               oid,
+		`OwnProperties`:          false,
+		`AccessorPropertiesOnly`: true,
+	}); err == nil {
+		log.Dump(rv)
+	} else {
+		return nil, err
+	}
+
+	return nil, fmt.Errorf(`NI`)
 }

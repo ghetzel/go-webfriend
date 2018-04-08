@@ -1,6 +1,6 @@
 package core
 
-import "fmt"
+import "github.com/ghetzel/go-stockutil/typeutil"
 
 // Inject Javascript into the current page, evaluate it, and return the results.
 // The script is wrapped in an anonymous function whose return value will be
@@ -11,5 +11,7 @@ import "fmt"
 // as a plain object accessible using the "this" variable.
 //
 func (self *Commands) Javascript(script interface{}) (interface{}, error) {
-	return nil, fmt.Errorf(`NI`)
+	return self.browser.Tab().DOM().Root().Evaluate(
+		typeutil.V(script).String(),
+	)
 }

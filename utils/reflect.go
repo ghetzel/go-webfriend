@@ -3,6 +3,8 @@ package utils
 import (
 	"fmt"
 	"reflect"
+
+	"github.com/ghetzel/go-stockutil/maputil"
 )
 
 var errorInterface = reflect.TypeOf((*error)(nil)).Elem()
@@ -27,7 +29,6 @@ func CallCommandFunction(from interface{}, name string, first interface{}, rest 
 	if fn, err := GetFunctionByName(from, name); err == nil {
 		arguments := make([]reflect.Value, fn.Type().NumIn())
 		firstV := reflect.ValueOf(first)
-		restV := reflect.ValueOf(rest)
 
 		for i := 0; i < len(arguments); i++ {
 			argT := fn.Type().In(i)
@@ -41,15 +42,18 @@ func CallCommandFunction(from interface{}, name string, first interface{}, rest 
 					return nil, fmt.Errorf("first argument expects %v, got %T", argT, first)
 				}
 				// } else if argT.Kind() == reflect.Ptr && argT.Elem().Kind() == reflect.Struct {
-
-			} else if len(rest) > 0 {
-				arguments[i] = restV
 			} else {
 				if argT.Kind() == reflect.Ptr {
 					argT = argT.Elem()
 				}
 
 				arguments[i] = reflect.New(argT)
+
+				if len(rest) > 0 {
+					if err := maputil.TaggedStructFromMap(rest, arguments[i], `json`); err != nil {
+						return nil, fmt.Errorf("Cannot populate %v: %v", arguments[i].Type(), err)
+					}
+				}
 			}
 		}
 

@@ -16,26 +16,44 @@ import (
 
 type EventCallbackFunc func(event *Event)
 
-type eventWaiter struct {
-	ID      string
+type EventWaiter struct {
 	Pattern glob.Glob
 	Events  chan *Event
+	id      string
+	tab     *Tab
 }
 
-func newEventWaiter(eventGlob string) (*eventWaiter, error) {
+func NewEventWaiter(tab *Tab, eventGlob string) (*EventWaiter, error) {
 	if pattern, err := glob.Compile(eventGlob); err == nil {
-		return &eventWaiter{
-			ID:      stringutil.UUID().String(),
+		return &EventWaiter{
 			Pattern: pattern,
-			Events:  make(chan *Event),
+			Events:  make(chan *Event, 1024),
+			id:      stringutil.UUID().String(),
+			tab:     tab,
 		}, nil
 	} else {
 		return nil, err
 	}
 }
 
-func (self *eventWaiter) Match(event *Event) bool {
+func (self *EventWaiter) Match(event *Event) bool {
 	return self.Pattern.Match(event.Name)
+}
+
+func (self *EventWaiter) Wait(timeout time.Duration) (*Event, error) {
+	select {
+	case event := <-self.Events:
+		log.Debugf("[rpc] Wait over; got %v", event)
+		return event, nil
+	case <-time.After(timeout):
+		return nil, fmt.Errorf("timeout")
+	}
+}
+
+func (self *EventWaiter) Remove() {
+	if self.tab != nil {
+		self.tab.RemoveWaiter(self.id)
+	}
 }
 
 type Event struct {
