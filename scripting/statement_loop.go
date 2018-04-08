@@ -122,10 +122,10 @@ func (self *Loop) UpperBound() int {
 				if v, err := self.statement.resolveVariable(arg); err == nil {
 					nI = v
 				} else {
-					log.Fatalf("error resolving variable '%v': %v", varname, err)
+					log.Panicf("error resolving variable '%v': %v", varname, err)
 				}
 			} else {
-				log.Fatalf(
+				log.Panicf(
 					"invalid loop syntax: '%v'",
 					self.statement.raw(lenNode),
 				)
@@ -135,7 +135,7 @@ func (self *Loop) UpperBound() int {
 				if n, err := stringutil.ConvertToInteger(nI); err == nil {
 					return int(n)
 				} else {
-					log.Fatalf("invalid loop argument: '%v'", nI)
+					log.Panicf("invalid loop argument: '%v'", nI)
 				}
 			} else {
 				log.Fatal("missing loop argument")
@@ -172,7 +172,7 @@ func (self *Loop) ShouldContinue() bool {
 		return true
 
 	default:
-		log.Fatalf("NI type=%v", self.Type())
+		log.Panicf("NI type=%v", self.Type())
 	}
 
 	return false
@@ -206,7 +206,7 @@ func (self *Loop) IteratableParts() ([]string, interface{}) {
 					if key, err := self.statement.resolveVariableKey(varNode); err == nil {
 						names = append(names, key)
 					} else {
-						log.Fatalf("unable to resolve variable name: %v", err)
+						log.Panicf("unable to resolve variable name: %v", err)
 					}
 				}
 
@@ -219,7 +219,7 @@ func (self *Loop) IteratableParts() ([]string, interface{}) {
 					} else if key, err := self.statement.resolveVariableKey(rhsNode); err == nil {
 						rightHand = key
 					} else {
-						log.Fatalf("unable to resolve variable name: %v", err)
+						log.Panicf("unable to resolve variable name: %v", err)
 					}
 				}
 

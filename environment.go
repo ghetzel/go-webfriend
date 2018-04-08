@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"sort"
 	"strings"
+	"time"
 
+	prompt "github.com/c-bata/go-prompt"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
@@ -17,6 +19,8 @@ import (
 	"github.com/ghetzel/go-webfriend/commands/page"
 	"github.com/ghetzel/go-webfriend/scripting"
 )
+
+var MaxReaderWait = time.Duration(5) * time.Second
 
 type Environment struct {
 	Core    *core.Commands
@@ -44,16 +48,33 @@ func NewEnvironment(browser *browser.Browser) *Environment {
 }
 
 func (self *Environment) EvaluateReader(reader io.Reader, scope ...*scripting.Scope) (*scripting.Scope, error) {
-	if data, err := ioutil.ReadAll(reader); err == nil {
-		return self.EvaluateString(string(data), scope...)
-	} else {
-		return nil, err
+	var data []byte
+	var errchan = make(chan error)
+
+	go func() {
+		if d, err := ioutil.ReadAll(reader); err == nil {
+			data = d
+			errchan <- nil
+		} else {
+			errchan <- err
+		}
+	}()
+
+	select {
+	case err := <-errchan:
+		if err == nil {
+			return self.EvaluateString(string(data), scope...)
+		} else {
+			return nil, err
+		}
+	case <-time.After(MaxReaderWait):
+		return nil, fmt.Errorf("Failed to read Friendscript after %v", MaxReaderWait)
 	}
 }
 
 func (self *Environment) EvaluateString(data string, scope ...*scripting.Scope) (*scripting.Scope, error) {
 	if script, err := scripting.Parse(data); err == nil {
-		return self.Evaluate(script)
+		return self.Evaluate(script, scope...)
 	} else {
 		return nil, err
 	}
@@ -78,6 +99,38 @@ func (self *Environment) Evaluate(script *scripting.Friendscript, scope ...*scri
 	}
 
 	return self.scope(), nil
+}
+
+func (self *Environment) replCompleter(d prompt.Document) []prompt.Suggest {
+	s := []prompt.Suggest{
+		// {Text: "users", Description: "Store the username and age"},
+		// {Text: "articles", Description: "Store the article text posted by user"},
+		// {Text: "comments", Description: "Store the text commented to articles"},
+	}
+
+	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
+}
+
+func (self *Environment) REPL() (*scripting.Scope, error) {
+	replScope := scripting.NewScope(nil)
+	var replErr error
+
+	var options = []prompt.Option{
+		prompt.OptionPrefix(`friendscript> `),
+	}
+
+	exec := func(line string) {
+		_, replErr = self.EvaluateString(line, replScope)
+
+		if replErr != nil {
+			fmt.Println(replErr.Error())
+		}
+	}
+
+	repl := prompt.New(exec, self.replCompleter, options...)
+	repl.Run()
+
+	return replScope, replErr
 }
 
 func (self *Environment) pushScope(scope *scripting.Scope) {

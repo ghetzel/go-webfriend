@@ -100,10 +100,10 @@ func (self *Conditional) WithRegex() (*Expression, MatchOperator, *regexp.Regexp
 			if cmp, err := parseMatchComparator(matchNode); err == nil {
 				return expr, cmp, rx
 			} else {
-				log.Fatalf("malformed match operator: %v", err)
+				log.Panicf("malformed match operator: %v", err)
 			}
 		} else {
-			log.Fatalf("malformed regular expression: %v", err)
+			log.Panicf("malformed regular expression: %v", err)
 		}
 	}
 

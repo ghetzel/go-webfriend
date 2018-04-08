@@ -87,7 +87,7 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 
 		return element
 	} else {
-		log.Fatalf("Received invalid node")
+		log.Panicf("Received invalid node")
 		return nil
 	}
 }
@@ -104,7 +104,7 @@ func (self *Document) Element(id int) (*Element, bool) {
 }
 
 // Return the root element of the current document.
-func (self *Document) Root() *Element {
+func (self *Document) Root() (*Element, error) {
 	if self.root == nil {
 		if rv, err := self.tab.RPC(`DOM`, `getDocument`, map[string]interface{}{
 			`Pierce`: true,
@@ -123,21 +123,25 @@ func (self *Document) Root() *Element {
 			}
 
 		} else {
-			log.Fatalf("Failed to get root element: %v", err)
+			return nil, fmt.Errorf("Failed to get root element: %v", err)
 		}
 	}
 
 	if self.root == nil {
-		log.Fatalf("Failed to locate root element")
+		return nil, fmt.Errorf("Failed to locate root element")
 	}
 
-	return self.root
+	return self.root, nil
 }
 
 // Select one or more elements from the current DOM.
 func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, error) {
 	if queryRoot == nil {
-		queryRoot = self.Root()
+		if el, err := self.Root(); err == nil {
+			queryRoot = el
+		} else {
+			return nil, err
+		}
 	}
 
 	if rv, err := self.tab.RPC(`DOM`, `querySelectorAll`, map[string]interface{}{
@@ -165,15 +169,19 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 
 // Recursively print the entire document tree, retrieving elements as neccessary.
 func (self *Document) PrintTree() {
-	start := time.Now()
+	if root, err := self.Root(); err == nil {
+		start := time.Now()
 
-	for _, line := range strings.Split(self.Root().TreeString(0), "\n") {
-		if !typeutil.IsEmpty(line) {
-			log.Info(line)
+		for _, line := range strings.Split(root.TreeString(0), "\n") {
+			if !typeutil.IsEmpty(line) {
+				log.Info(line)
+			}
 		}
-	}
 
-	log.Debugf("Finished, took %v", time.Since(start))
+		log.Debugf("Finished, took %v", time.Since(start))
+	} else {
+		log.Warning(err)
+	}
 }
 
 func (self *Document) String() string {

@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"reflect"
@@ -449,16 +450,82 @@ func (self *Tab) RegisterEventHandler(eventGlob string, callback EventCallbackFu
 	}
 }
 
-func (self *Tab) getJavascriptResponse(oid string) (interface{}, error) {
-	if rv, err := self.RPC(`Runtime`, `getProperties`, map[string]interface{}{
-		`ObjectID`:               oid,
-		`OwnProperties`:          false,
-		`AccessorPropertiesOnly`: true,
-	}); err == nil {
-		log.Dump(rv)
-	} else {
-		return nil, err
-	}
+// Recursively retrieve values from the RPC, turning a Javascript response into a concrete
+// native type. Expects to be given a maputil.Map representing a single Runtime.RemoteObject
+func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error) {
+	if oid := result.String(`objectId`); oid != `` {
+		if rv, err := self.RPC(`Runtime`, `getProperties`, map[string]interface{}{
+			`ObjectID`:               oid,
+			`OwnProperties`:          true,
+			`AccessorPropertiesOnly`: false,
+		}); err == nil {
+			remoteType := result.String(`subtype`, result.String(`type`))
 
-	return nil, fmt.Errorf(`NI`)
+			// handles compound types
+			switch remoteType {
+			case `array`:
+				out := make([]interface{}, 0)
+
+				// go through the results and populate the output array
+				for _, elem := range maputil.M(rv).Slice(`result`) {
+					if elemM := maputil.M(elem); elemM.Bool(`enumerable`) {
+						if elemV, err := self.getJavascriptResponse(maputil.M(elemM.Get(`value`))); err == nil {
+							out = append(out, elemV)
+						} else {
+							return nil, err
+						}
+					}
+				}
+
+				return out, nil
+
+			case `object`:
+				out := make(map[string]interface{})
+
+				// go through the results and populate the output map
+				for _, elem := range maputil.M(rv).Slice(`result`) {
+					if elemM := maputil.M(elem); elemM.Bool(`enumerable`) {
+						if key := elemM.String(`name`); key != `` {
+							if elemV, err := self.getJavascriptResponse(maputil.M(elemM.Get(`value`))); err == nil {
+								out[key] = elemV
+							} else {
+								return nil, fmt.Errorf("key %s: %v", key, err)
+							}
+						}
+					}
+				}
+
+				return out, nil
+
+			default:
+				log.Dumpf("Unhandled Value: %s", result.Value())
+				return nil, fmt.Errorf("Unhandled Javascript type %q", remoteType)
+			}
+		} else {
+			return nil, err
+		}
+	} else if valueI := result.Get(`value`).Value; valueI != nil {
+		// handle raw values returned as JSON
+		if raw, ok := valueI.(json.RawMessage); ok {
+			var value interface{}
+
+			if err := json.Unmarshal(raw, &value); err == nil {
+				return value, nil
+			} else {
+				return nil, err
+			}
+		} else {
+			return nil, fmt.Errorf("Unhandled value type %T", valueI)
+		}
+	} else {
+		return nil, fmt.Errorf("Neither objectId nor value was present in the given Runtime.RemoteObject")
+	}
+}
+
+func (self *Tab) releaseObjectGroup(gid string) error {
+	_, err := self.RPC(`Runtime`, `releaseObjectGroup`, map[string]interface{}{
+		`ObjectGroup`: gid,
+	})
+
+	return err
 }

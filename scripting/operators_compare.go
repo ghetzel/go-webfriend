@@ -66,7 +66,7 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 	} else if v, err := lhs.Value(); err == nil {
 		lvv = v
 	} else {
-		log.Fatalf("invalid expression result: %v", err)
+		log.Panicf("invalid expression result: %v", err)
 	}
 
 	if rhs == nil {
@@ -74,7 +74,7 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 	} else if v, err := rhs.Value(); err == nil {
 		rvv = v
 	} else {
-		log.Fatalf("invalid expression result: %v", err)
+		log.Panicf("invalid expression result: %v", err)
 	}
 
 	lv, lverr = stringutil.ConvertToFloat(lvv)
@@ -85,14 +85,14 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 		if res, err := stringutil.RelaxedEqual(lvv, rvv); err == nil {
 			return res
 		} else {
-			log.Fatalf("incomparable types %T, %T: %v", lvv, rvv, err)
+			log.Panicf("incomparable types %T, %T: %v", lvv, rvv, err)
 			return false
 		}
 	case cmpNonEquality:
 		if res, err := stringutil.RelaxedEqual(lvv, rvv); err == nil {
 			return !res
 		} else {
-			log.Fatalf("incomparable types %T, %T: %v", lvv, rvv, err)
+			log.Panicf("incomparable types %T, %T: %v", lvv, rvv, err)
 			return false
 		}
 
@@ -100,7 +100,7 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 		if lverr == nil && rverr == nil {
 			return (lv > rv)
 		} else {
-			log.Fatalf("incomparable types %T, %T", lvv, rvv)
+			log.Panicf("incomparable types %T, %T", lvv, rvv)
 			return false
 		}
 
@@ -108,7 +108,7 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 		if lverr == nil && rverr == nil {
 			return (lv >= rv)
 		} else {
-			log.Fatalf("incomparable types %T, %T", lvv, rvv)
+			log.Panicf("incomparable types %T, %T", lvv, rvv)
 			return false
 		}
 
@@ -116,7 +116,7 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 		if lverr == nil && rverr == nil {
 			return (lv <= rv)
 		} else {
-			log.Fatalf("incomparable types %T, %T", lvv, rvv)
+			log.Panicf("incomparable types %T, %T", lvv, rvv)
 			return false
 		}
 
@@ -124,7 +124,7 @@ func (self Comparator) Evaluate(lhs *Expression, rhs *Expression) bool {
 		if lverr == nil && rverr == nil {
 			return (lv < rv)
 		} else {
-			log.Fatalf("incomparable types %T, %T", lvv, rvv)
+			log.Panicf("incomparable types %T, %T", lvv, rvv)
 			return false
 		}
 

@@ -11,7 +11,11 @@ import "github.com/ghetzel/go-stockutil/typeutil"
 // as a plain object accessible using the "this" variable.
 //
 func (self *Commands) Javascript(script interface{}) (interface{}, error) {
-	return self.browser.Tab().DOM().Root().Evaluate(
-		typeutil.V(script).String(),
-	)
+	if root, err := self.browser.Tab().DOM().Root(); err == nil {
+		return root.Evaluate(
+			typeutil.V(script).String(),
+		)
+	} else {
+		return nil, err
+	}
 }

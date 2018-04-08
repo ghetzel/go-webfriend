@@ -7,7 +7,6 @@ import (
 	"os/signal"
 
 	"github.com/ghetzel/cli"
-	"github.com/ghetzel/go-stockutil/fileutil"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
@@ -31,56 +30,96 @@ func main() {
 			Name:  `debug, D`,
 			Usage: `Whether to open the browser in a non-headless mode for debugging purposes.`,
 		},
+		cli.BoolFlag{
+			Name:  `interactive, I`,
+			Usage: `Start Webfriend in an interactive Friendscript shell.`,
+		},
 	}
+
+	var chrome *browser.Browser
 
 	app.Before = func(c *cli.Context) error {
 		log.SetLevelString(c.String(`log-level`))
 		return nil
 	}
 
+	app.After = func(c *cli.Context) error {
+		if chrome != nil {
+			return chrome.Stop()
+		} else {
+			return nil
+		}
+	}
+
 	app.Action = func(c *cli.Context) {
 		log.Infof("Starting %s %s", c.App.Name, c.App.Version)
-		browser := browser.NewBrowser()
-		browser.Headless = !c.Bool(`debug`)
+		chrome = browser.NewBrowser()
+		chrome.Headless = !c.Bool(`debug`)
 
-		if err := browser.Launch(); err == nil {
-			defer handleSignals(func() {
-				browser.Stop()
-			})
+		if err := chrome.Launch(); err == nil {
+			exiterr := make(chan error)
+			defer chrome.Stop()
 
 			defer func() {
 				if r := recover(); r != nil {
-					log.Fatalf("Emergency Stop: %v", r)
-					browser.Stop()
+					log.Criticalf("Emergency Stop: %v", r)
+					chrome.Stop()
 					os.Exit(127)
 				}
 			}()
 
-			script := webfriend.NewEnvironment(browser)
-			var input io.Reader
+			// if Chrome exits before we do, cleanup and quit
+			go func() {
+				err := chrome.Wait()
+				log.Debugf("Chrome exited: %v", err)
+				exiterr <- err
+			}()
 
-			if c.NArg() > 0 {
-				if file, err := os.Open(c.Args().First()); err == nil {
-					input = file
+			// evaluate Friendscript / run the REPL
+			script := webfriend.NewEnvironment(chrome)
+
+			go func() {
+				if c.Bool(`interactive`) {
+					if scope, err := script.REPL(); err == nil {
+						fmt.Println(scope)
+					} else {
+						exiterr <- fmt.Errorf("runtime error: %v", err)
+						return
+					}
 				} else {
-					log.Fatalf("file error: %v", err)
-				}
-			} else if fileutil.IsTerminal() {
-				input = os.Stdin
-			} else {
-				log.Fatal("Must specify a file to execute or Friendscript via standard input")
-			}
+					var input io.Reader
 
-			if scope, err := script.EvaluateReader(input); err == nil {
-				log.Infof("Done")
-				browser.Stop()
-				fmt.Println(scope)
-				os.Exit(0)
-			} else {
-				log.Fatalf("runtime error: %v", err)
+					if c.NArg() > 0 {
+						if file, err := os.Open(c.Args().First()); err == nil {
+							log.Debug("Friendscript being read from file %s", file.Name())
+							input = file
+						} else {
+							exiterr <- fmt.Errorf("file error: %v", err)
+							return
+						}
+					} else {
+						exiterr <- fmt.Errorf("Must specify a Friendscript filename to execute.")
+						return
+					}
+
+					if scope, err := script.EvaluateReader(input); err == nil {
+						fmt.Println(scope)
+					} else {
+						exiterr <- fmt.Errorf("runtime error: %v", err)
+						return
+					}
+				}
+			}()
+
+			select {
+			case err := <-exiterr:
+				if err != nil {
+					log.Error(err)
+				}
 			}
 		} else {
-			log.Fatalf("could not launch browser: %v", err)
+			log.Criticalf("could not launch browser: %v", err)
+			return
 		}
 	}
 

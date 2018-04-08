@@ -86,13 +86,13 @@ func (self AssignmentOperator) Evaluate(lhs interface{}, rhs interface{}) (inter
 	if v, err := exprToValue(lhs); err == nil {
 		lhs = v
 	} else {
-		log.Fatalf("malformed expression: %v", err)
+		log.Panicf("malformed expression: %v", err)
 	}
 
 	if v, err := exprToValue(rhs); err == nil {
 		rhs = v
 	} else {
-		log.Fatalf("malformed expression: %v", err)
+		log.Panicf("malformed expression: %v", err)
 	}
 
 	var lv float64

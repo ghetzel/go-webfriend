@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mitchellh/go-ps"
+
 	"github.com/ghetzel/argonaut"
 	"github.com/ghetzel/go-stockutil/httputil"
 	"github.com/ghetzel/go-stockutil/log"
@@ -23,6 +25,8 @@ import (
 
 var rpcGlobalTimeout = (60 * time.Second)
 var DefaultStartWait = time.Duration(500) * time.Millisecond
+var ProcessExitMaxWait = 10 * time.Second
+var ProcessExitCheckInterval = 125 * time.Millisecond
 
 type Browser struct {
 	Command                     argonaut.CommandName   `argonaut:",joiner=[=]"`
@@ -166,7 +170,8 @@ func (self *Browser) Wait() error {
 
 func (self *Browser) Stop() error {
 	self.tabLock.Lock()
-	self.tabLock.Unlock()
+	defer self.tabLock.Unlock()
+	log.Debug("Stopping process...")
 
 	for _, tab := range self.tabs {
 		tab.Disconnect()
@@ -176,7 +181,25 @@ func (self *Browser) Stop() error {
 		return fmt.Errorf("Process not running")
 	} else {
 		log.Debugf("Killing browser process %d", process.Pid)
-		return process.Kill()
+
+		if err := process.Kill(); err == nil {
+			started := time.Now()
+			deadline := started.Add(ProcessExitMaxWait)
+
+			for t := started; t.Before(deadline); t = time.Now() {
+				if proc, err := ps.FindProcess(process.Pid); err == nil && proc == nil {
+					log.Debugf("PID %d is gone", process.Pid)
+					return nil
+				}
+
+				log.Debugf("Polling for PID %d to disappear", process.Pid)
+				time.Sleep(ProcessExitCheckInterval)
+			}
+
+			return fmt.Errorf("Could not confirm process %d exited", process.Pid)
+		} else {
+			return err
+		}
 	}
 }
 

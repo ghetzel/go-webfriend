@@ -1,11 +1,13 @@
 package browser
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 )
 
@@ -140,13 +142,17 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 		`NodeID`: self.ID(),
 	}); err == nil {
 		remoteObject := maputil.M(rv)
+		callGroupId := stringutil.UUID().String()
 
 		if oid := remoteObject.String(`object.objectId`); oid != `` {
 			if rv, err := self.document.tab.RPC(`Runtime`, `callFunctionOn`, map[string]interface{}{
 				`ObjectID`:            oid,
 				`FunctionDeclaration`: fmt.Sprintf("function(){ %s }", script),
 				`ReturnByValue`:       false,
+				`AwaitPromise`:        true,
+				`ObjectGroup`:         callGroupId,
 			}); err == nil {
+				defer self.document.tab.releaseObjectGroup(callGroupId)
 				out := maputil.M(rv)
 
 				// return runtime exceptions as errors
@@ -157,8 +163,16 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 						"Evaluation error: %v",
 						excM.String(`exception.description`, excM.String(`text`)),
 					)
+				} else if returnOid := out.String(`result.objectId`); returnOid != `` {
+					// recursively populate the output result and return it as a native value
+					return self.document.tab.getJavascriptResponse(maputil.M(out.Get(`result`)))
+				} else if returnValue, ok := out.Get(`result.value`).Value.(json.RawMessage); ok {
+					// return values we can decode directly
+					var value interface{}
+					err := json.Unmarshal(returnValue, &value)
+					return value, err
 				} else {
-					return self.document.tab.getJavascriptResponse(out.String(`result.objectId`))
+					return nil, nil
 				}
 			} else {
 				return nil, err

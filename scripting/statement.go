@@ -89,7 +89,7 @@ func (self *Statement) s(node *node32) string {
 					raw = strings.Join(lines, "\n")
 				}
 
-				return globalScope.Interpolate(raw)
+				return raw
 			default:
 				return raw
 			}
@@ -363,7 +363,7 @@ func (self *Statement) makeAssignment(node *node32) *Assignment {
 				if key, err := self.resolveVariableKey(varNode); err == nil {
 					names = append(names, key)
 				} else {
-					log.Fatalf("unable to resolve variable name: %v", err)
+					log.Panicf("unable to resolve variable name: %v", err)
 				}
 			}
 
@@ -378,7 +378,7 @@ func (self *Statement) makeAssignment(node *node32) *Assignment {
 				statement:     self,
 			}
 		} else {
-			log.Fatalf("invalid assignment operator: %v", err)
+			log.Panicf("invalid assignment operator: %v", err)
 		}
 	}
 

@@ -26,7 +26,7 @@ func (self *ConditionalExpression) IsTrue() bool {
 		if value, err := NewExpression(self.statement, exprNodes[0]).Value(); err == nil {
 			return isTruthy(value)
 		} else {
-			log.Fatalf("malformed conditional expression: %v", err)
+			log.Panicf("malformed conditional expression: %v", err)
 		}
 
 	case 2:
@@ -36,7 +36,7 @@ func (self *ConditionalExpression) IsTrue() bool {
 				NewExpression(self.statement, exprNodes[1]),
 			)
 		} else {
-			log.Fatalf("malformed conditional expression: %v", err)
+			log.Panicf("malformed conditional expression: %v", err)
 		}
 	}
 
