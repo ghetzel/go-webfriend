@@ -112,7 +112,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 				}
 
 				totalTime = time.Since(commandIssued)
-				rvM := maputil.M(rv)
+				rvM := maputil.M(rv.Result)
 
 				// locate the network request, response/error that resulted from the page navigation call
 				if req, res, rerr := self.browser.Tab().GetLoaderRequest(

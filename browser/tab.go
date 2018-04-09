@@ -1,7 +1,6 @@
 package browser
 
 import (
-	"encoding/json"
 	"fmt"
 	"sync"
 	"time"
@@ -128,7 +127,7 @@ func (self *Tab) setupEvents() error {
 func (self *Tab) startEventReceiver() {
 	for message := range self.rpc.Messages() {
 		event := eventFromRpcResponse(message)
-		// log.Dumpf("[event] %v", event)
+		log.Debugf("[event] %v", event)
 
 		// dispatch events to waiters
 		self.waiters.Range(func(_ interface{}, waiterI interface{}) bool {
@@ -314,9 +313,9 @@ func (self *Tab) RegisterEventHandler(eventGlob string, callback EventCallbackFu
 func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error) {
 	if oid := result.String(`objectId`); oid != `` {
 		if rv, err := self.RPC(`Runtime`, `getProperties`, map[string]interface{}{
-			`ObjectID`:               oid,
-			`OwnProperties`:          true,
-			`AccessorPropertiesOnly`: false,
+			`objectID`:               oid,
+			`ownProperties`:          true,
+			`accessorPropertiesOnly`: false,
 		}); err == nil {
 			remoteType := result.String(`subtype`, result.String(`type`))
 
@@ -326,7 +325,7 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 				out := make([]interface{}, 0)
 
 				// go through the results and populate the output array
-				for _, elem := range maputil.M(rv).Slice(`result`) {
+				for _, elem := range maputil.M(rv.Result).Slice(`result`) {
 					if elemM := maputil.M(elem); elemM.Bool(`enumerable`) {
 						if elemV, err := self.getJavascriptResponse(maputil.M(elemM.Get(`value`))); err == nil {
 							out = append(out, elemV)
@@ -342,7 +341,7 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 				out := make(map[string]interface{})
 
 				// go through the results and populate the output map
-				for _, elem := range maputil.M(rv).Slice(`result`) {
+				for _, elem := range maputil.M(rv.Result).Slice(`result`) {
 					if elemM := maputil.M(elem); elemM.Bool(`enumerable`) {
 						if key := elemM.String(`name`); key != `` {
 							if elemV, err := self.getJavascriptResponse(maputil.M(elemM.Get(`value`))); err == nil {
@@ -363,27 +362,14 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 		} else {
 			return nil, err
 		}
-	} else if valueI := result.Get(`value`).Value; valueI != nil {
-		// handle raw values returned as JSON
-		if raw, ok := valueI.(json.RawMessage); ok {
-			var value interface{}
-
-			if err := json.Unmarshal(raw, &value); err == nil {
-				return value, nil
-			} else {
-				return nil, err
-			}
-		} else {
-			return nil, fmt.Errorf("Unhandled value type %T", valueI)
-		}
 	} else {
-		return nil, fmt.Errorf("Neither objectId nor value was present in the given Runtime.RemoteObject")
+		return result.Get(`value`), nil
 	}
 }
 
 func (self *Tab) releaseObjectGroup(gid string) error {
 	_, err := self.RPC(`Runtime`, `releaseObjectGroup`, map[string]interface{}{
-		`ObjectGroup`: gid,
+		`objectGroup`: gid,
 	})
 
 	return err

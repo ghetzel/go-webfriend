@@ -3,6 +3,7 @@ package browser
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 	"sync/atomic"
 	"time"
 
@@ -20,6 +21,8 @@ type RPC struct {
 	waitingForMessageId int64
 	recv                chan *RpcMessage
 	reply               chan *RpcMessage
+	sendlock            sync.Mutex
+	closing             bool
 }
 
 type RpcError struct {
@@ -27,22 +30,16 @@ type RpcError struct {
 	Message string
 }
 
+func (self *RpcError) Error() string {
+	return fmt.Sprintf("code %d: %v", self.Code, self.Message)
+}
+
 type RpcMessage struct {
 	ID     int64                  `json:"id"`
 	Method string                 `json:"method"`
 	Params map[string]interface{} `json:"params,omitempty"`
-	Result map[string]interface{} `json:"results,omitempty"`
-	Error  string                 `json:"error,omitempty"`
-}
-
-func (self *RpcMessage) Err() *RpcError {
-	if self.Error != `` {
-		return &RpcError{
-			Message: self.Error,
-		}
-	} else {
-		return nil
-	}
+	Result map[string]interface{} `json:"result,omitempty"`
+	Error  error                  `json:"error,omitempty"`
 }
 
 func (self *RpcMessage) String() string {
@@ -72,17 +69,19 @@ func NewRPC(wsUrl string) (*RPC, error) {
 
 func (self *RPC) startReading() {
 	for {
+		if self.closing {
+			return
+		}
+
 		message := &RpcMessage{}
 
 		if _, data, err := self.conn.ReadMessage(); err == nil {
-
 			if err := json.Unmarshal(data, message); err == nil {
-				if id := message.ID; id > 0 {
-					log.Debugf("[rpc] READ: %v", id)
-				}
+				waitingForId := atomic.LoadInt64(&self.waitingForMessageId)
 
 				// if we just read a message another
-				if id := atomic.LoadInt64(&self.waitingForMessageId); id > 0 && int64(message.ID) == id {
+				if waitingForId > 0 && int64(message.ID) == waitingForId {
+					log.Debugf("[rpc] REPLY %d", message.ID)
 					self.reply <- message
 				} else {
 					self.recv <- message
@@ -122,11 +121,19 @@ func (self *RPC) CallAsync(method string, params map[string]interface{}) error {
 }
 
 func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, error) {
-	message.ID = atomic.AddInt64(&self.messageId, 1)
+	if self.closing {
+		return nil, fmt.Errorf("Cannot send, connection is closing...")
+	}
+
+	self.sendlock.Lock()
+	defer self.sendlock.Unlock()
+
+	mid := atomic.AddInt64(&self.messageId, 1)
+	message.ID = mid
 	waitForReply := (timeout > 0)
 
 	if waitForReply {
-		atomic.StoreInt64(&self.waitingForMessageId, message.ID)
+		atomic.StoreInt64(&self.waitingForMessageId, mid)
 	}
 
 	if err := self.conn.WriteJSON(message); err == nil {
@@ -137,8 +144,9 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 			case reply := <-self.reply:
 				atomic.StoreInt64(&self.waitingForMessageId, 0)
 				return reply, nil
+
 			case <-time.After(timeout):
-				return nil, fmt.Errorf("Timed out waiting for reply to message %d", message.ID)
+				return nil, fmt.Errorf("Timed out waiting for reply to message %d", mid)
 			}
 		} else {
 			return nil, nil
@@ -149,5 +157,11 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 }
 
 func (self *RPC) Close() error {
+	if !self.closing {
+		log.Debug("Closing RPC connection")
+		self.closing = true
+		close(self.recv)
+	}
+
 	return self.conn.Close()
 }

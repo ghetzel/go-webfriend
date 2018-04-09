@@ -1,7 +1,6 @@
 package browser
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -76,9 +75,9 @@ func (self *Element) Children() []*Element {
 		defer accumulator.Destroy()
 
 		if _, err := self.document.tab.RPC(`DOM`, `requestChildNodes`, map[string]interface{}{
-			`NodeID`: self.id,
-			`Pierce`: true,
-			`Depth`:  1,
+			`nodeId`: self.id,
+			`pierce`: true,
+			`depth`:  1,
 		}); err == nil {
 			// stop receiving events now
 			accumulator.Stop()
@@ -101,9 +100,9 @@ func (self *Element) Children() []*Element {
 // Retrieve the current attributes on this node and update our local copy.
 func (self *Element) RefreshAttributes() error {
 	if rv, err := self.document.tab.RPC(`DOM`, `getAttributes`, map[string]interface{}{
-		`NodeID`: self.ID(),
+		`nodeId`: self.ID(),
 	}); err == nil {
-		self.setAttributesFromInterleavedArray(maputil.M(rv).Slice(`attributes`))
+		self.setAttributesFromInterleavedArray(maputil.M(rv.Result).Slice(`attributes`))
 		return nil
 	} else {
 		return err
@@ -113,9 +112,9 @@ func (self *Element) RefreshAttributes() error {
 // Set the given named attribute to the stringified output of value.
 func (self *Element) SetAttribute(attrName string, value interface{}) error {
 	_, err := self.document.tab.RPC(`DOM`, `setAttributeValue`, map[string]interface{}{
-		`NodeID`: self.ID(),
-		`Name`:   attrName,
-		`Value`:  typeutil.V(value).String(),
+		`nodeId`: self.ID(),
+		`name`:   attrName,
+		`value`:  typeutil.V(value).String(),
 	})
 
 	return err
@@ -124,7 +123,7 @@ func (self *Element) SetAttribute(attrName string, value interface{}) error {
 // Focus the current element.
 func (self *Element) Focus() error {
 	_, err := self.document.tab.RPC(`DOM`, `focus`, map[string]interface{}{
-		`NodeID`: self.ID(),
+		`nodeId`: self.ID(),
 	})
 
 	return err
@@ -139,21 +138,21 @@ func (self *Element) Click() error {
 // Evaluate the given JavaScript as an anonymous function on the current element.
 func (self *Element) Evaluate(script string) (interface{}, error) {
 	if rv, err := self.document.tab.RPC(`DOM`, `resolveNode`, map[string]interface{}{
-		`NodeID`: self.ID(),
+		`nodeId`: self.ID(),
 	}); err == nil {
-		remoteObject := maputil.M(rv)
+		remoteObject := maputil.M(rv.Result)
 		callGroupId := stringutil.UUID().String()
 
 		if oid := remoteObject.String(`object.objectId`); oid != `` {
 			if rv, err := self.document.tab.RPC(`Runtime`, `callFunctionOn`, map[string]interface{}{
-				`ObjectID`:            oid,
-				`FunctionDeclaration`: fmt.Sprintf("function(){ %s }", script),
-				`ReturnByValue`:       false,
-				`AwaitPromise`:        true,
-				`ObjectGroup`:         callGroupId,
+				`objectId`:            oid,
+				`functionDeclaration`: fmt.Sprintf("function(){ %s }", script),
+				`returnByValue`:       false,
+				`awaitPromise`:        true,
+				`objectGroup`:         callGroupId,
 			}); err == nil {
 				defer self.document.tab.releaseObjectGroup(callGroupId)
-				out := maputil.M(rv)
+				out := maputil.M(rv.Result)
 
 				// return runtime exceptions as errors
 				if exc := out.Get(`exceptionDetails`); !exc.IsZero() {
@@ -166,11 +165,8 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 				} else if returnOid := out.String(`result.objectId`); returnOid != `` {
 					// recursively populate the output result and return it as a native value
 					return self.document.tab.getJavascriptResponse(maputil.M(out.Get(`result`)))
-				} else if returnValue, ok := out.Get(`result.value`).Value.(json.RawMessage); ok {
-					// return values we can decode directly
-					var value interface{}
-					err := json.Unmarshal(returnValue, &value)
-					return value, err
+				} else if returnValue := out.Get(`result.value`).Value; returnValue != nil {
+					return returnValue, nil
 				} else {
 					return nil, nil
 				}

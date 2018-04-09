@@ -76,14 +76,7 @@ func eventFromRpcResponse(resp *RpcMessage) *Event {
 		Result:    maputil.M(resp.Result),
 		Params:    maputil.M(resp.Params),
 		Timestamp: time.Now(),
-	}
-
-	if err := resp.Err(); err != nil {
-		event.Error = fmt.Errorf(
-			"Error %d: %v",
-			err.Code,
-			err.Message,
-		)
+		Error:     resp.Error,
 	}
 
 	return event

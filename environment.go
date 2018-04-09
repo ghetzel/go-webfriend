@@ -97,7 +97,6 @@ func (self *Environment) Evaluate(script *scripting.Friendscript, scope ...*scri
 			return self.scope(), err
 		}
 	}
-
 	return self.scope(), nil
 }
 

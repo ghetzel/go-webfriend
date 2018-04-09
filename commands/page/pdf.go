@@ -27,8 +27,8 @@ func (self *Commands) Pdf(filenameOrWriter interface{}, args *PdfArgs) error {
 		return fmt.Errorf("Must specify either a filename or io.Writer destination")
 	}
 
-	if rv, err := self.browser.Tab().RPC(`Page`, `PrintToPDF`, map[string]interface{}{}); err == nil {
-		dataI := maputil.Get(rv, `Data`)
+	if rv, err := self.browser.Tab().RPC(`Page`, `printToPDF`, map[string]interface{}{}); err == nil {
+		dataI := maputil.Get(rv.Result, `data`)
 
 		if data, ok := dataI.([]byte); ok {
 			_, err := dest.Write(data)

@@ -107,10 +107,10 @@ func (self *Document) Element(id int) (*Element, bool) {
 func (self *Document) Root() (*Element, error) {
 	if self.root == nil {
 		if rv, err := self.tab.RPC(`DOM`, `getDocument`, map[string]interface{}{
-			`Pierce`: true,
-			`Depth`:  1,
+			`pierce`: true,
+			`depth`:  1,
 		}); err == nil {
-			docElem := maputil.M(rv)
+			docElem := maputil.M(rv.Result)
 
 			for _, child := range docElem.Slice(`root.children`) {
 				node := maputil.M(child)
@@ -145,12 +145,12 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 	}
 
 	if rv, err := self.tab.RPC(`DOM`, `querySelectorAll`, map[string]interface{}{
-		`NodeID`:   queryRoot.ID(),
-		`Selector`: selector,
+		`nodeId`:   queryRoot.ID(),
+		`selector`: selector,
 	}); err == nil {
 		results := make([]*Element, 0)
 
-		for _, nid := range maputil.M(rv).Slice(`nodeIds`) {
+		for _, nid := range maputil.M(rv.Result).Slice(`nodeIds`) {
 			if element, ok := self.Element(int(nid.Int())); ok {
 				results = append(results, element)
 			} else {

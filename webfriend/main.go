@@ -82,9 +82,9 @@ func main() {
 				if c.Bool(`interactive`) {
 					if scope, err := script.REPL(); err == nil {
 						fmt.Println(scope)
+						exiterr <- nil
 					} else {
 						exiterr <- fmt.Errorf("runtime error: %v", err)
-						return
 					}
 				} else {
 					var input io.Reader
@@ -104,9 +104,9 @@ func main() {
 
 					if scope, err := script.EvaluateReader(input); err == nil {
 						fmt.Println(scope)
+						exiterr <- nil
 					} else {
 						exiterr <- fmt.Errorf("runtime error: %v", err)
-						return
 					}
 				}
 			}()
