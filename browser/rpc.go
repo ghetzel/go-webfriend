@@ -90,6 +90,8 @@ func (self *RPC) startReading() {
 				log.Errorf("Failed to decode RPC message: %v", err)
 				return
 			}
+		} else if self.closing {
+			return
 		} else {
 			log.Errorf("Failed to read from RPC: %v", err)
 			return
@@ -158,7 +160,7 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 
 func (self *RPC) Close() error {
 	if !self.closing {
-		log.Debug("Closing RPC connection")
+		log.Debug("[rpc] Closing RPC connection")
 		self.closing = true
 		close(self.recv)
 	}

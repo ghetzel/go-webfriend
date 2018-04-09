@@ -122,7 +122,7 @@ func (self *Browser) Launch() error {
 
 		// launch the browser
 		go func() {
-			log.Debugf("Executing: %v", strings.Join(self.cmd.Args, ` `))
+			log.Debugf("[browser] Executing: %v", strings.Join(self.cmd.Args, ` `))
 			self.exitchan <- self.cmd.Run()
 		}()
 
@@ -130,13 +130,12 @@ func (self *Browser) Launch() error {
 		case err := <-self.exitchan:
 			return err
 		case <-time.After(self.StartWait):
-			log.Debugf("Process stayed running for %v", self.StartWait)
+			log.Debugf("[browser] Process stayed running for %v", self.StartWait)
 
 			if err := self.connectRPC(fmt.Sprintf("127.0.0.1:%d", self.RemoteDebuggingPort)); err == nil {
 				return nil
 			} else {
 				defer self.Stop()
-				defer self.cleanupUserDataDirectory()
 				return err
 			}
 		}
@@ -171,7 +170,9 @@ func (self *Browser) Wait() error {
 func (self *Browser) Stop() error {
 	self.tabLock.Lock()
 	defer self.tabLock.Unlock()
-	log.Debug("Stopping process...")
+	defer self.cleanupUserDataDirectory()
+
+	log.Debug("[browser] Stopping process...")
 
 	for _, tab := range self.tabs {
 		tab.Disconnect()
@@ -180,7 +181,7 @@ func (self *Browser) Stop() error {
 	if process := self.cmd.Process; process == nil {
 		return fmt.Errorf("Process not running")
 	} else {
-		log.Debugf("Killing browser process %d", process.Pid)
+		log.Debugf("[browser] Killing browser process %d", process.Pid)
 
 		if err := process.Kill(); err == nil {
 			started := time.Now()
@@ -188,11 +189,11 @@ func (self *Browser) Stop() error {
 
 			for t := started; t.Before(deadline); t = time.Now() {
 				if proc, err := ps.FindProcess(process.Pid); err == nil && proc == nil {
-					log.Debugf("PID %d is gone", process.Pid)
+					log.Debugf("[browser] PID %d is gone", process.Pid)
 					return nil
 				}
 
-				log.Debugf("Polling for PID %d to disappear", process.Pid)
+				log.Debugf("[browser] Polling for PID %d to disappear", process.Pid)
 				time.Sleep(ProcessExitCheckInterval)
 			}
 
@@ -204,7 +205,8 @@ func (self *Browser) Stop() error {
 }
 
 func (self *Browser) cleanupUserDataDirectory() error {
-	if self.isTempUserDataDir {
+	if self.isTempUserDataDir && pathutil.DirExists(self.UserDataDirectory) {
+		log.Debugf("[browser] Cleaning up temporary profile %s", self.UserDataDirectory)
 		return os.RemoveAll(self.UserDataDirectory)
 	}
 

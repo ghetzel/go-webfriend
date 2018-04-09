@@ -71,7 +71,6 @@ func main() {
 			// if Chrome exits before we do, cleanup and quit
 			go func() {
 				err := chrome.Wait()
-				log.Debugf("Chrome exited: %v", err)
 				exiterr <- err
 			}()
 

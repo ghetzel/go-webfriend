@@ -72,6 +72,7 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 			}
 		}
 
+		log.Debugf("Store element %d", element.ID())
 		self.elements.Store(nodeId, element)
 
 		if !collapsed {
@@ -153,11 +154,6 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 		for _, nid := range maputil.M(rv.Result).Slice(`nodeIds`) {
 			if element, ok := self.Element(int(nid.Int())); ok {
 				results = append(results, element)
-			} else {
-				log.Warningf(
-					"Element %d was returned in a query, but not found in the local DOM cache",
-					nid.Int(),
-				)
 			}
 		}
 
