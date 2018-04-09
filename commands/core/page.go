@@ -3,7 +3,10 @@ package core
 import (
 	"fmt"
 
+	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
+	defaults "github.com/mcuadros/go-defaults"
 )
 
 type NewTabArgs struct {
@@ -53,8 +56,14 @@ const (
 )
 
 type ResizeArgs struct {
+	// The width of the screen.
+	Width int `json:"width"`
+
+	// The height of the screen.
+	Height int `json:"height"`
+
 	// The scaling factor of the content.
-	Scale float64 `json:"scale"` // 0
+	Scale float64 `json:"scale"`
 
 	// Whether to emulate a mobile device or not. If a map is provided, mobile
 	// emulation will be enabled and configured using the following keys:
@@ -69,16 +78,21 @@ type ResizeArgs struct {
 	//    y (int, optional): The vertical position of the currently viewable
 	//                       portion of the mobile screen.
 	//
-	Mobile interface{} `json:"mobile"` // false
+	Mobile interface{} `json:"mobile"`
 
 	// Whether to fit the viewport contents to the available area or not.
-	FitWindow bool `json:"fit_window"` // false
+	FitWindow bool `json:"fit_window"`
 
 	// Which screen orientation to emulate, if any.
-	Orientation Orientation `json:"orientation"` // null
+	Orientation string `json:"orientation" default:"landscapePrimary"`
 
 	// The angle of the screen to emulate (in degrees; 0-360).
-	Angle int `json:"angle"` // 0
+	Angle int `json:"angle"`
+}
+
+type ResizeResponse struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 // Resizes the active viewport of the current page using the Chrome Device
@@ -87,8 +101,52 @@ type ResizeArgs struct {
 //
 // This is useful for setting the size of the area that will be rendered for
 // screenshots and screencasts, or for testing responsive design elements.
-func (self *Commands) Resize(width int, height int, args *ResizeArgs) (int, int, error) {
-	return -1, -1, fmt.Errorf(`NI`)
+func (self *Commands) Resize(args *ResizeArgs) (*ResizeResponse, error) {
+	if args == nil {
+		args = &ResizeArgs{}
+	}
+
+	defaults.SetDefaults(args)
+
+	rpcArgs := map[string]interface{}{
+		`width`:             args.Width,
+		`height`:            args.Height,
+		`deviceScaleFactor`: args.Scale,
+		`mobile`:            typeutil.V(args.Mobile).Bool(),
+		`screenOrientation`: map[string]interface{}{
+			`type`:  string(args.Orientation),
+			`angle`: args.Angle,
+		},
+	}
+
+	if typeutil.IsMap(args.Mobile) {
+		mobile := maputil.M(args.Mobile)
+
+		if v := mobile.Int(`width`); v > 0 {
+			rpcArgs[`screenWidth`] = int(v)
+		}
+
+		if v := mobile.Int(`height`); v > 0 {
+			rpcArgs[`screenHeight`] = int(v)
+		}
+
+		if v := mobile.Int(`x`); v > 0 {
+			rpcArgs[`positionX`] = int(v)
+		}
+
+		if v := mobile.Int(`y`); v > 0 {
+			rpcArgs[`positionY`] = int(v)
+		}
+	}
+
+	if _, err := self.browser.Tab().RPC(`Emulation`, `setDeviceMetricsOverride`, rpcArgs); err == nil {
+		return &ResizeResponse{
+			Width:  args.Width,
+			Height: args.Height,
+		}, nil
+	} else {
+		return nil, err
+	}
 }
 
 // Return all currently open tabs.

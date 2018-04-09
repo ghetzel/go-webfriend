@@ -1,17 +1,13 @@
 package browser
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
 	"time"
 
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/gobwas/glob"
-	"github.com/mafredri/cdp/rpcc"
 )
 
 type EventCallbackFunc func(event *Event)
@@ -73,89 +69,22 @@ func (self *Event) String() string {
 	}
 }
 
-func eventFromRpcResponse(resp *rpcc.Response) (*Event, error) {
+func eventFromRpcResponse(resp *RpcMessage) *Event {
 	event := &Event{
 		ID:        int(resp.ID),
 		Name:      resp.Method,
-		Result:    maputil.M(nil),
-		Params:    maputil.M(nil),
+		Result:    maputil.M(resp.Result),
+		Params:    maputil.M(resp.Params),
 		Timestamp: time.Now(),
 	}
 
-	// an empty result will be the literal "{}", so len>2 means there's actual data in there
-	if len(resp.Result) > 2 {
-		m := make(map[string]interface{})
-
-		if err := json.Unmarshal(resp.Result, &m); err == nil {
-			event.Result = maputil.M(m)
-		} else {
-			return nil, err
-		}
-	}
-
-	if len(resp.Args) > 0 {
-		m := make(map[string]interface{})
-
-		if err := json.Unmarshal(resp.Args, &m); err == nil {
-			event.Params = maputil.M(m)
-		} else {
-			return nil, err
-		}
-	}
-
-	if resp.Error != nil {
+	if err := resp.Err(); err != nil {
 		event.Error = fmt.Errorf(
 			"Error %d: %v",
-			resp.Error.Code,
-			resp.Error.Message,
+			err.Code,
+			err.Message,
 		)
 	}
 
-	return event, nil
-}
-
-type rpccStreamIntercept struct {
-	conn   io.ReadWriter
-	events chan *Event
-}
-
-func newRpccStreamIntercept(conn io.ReadWriter, events chan *Event) *rpccStreamIntercept {
-	return &rpccStreamIntercept{
-		conn:   conn,
-		events: events,
-	}
-}
-
-func (self *rpccStreamIntercept) WriteRequest(req *rpcc.Request) error {
-	var buf bytes.Buffer
-
-	if err := json.NewEncoder(&buf).Encode(req); err != nil {
-		return err
-	}
-
-	if _, err := self.conn.Write(buf.Bytes()); err != nil {
-		return err
-	}
-
-	// log.Debugf("[proto] WROTE: %v", buf.String())
-
-	return nil
-}
-
-func (self *rpccStreamIntercept) ReadResponse(resp *rpcc.Response) error {
-	var buf bytes.Buffer
-
-	if err := json.NewDecoder(io.TeeReader(self.conn, &buf)).Decode(resp); err != nil {
-		return err
-	}
-
-	// log.Debugf("[proto] READ: %v", buf.String())
-
-	if event, err := eventFromRpcResponse(resp); err == nil {
-		self.events <- event
-	} else {
-		log.Warningf("event error: %v", err)
-	}
-
-	return nil
+	return event
 }

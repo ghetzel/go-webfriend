@@ -3,22 +3,14 @@ package browser
 import (
 	"encoding/json"
 	"fmt"
-	"io"
-	"reflect"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/fatih/structs"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
-	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
-	"github.com/ghetzel/go-webfriend/utils"
 	"github.com/gobwas/glob"
-	"github.com/mafredri/cdp"
 	"github.com/mafredri/cdp/devtool"
-	"github.com/mafredri/cdp/rpcc"
 )
 
 var netTrackingEvents = `Network.{requestWillBeSent,responseReceived,loadingFailed}`
@@ -30,8 +22,7 @@ type TabID string
 type Tab struct {
 	browser         *Browser
 	target          *devtool.Target
-	rpcConn         *rpcc.Conn
-	rpc             *cdp.Client
+	rpc             *RPC
 	events          chan *Event
 	waiters         sync.Map
 	networkRequests []*Event
@@ -56,7 +47,7 @@ func (self *Tab) ID() string {
 }
 
 func (self *Tab) Disconnect() error {
-	return self.rpcConn.Close()
+	return self.rpc.Close()
 }
 
 func (self *Tab) DOM() *Document {
@@ -68,24 +59,13 @@ func (self *Tab) DOM() *Document {
 }
 
 func (self *Tab) connect() error {
-	if conn, err := rpcc.Dial(self.target.WebSocketDebuggerURL, rpcc.WithCodec(func(conn io.ReadWriter) rpcc.Codec {
-		return newRpccStreamIntercept(conn, self.events)
-	})); err == nil {
-		self.rpcConn = conn
-		self.rpc = cdp.NewClient(self.rpcConn)
+	if conn, err := NewRPC(self.target.WebSocketDebuggerURL); err == nil {
+		self.rpc = conn
 
 		return self.setupEvents()
 	} else {
 		return err
 	}
-}
-
-func (self *Tab) getModule(module string) (*structs.Field, bool) {
-	if module == `` {
-		module = `core`
-	}
-
-	return structs.New(self.rpc).FieldOk(module)
 }
 
 func (self *Tab) CreateAccumulator(filter string) (*eventAccumulator, error) {
@@ -104,140 +84,18 @@ func (self *Tab) CreateAccumulator(filter string) (*eventAccumulator, error) {
 	}
 }
 
-func (self *Tab) RPC(module string, method string, args map[string]interface{}) (map[string]interface{}, error) {
-	if mod, ok := self.getModule(module); ok {
-		// titleize the incoming method name because the DevTools protcol has them as camelCase (which we
-		// want to accept for clarity), but the function we're looking for will be in PascalCase.
-		if fn, err := utils.GetFunctionByName(mod.Value(), strings.Title(method)); err == nil {
-			ctx := self.browser.ctx()
-			arguments := make([]reflect.Value, fn.Type().NumIn())
+func (self *Tab) AsyncRPC(module string, method string, args map[string]interface{}) error {
+	return self.rpc.CallAsync(
+		fmt.Sprintf("%s.%s", module, method),
+		args,
+	)
+}
 
-			for i := 0; i < len(arguments); i++ {
-				argT := fn.Type().In(i)
-
-				switch i {
-				case 0:
-					arguments[i] = reflect.ValueOf(ctx)
-					continue
-				case 1:
-					if argT.Kind() == reflect.Ptr {
-						argT = argT.Elem()
-					}
-
-					if argT.Kind() != reflect.Struct {
-						return nil, fmt.Errorf("Expected second argument to be a configuration struct, got %v", argT)
-					}
-
-					argStruct := reflect.New(argT)
-
-					if len(args) > 0 {
-						fieldNames := make([]string, 0)
-
-						for i := 0; i < argT.NumField(); i++ {
-							fieldNames = append(fieldNames, argT.Field(i).Name)
-						}
-
-						for key, _ := range args {
-							if sliceutil.ContainsString(fieldNames, key) {
-								continue
-							} else if _, err := utils.GetFunctionByName(argStruct, fmt.Sprintf("Set%v", key)); err == nil {
-								continue
-							} else {
-								return nil, fmt.Errorf("Could not find field or setter function for parameter '%v'", key)
-							}
-						}
-
-						// for each field in the argstruct
-						for i := 0; i < argT.NumField(); i++ {
-							field := argStruct.Elem().Field(i)
-							keyName := argT.Field(i).Name
-
-							// if there is a key with this name in the arg map
-							if value, ok := args[keyName]; ok {
-								valueV := reflect.ValueOf(value)
-								didSet := false
-
-								if field.CanSet() {
-									// convert if necessary
-									if !valueV.Type().AssignableTo(field.Type()) {
-										if valueV.Type().ConvertibleTo(field.Type()) {
-											valueV = valueV.Convert(field.Type())
-										}
-									}
-
-									if valueV.Type().AssignableTo(field.Type()) {
-										field.Set(valueV)
-										didSet = true
-									}
-								}
-
-								if !didSet {
-									// if we couldn't set the value, look for a setter function
-									// with the format Set<FieldName>().
-									fnName := fmt.Sprintf("Set%v", keyName)
-
-									if setter, err := utils.GetFunctionByName(argStruct, fnName); err == nil {
-										setterT := setter.Type()
-
-										// valid setters must take one argument
-										if setterT.NumIn() == 1 {
-											setterArgT := setterT.In(0)
-											valueV := reflect.ValueOf(value)
-
-											// if we can't assign the value directly, try to convert it
-											if !valueV.Type().AssignableTo(setterArgT) {
-												if valueV.Type().ConvertibleTo(setterArgT) {
-													valueV = valueV.Convert(setterArgT)
-												} else {
-													return nil, fmt.Errorf("%v: cannot convert %T to %v", fnName, value, setterArgT)
-												}
-											}
-
-											// call the setter function
-
-											setter.Call([]reflect.Value{
-												valueV,
-											})
-										} else {
-											return nil, fmt.Errorf("Setter function %v must take one argument", fnName)
-										}
-									} else {
-										return nil, fmt.Errorf("Could not set %v, and no setter function was found", keyName)
-									}
-								}
-							}
-						}
-					}
-
-					arguments[i] = argStruct
-				default:
-					return nil, fmt.Errorf("Unsupported number of arguments; expected [0,1], got %d", len(arguments))
-				}
-			}
-
-			// log.Debugf("CALL %v.%v", module, method)
-			results := fn.Call(arguments)
-
-			switch len(results) {
-			case 1:
-				return nil, fnOutputVarToError(results[0])
-
-			case 2:
-				if err := fnOutputVarToError(results[1]); err == nil {
-					rv := results[0].Interface()
-					return structs.Map(rv), nil
-				} else {
-					return nil, err
-				}
-
-			default:
-				return nil, fmt.Errorf("Expected [1,2] result values, got %d", len(results))
-			}
-		} else {
-			return nil, err
-		}
+func (self *Tab) RPC(module string, method string, args map[string]interface{}) (*RpcMessage, error) {
+	if reply, err := self.rpc.Call(fmt.Sprintf("%s.%s", module, method), args, DefaultReplyTimeout); err == nil {
+		return reply, nil
 	} else {
-		return nil, fmt.Errorf("No such RPC module '%v'", module)
+		return nil, err
 	}
 }
 
@@ -248,19 +106,19 @@ func (self *Tab) setupEvents() error {
 	// setup internal event handlers
 	self.registerInternalEvents()
 
-	if err := self.rpc.Console.Enable(self.browser.ctx()); err != nil {
+	if err := self.rpc.CallAsync(`Console.enable`, nil); err != nil {
 		return err
 	}
 
-	if err := self.rpc.Page.Enable(self.browser.ctx()); err != nil {
+	if err := self.rpc.CallAsync(`Page.enable`, nil); err != nil {
 		return err
 	}
 
-	if err := self.rpc.DOM.Enable(self.browser.ctx()); err != nil {
+	if err := self.rpc.CallAsync(`DOM.enable`, nil); err != nil {
 		return err
 	}
 
-	if err := self.rpc.Network.Enable(self.browser.ctx(), nil); err != nil {
+	if err := self.rpc.CallAsync(`Network.enable`, nil); err != nil {
 		return err
 	}
 
@@ -268,7 +126,8 @@ func (self *Tab) setupEvents() error {
 }
 
 func (self *Tab) startEventReceiver() {
-	for event := range self.events {
+	for message := range self.rpc.Messages() {
+		event := eventFromRpcResponse(message)
 		// log.Dumpf("[event] %v", event)
 
 		// dispatch events to waiters

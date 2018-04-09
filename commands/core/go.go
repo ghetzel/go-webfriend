@@ -94,7 +94,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 			var totalTime time.Duration
 
 			if rv, err := self.browser.Tab().RPC(`Page`, `navigate`, map[string]interface{}{
-				`URL`: u.String(),
+				`url`: u.String(),
 			}); err == nil {
 				if args.WaitForLoad {
 					// wait for the first event matching the given pattern

@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/typeutil"
 )
 
 var errorInterface = reflect.TypeOf((*error)(nil)).Elem()
@@ -27,31 +28,43 @@ func GetFunctionByName(from interface{}, name string) (reflect.Value, error) {
 
 func CallCommandFunction(from interface{}, name string, first interface{}, rest map[string]interface{}) (interface{}, error) {
 	if fn, err := GetFunctionByName(from, name); err == nil {
+		inputs := []interface{}{first, rest}
 		arguments := make([]reflect.Value, fn.Type().NumIn())
-		firstV := reflect.ValueOf(first)
 
 		for i := 0; i < len(arguments); i++ {
-			argT := fn.Type().In(i)
+			if i < len(inputs) {
+				argT := fn.Type().In(i)
 
-			if i == 0 && firstV.IsValid() {
-				if firstV.Type().AssignableTo(argT) {
-					arguments[i] = firstV
-				} else if firstV.Type().ConvertibleTo(argT) {
-					arguments[i] = firstV.Convert(argT)
-				} else {
-					return nil, fmt.Errorf("first argument expects %v, got %T", argT, first)
-				}
-				// } else if argT.Kind() == reflect.Ptr && argT.Elem().Kind() == reflect.Struct {
-			} else {
-				if argT.Kind() == reflect.Ptr {
-					argT = argT.Elem()
-				}
+				if inV := reflect.ValueOf(inputs[i]); inV.IsValid() {
+					if inV.Type().AssignableTo(argT) {
+						// attempt direct assignment
+						arguments[i] = inV
+						continue
+					} else if inV.Type().ConvertibleTo(argT) {
+						// attempt type conversion
+						arguments[i] = inV.Convert(argT)
+						continue
+					}
 
-				arguments[i] = reflect.New(argT)
+					// dereference pointers
+					if argT.Kind() == reflect.Ptr {
+						argT = argT.Elem()
+					}
 
-				if len(rest) > 0 {
-					if err := maputil.TaggedStructFromMap(rest, arguments[i], `json`); err != nil {
-						return nil, fmt.Errorf("Cannot populate %v: %v", arguments[i].Type(), err)
+					// instantiate new arg type
+					arguments[i] = reflect.New(argT)
+
+					// map arguments are used to populate newly instantiated structs
+					if typeutil.IsMap(inputs[i]) {
+						if argT.Kind() == reflect.Struct {
+							inputM := maputil.DeepCopy(inputs[i])
+
+							if err := maputil.TaggedStructFromMap(inputM, arguments[i], `json`); err != nil {
+								return nil, fmt.Errorf("Cannot populate %v: %v", arguments[i].Type(), err)
+							}
+						} else {
+							return nil, fmt.Errorf("Map arguments can only be used to populate structs")
+						}
 					}
 				}
 			}

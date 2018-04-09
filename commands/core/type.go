@@ -43,9 +43,9 @@ func (self *Commands) Type(input interface{}, args *TypeArgs) (string, error) {
 	for _, char := range text {
 		// send the keyDown event
 		if _, err := self.browser.Tab().RPC(`Input`, `dispatchKeyEvent`, map[string]interface{}{
-			`Type`:     `keyDown`,
-			`Text`:     string(char),
-			`IsKeypad`: args.IsKeypad,
+			`type`:     `keyDown`,
+			`text`:     string(char),
+			`isKeypad`: args.IsKeypad,
 		}); err == nil {
 			if args.KeyDownTime > 0 {
 				time.Sleep(
@@ -58,7 +58,7 @@ func (self *Commands) Type(input interface{}, args *TypeArgs) (string, error) {
 
 		// send the keyUp event
 		if _, err := self.browser.Tab().RPC(`Input`, `dispatchKeyEvent`, map[string]interface{}{
-			`Type`: `keyUp`,
+			`type`: `keyUp`,
 		}); err != nil {
 			return ``, err
 		}
