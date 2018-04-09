@@ -1,6 +1,7 @@
 package page
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io"
 	"os"
@@ -27,14 +28,18 @@ func (self *Commands) Pdf(filenameOrWriter interface{}, args *PdfArgs) error {
 		return fmt.Errorf("Must specify either a filename or io.Writer destination")
 	}
 
-	if rv, err := self.browser.Tab().RPC(`Page`, `printToPDF`, map[string]interface{}{}); err == nil {
-		dataI := maputil.Get(rv.Result, `data`)
-
-		if data, ok := dataI.([]byte); ok {
-			_, err := dest.Write(data)
-			return err
+	if rv, err := self.browser.Tab().RPC(`Page`, `printToPDF`, map[string]interface{}{
+		`scale`: 1,
+	}); err == nil {
+		if dataS := maputil.M(rv.Result).String(`data`); len(dataS) > 0 {
+			if data, err := base64.StdEncoding.DecodeString(dataS); err == nil {
+				_, err := dest.Write(data)
+				return err
+			} else {
+				return fmt.Errorf("decode error: %v", err)
+			}
 		} else {
-			return fmt.Errorf("Invalid response format: %T", dataI)
+			return fmt.Errorf("Empty response")
 		}
 	} else {
 		return err
