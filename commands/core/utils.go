@@ -102,7 +102,6 @@ func (self *Commands) Log(message interface{}) (interface{}, error) {
 // Store a value in the current scope. Strings will be automatically converted
 // into the appropriate data types (float, int, bool) if possible.
 func (self *Commands) Put(value interface{}) (interface{}, error) {
-	log.Debugf("put %T(%v)", value, value)
 	return value, nil
 }
 

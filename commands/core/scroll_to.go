@@ -8,7 +8,12 @@ import (
 
 // Scroll the viewport to the location of the first element matched by selector.
 func (self *Commands) ScrollTo(selector browser.Selector) error {
-	return fmt.Errorf(`NI`)
+	if _, err := self.browser.Tab().DOM().Root(); err == nil {
+		// _, err := root.Evaluate(fmt.Sprintf("window.scrollTo(%d, %d)")
+		return fmt.Errorf(`Not Implemented Yet`)
+	} else {
+		return err
+	}
 }
 
 // Scroll the viewport to the given X,Y coordinates relative to the top-left of

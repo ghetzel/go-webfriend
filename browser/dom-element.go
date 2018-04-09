@@ -10,6 +10,15 @@ import (
 	"github.com/ghetzel/go-stockutil/typeutil"
 )
 
+type Dimensions struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+	Top    int `json:"top"`
+	Left   int `json:"left"`
+	Right  int `json:"right"`
+	Bottom int `json:"bottom"`
+}
+
 type Selector string
 
 type Element struct {
@@ -24,6 +33,7 @@ type Element struct {
 	loadedChildren bool
 }
 
+// Return the parent element of this element, or nil if there isn't one.
 func (self *Element) Parent() *Element {
 	if parent, ok := self.document.Element(self.parent); ok {
 		return parent
@@ -32,6 +42,8 @@ func (self *Element) Parent() *Element {
 	return nil
 }
 
+// Return a map representation of the element. This is how values are exposed in
+// the Friendscript runtime environment.
 func (self *Element) ToMap() map[string]interface{} {
 	output := map[string]interface{}{
 		`id`:         self.id,
@@ -50,20 +62,28 @@ func (self *Element) ToMap() map[string]interface{} {
 	return output
 }
 
+// Satisifies the fmt.Stringer interface.
 func (self *Element) String() string {
 	return fmt.Sprintf("[NODE %v] %v", self.id, self.name)
 }
 
+// Retrieve the text value of the element.
 func (self *Element) Text() string {
 	return self.value
 }
 
+// Retrieve the current attributes on the element.
 func (self *Element) Attributes() map[string]interface{} {
 	return maputil.DeepCopy(self.attributes)
 }
 
 func (self *Element) ID() int {
 	return self.id
+}
+
+// Retrieve the current position and dimensions of the element.
+func (self *Element) Position() (Dimensions, error) {
+	return Dimensions{}, fmt.Errorf(`Not Implemented Yet`)
 }
 
 // Loads all child elements under this element.
