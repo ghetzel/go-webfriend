@@ -9,9 +9,11 @@ import (
 	"time"
 
 	prompt "github.com/c-bata/go-prompt"
+	"github.com/fatih/color"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
+	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/commands"
@@ -101,13 +103,12 @@ func (self *Environment) Evaluate(script *scripting.Friendscript, scope ...*scri
 }
 
 func (self *Environment) replCompleter(d prompt.Document) []prompt.Suggest {
-	s := []prompt.Suggest{
+	suggestions := []prompt.Suggest{}
 	// {Text: "users", Description: "Store the username and age"},
 	// {Text: "articles", Description: "Store the article text posted by user"},
 	// {Text: "comments", Description: "Store the text commented to articles"},
-	}
 
-	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
+	return prompt.FilterHasPrefix(suggestions, d.GetWordBeforeCursor(), true)
 }
 
 func (self *Environment) REPL() (*scripting.Scope, error) {
@@ -115,14 +116,20 @@ func (self *Environment) REPL() (*scripting.Scope, error) {
 	var replErr error
 
 	var options = []prompt.Option{
-		prompt.OptionPrefix(`friendscript> `),
+		prompt.OptionPrefix(`webfriend> `),
 	}
 
 	exec := func(line string) {
-		_, replErr = self.EvaluateString(line, replScope)
+		if handled, err := self.evaluateReplBuiltin(line); handled {
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		} else {
+			_, replErr = self.EvaluateString(line, replScope)
 
-		if replErr != nil {
-			fmt.Println(replErr.Error())
+			if replErr != nil {
+				fmt.Println(replErr.Error())
+			}
 		}
 	}
 
@@ -130,6 +137,91 @@ func (self *Environment) REPL() (*scripting.Scope, error) {
 	repl.Run()
 
 	return replScope, replErr
+}
+
+func (self *Environment) evaluateReplBuiltin(line string) (bool, error) {
+	cmd, _ := stringutil.SplitPair(strings.TrimSpace(line), ` `)
+
+	switch cmd {
+	case `help`:
+		// [ .. ] hi blue w/ blue bg
+		// { .. } hi green w/ blue bg
+		// ( .. ) hi black w/ blue bg
+		// < .. > hi gree w/ default bg
+
+		lines := []string{}
+		lines = append(lines, "")
+		lines = append(lines, fmt.Sprintf("[Web]<friend> v%s - %q", Version, Slogan))
+		lines = append(lines, "")
+		lines = append(lines, "                       [░░▓▓▓▓▓▓▓▓▓▓▓░░]")
+		lines = append(lines, "                   [░▓▓█████████████████▓▓░]")
+		lines = append(lines, "               {░████▙}[██████████████████████▓▓░░]")
+		lines = append(lines, "            {░███████▛}[██]{▟██▙}[███████████████]{▟█████░}")
+		lines = append(lines, "          {░██████████}[█]{▟██▛}[███████████████]{▟█▛██████░}")
+		lines = append(lines, "        {░████████████████}[██████████████████]{▟████████░}")
+		lines = append(lines, "       {░███████████████▛}[████████████████]{▟████████████░}")
+		lines = append(lines, "      {░█████████████▛}[█████████████████]{▟██████▛}[█]{▜█▛}[█]{███░}")
+		lines = append(lines, "     {░█████████████▛}[█](▟██▙)[█████████](▟██▙){▜██▛}[█████]{▜▛}[██]{████░}")
+		lines = append(lines, "     {░█}[█]{▜████▛}[██]{▜█▙}[██](████)[█████████](████)[█████████████]{████░}")
+		lines = append(lines, "     [░███]{▜████}[███████](▜██▛)[█████████](▜██▛){▟█████████████████░}")
+		lines = append(lines, "     [░█████]{▜█▙}[████████████████████]{▟████████████████████░}")
+		lines = append(lines, "     [░██████]{▜█▙}[██████████████████]{█████████████████████▓░}")
+		lines = append(lines, "      [░▓▓█]{▟██████▙}[████████████████]{▜███████████████▛}[██▓░]")
+		lines = append(lines, "       {░███████████▙}[███████████████████]{▟██████████▛}[█▓░]")
+		lines = append(lines, "        {░███████████}[█████](▜████████▛)[███]{██████████▛}[█▓▓░]")
+		lines = append(lines, "          {░███████▛}[███████](▜██████▛)[████]{█████████▛}[█░]")
+		lines = append(lines, "            {░████▛}[███████████████████]{▟███████▛}[██░]")
+		lines = append(lines, "               [░▓▓███████████████████]{███████}[█░]")
+		lines = append(lines, "                   [░▓▓███████████████]{▜█▓}[▓░]")
+		lines = append(lines, "                       [░░▓▓▓▓▓▓▓▓▓▓▓▓░░]")
+
+		output := ``
+
+		for _, line := range lines {
+			outline := ``
+			state := 0
+
+			for _, c := range line {
+				switch c {
+				case '[':
+					state = 1
+				case '{':
+					state = 2
+				case '(':
+					state = 3
+				case '<':
+					state = 4
+				case ']', '}', ')', '>':
+					switch state {
+					case 1:
+						output += color.New(color.FgHiBlue).Sprint(outline)
+					case 2:
+						output += color.New(color.FgHiGreen, color.BgHiBlue).Sprint(outline)
+					case 3:
+						output += color.New(color.FgHiBlack, color.BgHiBlue).Sprint(outline)
+					case 4:
+						output += color.New(color.FgHiGreen).Sprint(outline)
+					}
+
+					state = 0
+					outline = ``
+				default:
+					if state > 0 {
+						outline += string(c)
+					} else {
+						output += string(c)
+					}
+				}
+			}
+
+			output += "\n"
+		}
+
+		fmt.Println(output)
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func (self *Environment) pushScope(scope *scripting.Scope) {

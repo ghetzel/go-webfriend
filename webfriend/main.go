@@ -15,15 +15,15 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = `webfriend`
-	app.Usage = `Your friendly friend in web browser automation.`
-	app.Version = `1.0.0`
+	app.Usage = webfriend.Slogan
+	app.Version = webfriend.Version
 	app.EnableBashCompletion = false
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   `log-level, L`,
 			Usage:  `Level of log output verbosity`,
-			Value:  `debug`,
+			Value:  `info`,
 			EnvVar: `LOGLEVEL`,
 		},
 		cli.BoolFlag{

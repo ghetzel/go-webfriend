@@ -68,15 +68,15 @@ type ResizeArgs struct {
 	// Whether to emulate a mobile device or not. If a map is provided, mobile
 	// emulation will be enabled and configured using the following keys:
 	//
-	//    width (int, optional): The width of the mobile screen to emulate.
+	//    width (int, optional), The width of the mobile screen to emulate.;
 	//
-	//    height (int, optional): The height of the mobile screen to emulate.
+	//    height (int, optional), The height of the mobile screen to emulate.;
 	//
-	//    x (int, optional): The horizontal position of the currently viewable
-	//                       portion of the mobile screen.
+	//    x (int, optional), The horizontal position of the currently viewable
+	//                       portion of the mobile screen.;
 	//
-	//    y (int, optional): The vertical position of the currently viewable
-	//                       portion of the mobile screen.
+	//    y (int, optional), The vertical position of the currently viewable
+	//                       portion of the mobile screen.;
 	//
 	Mobile interface{} `json:"mobile"`
 

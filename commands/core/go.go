@@ -59,7 +59,7 @@ type GoResponse struct {
 	Protocol      string             `json:"protocol"`
 }
 
-// Nagivate to a URL.
+// Navigate to a URL.
 func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 	if args == nil {
 		args = &GoArgs{}
