@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ghetzel/go-stockutil/log"
+	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/commands"
 )
@@ -24,7 +25,7 @@ type parsedStructField struct {
 
 type parsedStruct struct {
 	Name   string
-	Fields []parsedStructField
+	Fields []*parsedStructField
 }
 
 type parsedArg struct {
@@ -33,12 +34,22 @@ type parsedArg struct {
 	Primitive bool
 }
 
+func (self parsedArg) String() string {
+	return strings.TrimSpace(fmt.Sprintf("%v %v", self.Name, self.Type))
+}
+
+type parsedArgSet []*parsedArg
+
+func (self parsedArgSet) String() string {
+	return strings.Join(sliceutil.Stringify(self), ` `)
+}
+
 type parsedFunc struct {
 	Name             string
 	FriendscriptName string
 	Docs             string
-	Args             []parsedArg
-	Return           parsedArg
+	Args             parsedArgSet
+	Return           *parsedArg
 }
 
 type parsedSource struct {
@@ -73,18 +84,21 @@ func (self *Environment) Documentation() []commands.ModuleDoc {
 								Name:             fnDecl.Name.Name,
 								FriendscriptName: key,
 								Docs:             astCommentGroupToString(fnDecl.Doc),
-								Args:             make([]parsedArg, len(fnDecl.Type.Params.List)),
+								Args:             make(parsedArgSet, len(fnDecl.Type.Params.List)),
 							}
 
 							for i, inParam := range fnDecl.Type.Params.List {
-								pFunc.Args[i] = parsedArg{
+								pFunc.Args[i] = &parsedArg{
 									Name: inParam.Names[0].Name,
+									Type: astTypeToString(inParam.Type),
 								}
 							}
 
-							// for _, outParam := range fnDecl.Type.Results.List {
-							// 	if
-							// }
+							if len(fnDecl.Type.Results.List) > 1 {
+								pFunc.Return = &parsedArg{
+									Type: astTypeToString(fnDecl.Type.Results.List[0].Type),
+								}
+							}
 
 							parsed.Functions[key] = pFunc
 
@@ -95,11 +109,11 @@ func (self *Environment) Documentation() []commands.ModuleDoc {
 										key := typeSpec.Name.Name
 										stc := parsedStruct{
 											Name:   key,
-											Fields: make([]parsedStructField, 0),
+											Fields: make([]*parsedStructField, 0),
 										}
 
 										for _, sfield := range structType.Fields.List {
-											stc.Fields = append(stc.Fields, parsedStructField{
+											stc.Fields = append(stc.Fields, &parsedStructField{
 												Name:             sfield.Names[0].Name,
 												FriendscriptName: stringutil.Underscore(sfield.Names[0].Name),
 												Docs:             astCommentGroupToString(sfield.Doc),
@@ -126,11 +140,20 @@ func (self *Environment) Documentation() []commands.ModuleDoc {
 			fn := moduleT.Method(i)
 			key := stringutil.Underscore(fn.Name)
 
-			log.Debugf("[doc] %v::%v", name, key)
+			if key == `execute_command` {
+				continue
+			}
 
 			if fnDoc, ok := parsed.Functions[key]; ok && fnDoc.Docs != `` {
+				if r := fnDoc.Return; r != nil {
+					log.Debugf("[doc] %v::%v(%v) -> %v", name, key, fnDoc.Args, r)
+				} else {
+					log.Debugf("[doc] %v::%v(%v)", name, key, fnDoc.Args)
+				}
+
 				log.Debugf("[doc]   %v", fnDoc.Docs)
 			} else {
+				log.Debugf("[doc] %v::%v", name, key)
 				log.Debugf("[doc]   UNDOCUMENTED")
 			}
 
@@ -157,4 +180,24 @@ func astCommentGroupToString(cg *ast.CommentGroup) string {
 	}
 
 	return ``
+}
+
+func astTypeToString(ty ast.Expr) string {
+	if star, ok := ty.(*ast.StarExpr); ok {
+		ty = star.X
+	}
+
+	if sel, ok := ty.(*ast.SelectorExpr); ok {
+		ty = sel.Sel
+	}
+
+	if ident, ok := ty.(*ast.Ident); ok {
+		return ident.Name
+	} else if _, ok := ty.(*ast.InterfaceType); ok {
+		return `any`
+	} else if _, ok := ty.(*ast.MapType); ok {
+		return `{}`
+	} else {
+		return `UNKNOWN`
+	}
 }

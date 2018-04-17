@@ -86,17 +86,17 @@ func (self *Commands) Rpc(method string, args map[string]interface{}) (interface
 }
 
 // Outputs a line to the log.
-func (self *Commands) Log(message interface{}) (interface{}, error) {
+func (self *Commands) Log(message interface{}) error {
 	if typeutil.IsScalar(reflect.ValueOf(message)) {
 		fmt.Printf("%v\n", message)
 	} else if data, err := json.MarshalIndent(message, ``, `  `); err == nil {
 		fmt.Printf(string(data) + "\n")
 	} else {
 		log.Errorf("Failed to log message: %v", err)
-		return message, err
+		return err
 	}
 
-	return message, nil
+	return nil
 }
 
 // Store a value in the current scope. Strings will be automatically converted
