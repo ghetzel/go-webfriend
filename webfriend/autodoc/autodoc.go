@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"os"
 
 	"github.com/ghetzel/cli"
@@ -28,7 +29,15 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		webfriend.NewEnvironment(nil).Documentation()
+		if out, err := os.Create(`autodoc.gob`); err == nil {
+			docs := webfriend.NewEnvironment(nil).Documentation()
+
+			if err := gob.NewEncoder(out).Encode(docs); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			log.Fatal(err)
+		}
 	}
 
 	app.Run(os.Args)

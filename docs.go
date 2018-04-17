@@ -12,8 +12,28 @@ import (
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
-	"github.com/ghetzel/go-webfriend/commands"
 )
+
+type DocItem struct {
+	Name        string   `json:"name"`
+	Type        string   `json:"types"`
+	Required    bool     `json:"required"`
+	Description string   `json:"description"`
+	Examples    []string `json:"examples,omitempty"`
+}
+type CallDoc struct {
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	Argument    *DocItem   `json:"argument,omitempty"`
+	Options     []*DocItem `json:"options"`
+	Return      *DocItem   `json:"return,omitempty"`
+}
+
+type ModuleDoc struct {
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	Commands    []CallDoc `json:"commands"`
+}
 
 type parsedStructField struct {
 	Name             string
@@ -53,115 +73,146 @@ type parsedFunc struct {
 }
 
 type parsedSource struct {
+	Docs      string
 	Functions map[string]parsedFunc
 	Structs   map[string]parsedStruct
 }
 
-func (self *Environment) Documentation() []commands.ModuleDoc {
-	docs := make([]commands.ModuleDoc, 0)
+func (self *Environment) Documentation() []ModuleDoc {
+	docs := make([]ModuleDoc, 0)
 
 	for name, module := range self.modules {
-		moduleT := reflect.TypeOf(module)
-		parsed := &parsedSource{
-			Functions: make(map[string]parsedFunc),
-			Structs:   make(map[string]parsedStruct),
+		doc := ModuleDoc{
+			Name:     name,
+			Commands: make([]CallDoc, 0),
 		}
 
-		if sources, err := filepath.Glob(fmt.Sprintf("commands/%s/*.go", name)); err == nil {
-			for _, sourcefile := range sources {
-				if source, err := parser.ParseFile(
-					token.NewFileSet(),
-					sourcefile,
-					nil,
-					parser.ParseComments,
-				); err == nil {
-					for _, decl := range source.Decls {
-						switch decl.(type) {
-						case *ast.FuncDecl:
-							fnDecl := decl.(*ast.FuncDecl)
-							key := stringutil.Underscore(fnDecl.Name.Name)
-							pFunc := parsedFunc{
-								Name:             fnDecl.Name.Name,
-								FriendscriptName: key,
-								Docs:             astCommentGroupToString(fnDecl.Doc),
-								Args:             make(parsedArgSet, len(fnDecl.Type.Params.List)),
+		if parsed, err := parseCommandSourceCode(fmt.Sprintf("commands/%s/*.go", name)); err == nil {
+			doc.Description = parsed.Docs
+			moduleT := reflect.TypeOf(module)
+
+			for i := 0; i < moduleT.NumMethod(); i++ {
+				fn := moduleT.Method(i)
+				key := stringutil.Underscore(fn.Name)
+
+				if key == `execute_command` {
+					continue
+				}
+
+				cmdDoc := CallDoc{
+					Name: key,
+				}
+
+				if fnDoc, ok := parsed.Functions[key]; ok && fnDoc.Docs != `` {
+					cmdDoc.Description = fnDoc.Docs
+
+					if r := fnDoc.Return; r != nil {
+						cmdDoc.Return = &DocItem{
+							Type: fmt.Sprintf("%v", r),
+						}
+					}
+
+					for i, arg := range fnDoc.Args {
+						if i == 0 {
+							cmdDoc.Argument = &DocItem{
+								Name: arg.Name,
+								Type: arg.Type,
 							}
+						} else {
+							cmdDoc.Options = append(cmdDoc.Options, &DocItem{
+								Name: arg.Name,
+								Type: arg.Type,
+							})
+						}
+					}
+				}
 
-							for i, inParam := range fnDecl.Type.Params.List {
-								pFunc.Args[i] = &parsedArg{
-									Name: inParam.Names[0].Name,
-									Type: astTypeToString(inParam.Type),
-								}
+				doc.Commands = append(doc.Commands, cmdDoc)
+			}
+		} else {
+			log.Fatal(err)
+		}
+
+		docs = append(docs, doc)
+	}
+
+	return docs
+}
+
+func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
+	parsed := &parsedSource{
+		Functions: make(map[string]parsedFunc),
+		Structs:   make(map[string]parsedStruct),
+	}
+
+	if sources, err := filepath.Glob(fileglob); err == nil {
+		for _, sourcefile := range sources {
+			if source, err := parser.ParseFile(
+				token.NewFileSet(),
+				sourcefile,
+				nil,
+				parser.ParseComments,
+			); err == nil {
+				for _, decl := range source.Decls {
+					switch decl.(type) {
+					case *ast.FuncDecl:
+						fnDecl := decl.(*ast.FuncDecl)
+						key := stringutil.Underscore(fnDecl.Name.Name)
+						pFunc := parsedFunc{
+							Name:             fnDecl.Name.Name,
+							FriendscriptName: key,
+							Docs:             astCommentGroupToString(fnDecl.Doc),
+							Args:             make(parsedArgSet, len(fnDecl.Type.Params.List)),
+						}
+
+						for i, inParam := range fnDecl.Type.Params.List {
+							pFunc.Args[i] = &parsedArg{
+								Name: inParam.Names[0].Name,
+								Type: astTypeToString(inParam.Type),
 							}
+						}
 
-							if len(fnDecl.Type.Results.List) > 1 {
-								pFunc.Return = &parsedArg{
-									Type: astTypeToString(fnDecl.Type.Results.List[0].Type),
-								}
+						if len(fnDecl.Type.Results.List) > 1 {
+							pFunc.Return = &parsedArg{
+								Type: astTypeToString(fnDecl.Type.Results.List[0].Type),
 							}
+						}
 
-							parsed.Functions[key] = pFunc
+						parsed.Functions[key] = pFunc
 
-						case *ast.GenDecl:
-							if gdecl := decl.(*ast.GenDecl); len(gdecl.Specs) > 0 {
-								if typeSpec, ok := gdecl.Specs[0].(*ast.TypeSpec); ok {
-									if structType, ok := typeSpec.Type.(*ast.StructType); ok {
-										key := typeSpec.Name.Name
-										stc := parsedStruct{
-											Name:   key,
-											Fields: make([]*parsedStructField, 0),
-										}
-
-										for _, sfield := range structType.Fields.List {
-											stc.Fields = append(stc.Fields, &parsedStructField{
-												Name:             sfield.Names[0].Name,
-												FriendscriptName: stringutil.Underscore(sfield.Names[0].Name),
-												Docs:             astCommentGroupToString(sfield.Doc),
-											})
-										}
-
-										parsed.Structs[key] = stc
+					case *ast.GenDecl:
+						if gdecl := decl.(*ast.GenDecl); len(gdecl.Specs) > 0 {
+							if typeSpec, ok := gdecl.Specs[0].(*ast.TypeSpec); ok {
+								if structType, ok := typeSpec.Type.(*ast.StructType); ok {
+									key := typeSpec.Name.Name
+									stc := parsedStruct{
+										Name:   key,
+										Fields: make([]*parsedStructField, 0),
 									}
+
+									for _, sfield := range structType.Fields.List {
+										stc.Fields = append(stc.Fields, &parsedStructField{
+											Name:             sfield.Names[0].Name,
+											FriendscriptName: stringutil.Underscore(sfield.Names[0].Name),
+											Docs:             astCommentGroupToString(sfield.Doc),
+										})
+									}
+
+									parsed.Structs[key] = stc
 								}
 							}
 						}
 					}
-				} else {
-					log.Fatalf("Failed to parse source for module %v: %v", name, err)
-					return nil
 				}
-			}
-		} else {
-			log.Fatalf("Failed to read source files for module %v: %v", name, err)
-			return nil
-		}
-
-		for i := 0; i < moduleT.NumMethod(); i++ {
-			fn := moduleT.Method(i)
-			key := stringutil.Underscore(fn.Name)
-
-			if key == `execute_command` {
-				continue
-			}
-
-			if fnDoc, ok := parsed.Functions[key]; ok && fnDoc.Docs != `` {
-				if r := fnDoc.Return; r != nil {
-					log.Debugf("[doc] %v::%v(%v) -> %v", name, key, fnDoc.Args, r)
-				} else {
-					log.Debugf("[doc] %v::%v(%v)", name, key, fnDoc.Args)
-				}
-
-				log.Debugf("[doc]   %v", fnDoc.Docs)
 			} else {
-				log.Debugf("[doc] %v::%v", name, key)
-				log.Debugf("[doc]   UNDOCUMENTED")
+				return nil, fmt.Errorf("Failed to parse source for module %v: %v", source, err)
 			}
-
-			log.Debugf("[doc]")
 		}
+	} else {
+		return nil, fmt.Errorf("Failed to read source files: %v", err)
 	}
 
-	return docs
+	return parsed, nil
 }
 
 func astCommentGroupToString(cg *ast.CommentGroup) string {
