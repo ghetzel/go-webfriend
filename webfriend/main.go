@@ -8,7 +8,7 @@ import (
 
 	"github.com/ghetzel/cli"
 	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-webfriend"
+	webfriend "github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
 )
 
@@ -33,6 +33,15 @@ func main() {
 		cli.BoolFlag{
 			Name:  `interactive, I`,
 			Usage: `Start Webfriend in an interactive Friendscript shell.`,
+		},
+		cli.BoolFlag{
+			Name:  `server, S`,
+			Usage: `Whether to run the Webfriend Debugging Server`,
+		},
+		cli.StringFlag{
+			Name:  `address, a`,
+			Usage: `If running the Webfriend Debugging Server, this specifies the [address]:port to listen on.`,
+			Value: `:19222`,
 		},
 	}
 
@@ -78,7 +87,10 @@ func main() {
 			script := webfriend.NewEnvironment(chrome)
 
 			go func() {
-				if c.Bool(`interactive`) {
+				if c.Bool(`server`) {
+					exiterr <- webfriend.NewServer(script).ListenAndServe(c.String(`address`))
+					return
+				} else if c.Bool(`interactive`) {
 					if scope, err := script.REPL(); err == nil {
 						fmt.Println(scope)
 						exiterr <- nil

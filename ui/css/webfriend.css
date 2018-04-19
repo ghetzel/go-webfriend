@@ -1,0 +1,21 @@
+#main {
+    padding: 0;
+    position: relative;
+    height: calc(100vh - 74px);
+}
+
+#browser {
+
+}
+
+#stats {
+    position: absolute;
+    top: 0;
+    right: 1em;
+    z-index: 10000;
+    width: 80px;
+}
+
+#stats > * {
+    margin: 0.5em;
+}

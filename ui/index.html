@@ -1,0 +1,89 @@
+<img
+    id="browser"
+>
+<div id="stats"></div>
+<script>
+$(function(){
+    $.each(webfriend.imageStats, function(i, panel){
+        panel.dom.style.cssText = 'position: relative';
+        panel.showPanel(i);
+        $('#stats').append(panel.dom);
+    });
+
+    webfriend.setScreenTarget('#browser');
+    var lastKnownButton = 0;
+
+    $('#browser').on('mousemove mousedown mouseup mousewheel', function(e) {
+        var parentOffset = $(this).parent().offset();
+        var relX = e.pageX - parentOffset.left;
+        var relY = e.pageY - parentOffset.top;
+
+        var args = {
+            x: relX,
+            y: relY,
+        };
+
+        var btn = e.button;
+
+        if (e.type == 'mousemove') {
+            btn = lastKnownButton;
+        } else {
+            lastKnownButton = btn;
+        }
+
+
+        args['count'] = e.detail;
+
+        switch (btn) {
+        case 1:
+            args['button'] = 'middle';
+            break;
+
+        case 2:
+            args['button'] = 'right';
+            break;
+
+        default:
+            args['button'] = 'left';
+            break;
+        }
+
+        switch (e.type) {
+        case 'mousedown':
+            args['action'] = 'press';
+            break;
+
+        case 'mouseup':
+            args['action'] = 'release';
+            break;
+
+        case 'mousewheel':
+            args['action'] = 'scroll';
+            args['wheelX'] = -1*e.originalEvent.wheelDeltaX;
+            args['wheelY'] = -1*e.originalEvent.wheelDeltaY;
+
+            break;
+        default:
+            args['action'] = 'move';
+            break;
+        }
+
+        webfriend.command('mouse', args);
+        e.preventDefault();
+    });
+
+    webfriend.connect().done(function(){
+        console.info('Connected');
+
+        /* window.onbeforeunload = webfriend.disconnect; */
+
+        $(window).resize(webfriend.resizeScreen.bind(webfriend));
+        webfriend.resizeScreen();
+
+        var url = $('#urlbar input[name=url]').val();
+        webfriend.command('go', url);
+    }).fail(function(){
+        console.error('Connect failed');
+    });
+});
+</script>

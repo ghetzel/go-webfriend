@@ -38,7 +38,7 @@ func (self *Commands) SwitchTab(id browser.TabID) (*browser.Tab, error) {
 
 // Reload the currently active tab.
 func (self *Commands) Reload() error {
-	return fmt.Errorf(`NI`)
+	return self.browser.Tab().AsyncRPC(`Page`, `reload`, nil)
 }
 
 // Stop loading the currently active tab.

@@ -6,7 +6,7 @@ import (
 
 	"github.com/ghetzel/cli"
 	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-webfriend"
+	webfriend "github.com/ghetzel/go-webfriend"
 )
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		if out, err := os.Create(`autodoc.gob`); err == nil {
+		if out, err := os.Create(`documentation.gob`); err == nil {
 			docs := webfriend.NewEnvironment(nil).Documentation()
 
 			if err := gob.NewEncoder(out).Encode(docs); err != nil {

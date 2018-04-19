@@ -1,12 +1,14 @@
 package browser
 
 import (
+	"encoding/base64"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/mathutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/gobwas/glob"
 	"github.com/mafredri/cdp/devtool"
@@ -19,15 +21,20 @@ var consoleEvents = `Console.messageAdded`
 type TabID string
 
 type Tab struct {
-	browser         *Browser
-	target          *devtool.Target
-	rpc             *RPC
-	events          chan *Event
-	waiters         sync.Map
-	networkRequests []*Event
-	netreqLock      sync.Mutex
-	accumulators    sync.Map
-	currentDocument *Document
+	browser              *Browser
+	target               *devtool.Target
+	rpc                  *RPC
+	events               chan *Event
+	waiters              sync.Map
+	networkRequests      []*Event
+	netreqLock           sync.Mutex
+	accumulators         sync.Map
+	currentDocument      *Document
+	mostRecentFrameId    int64
+	mostRecentFrame      []byte
+	mostRecentDimensions []int
+	screencasting        bool
+	castlock             sync.Mutex
 }
 
 func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
@@ -55,6 +62,61 @@ func (self *Tab) DOM() *Document {
 	}
 
 	return self.currentDocument
+}
+
+func (self *Tab) StartScreencast(quality int, width int, height int) error {
+	self.castlock.Lock()
+	defer self.castlock.Unlock()
+
+	if self.screencasting {
+		return nil
+	} else {
+		self.screencasting = true
+	}
+
+	return self.AsyncRPC(`Page`, `startScreencast`, map[string]interface{}{
+		`format`:    `jpeg`,
+		`quality`:   int(mathutil.Clamp(float64(quality), 0, 100)),
+		`maxWidth`:  width,
+		`maxHeight`: height,
+	})
+}
+
+func (self *Tab) IsScreencasting() bool {
+	self.castlock.Lock()
+	defer self.castlock.Unlock()
+
+	return self.screencasting
+}
+
+func (self *Tab) GetMostRecentFrame() (int64, []byte, int, int) {
+	self.castlock.Lock()
+	defer self.castlock.Unlock()
+
+	if self.screencasting {
+		if d := self.mostRecentDimensions; len(d) == 2 {
+			return self.mostRecentFrameId, self.mostRecentFrame, d[0], d[1]
+		}
+	}
+
+	return 0, nil, 0, 0
+}
+
+func (self *Tab) ResetMostRecentInfo() {
+	self.mostRecentFrameId = 0
+	self.mostRecentFrame = nil
+}
+
+func (self *Tab) StopScreencast() error {
+	self.castlock.Lock()
+	defer self.castlock.Unlock()
+
+	if self.screencasting {
+		self.screencasting = false
+		return self.AsyncRPC(`Page`, `stopScreencast`, nil)
+	} else {
+		return nil
+	}
 }
 
 func (self *Tab) connect() error {
@@ -207,6 +269,25 @@ func (self *Tab) registerInternalEvents() {
 				element.RefreshAttributes()
 			} else {
 				log.Warningf("Got attribute update event for unknown node %d", nid)
+			}
+		}
+	})
+
+	self.RegisterEventHandler(`Page.screencastFrame`, func(event *Event) {
+		defer self.RPC(`Page`, `screencastFrameAck`, map[string]interface{}{
+			`sessionId`: event.Params.Int(`sessionId`),
+		})
+
+		if data := event.Params.String(`data`); data != `` {
+			if decoded, err := base64.StdEncoding.DecodeString(data); err == nil {
+				self.mostRecentFrame = decoded
+				self.mostRecentFrameId = event.Params.Int(`metadata.timestamp`, time.Now().UnixNano())
+				self.mostRecentDimensions = []int{
+					int(event.Params.Int(`metadata.deviceWidth`)),
+					int(event.Params.Int(`metadata.deviceHeight`)),
+				}
+			} else {
+				log.Warningf("[rpc] Failed to decode screencast frame: %v", err)
 			}
 		}
 	})

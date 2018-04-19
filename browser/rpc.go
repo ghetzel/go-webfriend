@@ -39,7 +39,7 @@ type RpcMessage struct {
 	Method string                 `json:"method"`
 	Params map[string]interface{} `json:"params,omitempty"`
 	Result map[string]interface{} `json:"result,omitempty"`
-	Error  error                  `json:"error,omitempty"`
+	Error  map[string]interface{} `json:"error,omitempty"`
 }
 
 func (self *RpcMessage) String() string {
