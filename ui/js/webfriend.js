@@ -87,7 +87,7 @@ var Webfriend = Stapes.subclass({
     wsroot: function() {
         var out = '';
 
-        if (window.location.scheme === 'https') {
+        if (window.location.protocol === 'https:') {
             out += 'wss://';
         } else {
             out += 'ws://';
@@ -209,6 +209,34 @@ var Webfriend = Stapes.subclass({
                 height: screen.height(),
             });
         }
+    },
+
+    updateBuffer: function(index, document) {
+        if (window.localStorage) {
+            if (document) {
+                localStorage.setItem('webfriend.editor.buffer.' + index, JSON.stringify(document));
+            }
+        } else {
+            throw 'Local Storage is not available.';
+        }
+    },
+
+    retrieveBuffer: function(index) {
+        if (window.localStorage) {
+            var document = localStorage.getItem('webfriend.editor.buffer.' + index);
+
+            if (document) {
+                return JSON.parse(document);
+            } else {
+                return {};
+            }
+        } else {
+            throw 'Local Storage is not available.';
+        }
+    },
+
+    clearBuffer: function(index) {
+        localStorage.removeItem('webfriend.editor.buffer.' + index);
     },
 });
 

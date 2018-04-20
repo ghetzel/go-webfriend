@@ -19,3 +19,77 @@
 #stats > * {
     margin: 0.5em;
 }
+
+.caret {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-left: .255em;
+    vertical-align: .255em;
+    content: "";
+    border-top: .3em solid;
+    border-right: .3em solid transparent;
+    border-bottom: 0;
+    border-left: .3em solid transparent;
+}
+
+body > #editor, .CodeMirror {
+    width: 100vw;
+    height: 93vh;
+}
+
+body > .editor-statusbar {
+    background: #222222;
+    color: white;
+    width: 100vw;
+    height: 3vh;
+    font-size: 90%;
+    line-height: 3vh;
+    vertical-align: middle;
+    padding: 0 0.5em;
+}
+
+.editor-workspaces {
+    height: 4vh;
+    border-bottom: 1px solid #555555;
+    background: #222222;
+}
+
+.editor-workspaces .nav {
+    background: transparent;
+    border-bottom: 0;
+}
+
+.editor-workspaces .nav .nav-link {
+    border-radius: 0;
+    border: 0;
+    background: transparent;
+    color: #888888;
+    font-size: 90%;
+    min-width: 100px;
+    text-align: left;
+    padding-right: 0.5em;
+}
+
+.editor-workspaces .nav .nav-link .file-icon {
+    color: #888888;
+}
+
+.editor-workspaces .nav .nav-link.active {
+    background: #555555;
+    color: white;
+}
+
+.editor-workspaces .nav .nav-link.active .file-icon {
+    color: white;
+}
+
+.editor-workspaces .nav .nav-link.disabled {
+    background: #111111;
+    color: #555555;
+    cursor: not-allowed;
+}
+
+.editor-workspaces .workspace-selector .nav-link {
+    background: transparent;
+}
