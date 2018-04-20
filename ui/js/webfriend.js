@@ -84,11 +84,25 @@ var Webfriend = Stapes.subclass({
         this.stopCommandStream();
     },
 
+    wsroot: function() {
+        var out = '';
+
+        if (window.location.scheme === 'https') {
+            out += 'wss://';
+        } else {
+            out += 'ws://';
+        }
+
+        out += window.location.hostname + ':' + window.location.port;
+
+        return out
+    },
+
     connectImageStream: function() {
         var p = $.Deferred();
 
         this.imageStream = new WebSocket(
-            'ws://localhost:19222/api/tabs/current/screencast?q=50&fps=35',
+            this.wsroot() + '/api/tabs/current/screencast?q=100&fps=35',
             uuidv4()
         );
 
@@ -149,7 +163,7 @@ var Webfriend = Stapes.subclass({
         var p = $.Deferred();
 
         this.commandStream = new WebSocket(
-            'ws://localhost:19222/api/tabs/current/script',
+            this.wsroot() + '/api/tabs/current/script',
             uuidv4()
         );
 

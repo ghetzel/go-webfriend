@@ -28,12 +28,11 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navitems" aria-controls="navitems" aria-expanded="false"
-            aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <a class="navbar-brand" href="/">
+            <img src="/img/webfriend.svg" height="48">
+        </a>
 
-        <ul class="navbar-nav">
+        <ul class="navbar-nav mr-4">
             <li class="nav-item">
                 <a class="nav-link" href="/">
                     <i class="fa fa-fw fa-2x fa-arrow-left"></i>
@@ -47,13 +46,12 @@
             </li>
         </ul>
 
-        <form class="ml-4 w-100 mr-4" id="urlbar">
+        <form class="w-100" id="urlbar">
             <input type="text" name="url" class="form-control" value="https://news.ycombinator.com">
         </form>
 
-        <a class="navbar-brand ml-auto mr-4" href="/">
-            <img src="/img/webfriend.svg" height="48">
-            <img src="/img/logo-text-darkbg.svg" height="28" class="mb-2 ml-2">
+        <a class="navbar-brand ml-4 d-none d-sm-block" href="/">
+            <img src="/img/logo-text-darkbg.svg" height="28" class="mb-2">
         </a>
     </nav>
 

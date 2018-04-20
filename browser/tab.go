@@ -75,7 +75,7 @@ func (self *Tab) StartScreencast(quality int, width int, height int) error {
 	}
 
 	return self.AsyncRPC(`Page`, `startScreencast`, map[string]interface{}{
-		`format`:    `jpeg`,
+		`format`:    `png`,
 		`quality`:   int(mathutil.Clamp(float64(quality), 0, 100)),
 		`maxWidth`:  width,
 		`maxHeight`: height,
@@ -183,6 +183,10 @@ func (self *Tab) setupEvents() error {
 		return err
 	}
 
+	if err := self.rpc.CallAsync(`Overlay.enable`, nil); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -281,7 +285,7 @@ func (self *Tab) registerInternalEvents() {
 		if data := event.Params.String(`data`); data != `` {
 			if decoded, err := base64.StdEncoding.DecodeString(data); err == nil {
 				self.mostRecentFrame = decoded
-				self.mostRecentFrameId = event.Params.Int(`metadata.timestamp`, time.Now().UnixNano())
+				self.mostRecentFrameId = time.Now().UnixNano()
 				self.mostRecentDimensions = []int{
 					int(event.Params.Int(`metadata.deviceWidth`)),
 					int(event.Params.Int(`metadata.deviceHeight`)),

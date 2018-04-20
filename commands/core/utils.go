@@ -132,3 +132,20 @@ func (self *Commands) Run(filename string, args *RunArgs) (interface{}, error) {
 func (self *Commands) SwitchRoot(selector browser.Selector) error {
 	return fmt.Errorf(`Not Implemented Yet`)
 }
+
+// Highlight all nodes matching the given selector.
+func (self *Commands) Highlight(selector browser.Selector) error {
+	docroot := self.browser.Tab().DOM()
+
+	if elements, err := docroot.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
+		for _, element := range elements {
+			if err := element.Highlight(); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	} else {
+		return err
+	}
+}

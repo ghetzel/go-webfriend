@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
@@ -152,4 +153,20 @@ func (self *Commands) Resize(args *ResizeArgs) (*ResizeResponse, error) {
 // Return all currently open tabs.
 func (self *Commands) Tabs() ([]browser.Tab, error) {
 	return nil, fmt.Errorf(`NI`)
+}
+
+// Navigate back through the current tab's history.
+func (self *Commands) Back() error {
+	if r, err := self.browser.Tab().RPC(`Page`, `getNavigationHistory`, nil); err == nil {
+		results := maputil.M(r)
+		current := results.Int(`currentIndex`)
+		entries := results.Slice(`entries`)
+
+		log.Debugf("current: %d", current)
+		log.Dumpf("entries: %s", entries)
+
+		return nil
+	} else {
+		return err
+	}
 }

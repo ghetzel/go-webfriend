@@ -163,6 +163,26 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 	}
 }
 
+// Highlight all nodes matching the given selector.
+func (self *Document) HighlightAll(selector Selector) error {
+	if root, err := self.Root(); err == nil {
+		return self.tab.AsyncRPC(`Overlay`, `highlightNode`, map[string]interface{}{
+			`highlightConfig`: map[string]interface{}{
+				`contentColor`: map[string]interface{}{
+					`r`: 0,
+					`g`: 128,
+					`b`: 128,
+					`a`: 0.5,
+				},
+				`selectorList`: selector,
+			},
+			`nodeId`: root.ID(),
+		})
+	} else {
+		return err
+	}
+}
+
 // Recursively print the entire document tree, retrieving elements as neccessary.
 func (self *Document) PrintTree() {
 	if root, err := self.Root(); err == nil {

@@ -131,7 +131,7 @@ func (self *Server) ListenAndServe(address string) error {
 							return true
 						}
 
-						if _, data, width, height := session.Tab.GetMostRecentFrame(); len(data) > 0 {
+						if fid, data, width, height := session.Tab.GetMostRecentFrame(); len(data) > 0 {
 							if width != session.lastFrameW || height != session.lastFrameH {
 								session.lastFrameW = width
 								session.lastFrameH = height
@@ -145,15 +145,15 @@ func (self *Server) ListenAndServe(address string) error {
 							}
 
 							// don't send duplicate frames
-							// TODO: this is laggy and weird somehow...
-							// if fid != session.lastFrameId {
-							// 	session.lastFrameId = fid
-							// }
-							if err := session.Conn.WriteMessage(websocket.BinaryMessage, data); err != nil {
-								session.Stop()
+							if fid > session.lastFrameId {
+								if err := session.Conn.WriteMessage(websocket.BinaryMessage, data); err != nil {
+									session.Stop()
+								}
+
+								session.lastFrameId = fid
+								session.LastFrameTime = time.Now()
 							}
 
-							session.LastFrameTime = time.Now()
 						}
 					}
 				}

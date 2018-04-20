@@ -144,6 +144,8 @@ func (self *Environment) evaluateReplBuiltin(line string) (bool, error) {
 
 	switch cmd {
 	case `help`:
+		// This is a a big colorized Unicode WebFriend logo for terminal output.
+
 		// [ .. ] hi blue w/ blue bg
 		// { .. } hi green w/ blue bg
 		// ( .. ) hi black w/ blue bg

@@ -41,6 +41,27 @@ type MouseActionConfig struct {
 	Count   int         `json:"count,omitempty"`
 }
 
+type KeyboardAction string
+
+const (
+	KeyPressed  KeyboardAction = `keyDown`
+	KeyReleased                = `keyUp`
+	KeyRaw                     = `rawKeyDown`
+)
+
+func (self KeyboardAction) String() string {
+	return string(self)
+}
+
+type KeyboardActionConfig struct {
+	Action  KeyboardAction `json:"action" default:"keyDown"`
+	Alt     bool           `json:"alt,omitempty"`
+	Control bool           `json:"control,omitempty"`
+	Meta    bool           `json:"meta,omitempty"`
+	Shift   bool           `json:"shift,omitempty"`
+	KeyCode int            `json:"keycode,omitempty"`
+}
+
 func (self *Tab) MoveMouse(x float64, y float64, config *MouseActionConfig) error {
 	if config == nil {
 		config = &MouseActionConfig{}
@@ -83,4 +104,43 @@ func (self *Tab) MoveMouse(x float64, y float64, config *MouseActionConfig) erro
 	}
 
 	return self.AsyncRPC(`Input`, `dispatchMouseEvent`, args)
+}
+
+func (self *Tab) SendKey(domKeyName string, config *KeyboardActionConfig) error {
+	if config == nil {
+		config = &KeyboardActionConfig{}
+	}
+
+	defaults.SetDefaults(config)
+	mods := 0
+
+	if config.Alt {
+		mods |= 1
+	}
+
+	if config.Control {
+		mods |= 2
+	}
+
+	if config.Meta {
+		mods |= 4
+	}
+
+	if config.Shift {
+		mods |= 8
+	}
+
+	args := map[string]interface{}{
+		`type`:      config.Action.String(),
+		`modifiers`: mods,
+	}
+
+	if len(domKeyName) == 1 {
+		args[`text`] = domKeyName
+	}
+
+	args[`nativeVirtualKeyCode`] = config.KeyCode
+	args[`windowsVirtualKeyCode`] = config.KeyCode
+
+	return self.AsyncRPC(`Input`, `dispatchKeyEvent`, args)
 }

@@ -72,12 +72,12 @@ func (self *Event) String() string {
 func eventFromRpcResponse(resp *RpcMessage) *Event {
 	var err error
 
-	if resp.Error != nil {
+	if len(resp.Error) > 0 {
 		eM := maputil.M(resp.Error)
 		err = fmt.Errorf("Code %d: %v", eM.Int(`code`), eM.String(`message`))
 	}
 
-	event := &Event{
+	return &Event{
 		ID:        int(resp.ID),
 		Name:      resp.Method,
 		Result:    maputil.M(resp.Result),
@@ -85,6 +85,4 @@ func eventFromRpcResponse(resp *RpcMessage) *Event {
 		Timestamp: time.Now(),
 		Error:     err,
 	}
-
-	return event
 }

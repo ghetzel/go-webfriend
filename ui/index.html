@@ -13,6 +13,25 @@ $(function(){
     webfriend.setScreenTarget('#browser');
     var lastKnownButton = 0;
 
+    $('#browser').on('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    $(document).on('keydown keyup keypress', function(e) {
+        if (e.target.nodeName === 'BODY') {
+            webfriend.command('key', e.key, {
+                action:  (e.type === 'keyup' ? 'release' : 'press'),
+                alt:     e.altKey,
+                control: e.ctrlKey,
+                meta:    e.metaKey,
+                shift:   e.shiftKey,
+                keycode: e.keyCode,
+            });
+
+            e.preventDefault();
+        }
+    });
+
     $('#browser').on('mousemove mousedown mouseup mousewheel', function(e) {
         var parentOffset = $(this).parent().offset();
         var relX = e.pageX - parentOffset.left;
@@ -50,6 +69,7 @@ $(function(){
 
         switch (e.type) {
         case 'mousedown':
+            $('*').blur();
             args['action'] = 'press';
             break;
 

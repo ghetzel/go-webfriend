@@ -151,8 +151,21 @@ func (self *Element) Focus() error {
 
 // Click on the current element.
 func (self *Element) Click() error {
-	// if _, err := self.browser.Tab().RPC()
 	return fmt.Errorf(`NI`)
+}
+
+func (self *Element) Highlight() error {
+	return self.document.tab.AsyncRPC(`Overlay`, `highlightNode`, map[string]interface{}{
+		`highlightConfig`: map[string]interface{}{
+			`contentColor`: map[string]interface{}{
+				`r`: 0,
+				`g`: 128,
+				`b`: 128,
+				`a`: 0.5,
+			},
+		},
+		`nodeId`: self.id,
+	})
 }
 
 // Evaluate the given JavaScript as an anonymous function on the current element.
