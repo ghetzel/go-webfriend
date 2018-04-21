@@ -1,167 +1,41 @@
----
-layout: none
----
+--- layout: none ---
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-    <link rel="stylesheet" href="/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
+        crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+        crossorigin="anonymous">
     <link rel="stylesheet" href="/css/codemirror.css">
+    <link rel="stylesheet" href="/css/editor/show-hint.css" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/editor/webfriend.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/font-hind.css" integrity="sha384-EU3gxFIXEx0F6RDsVUTUQpjd+V6dOgH935HL/47t8xqMxngzJw6psDsqQYPOUe16" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/font-hind.css" integrity="sha384-EU3gxFIXEx0F6RDsVUTUQpjd+V6dOgH935HL/47t8xqMxngzJw6psDsqQYPOUe16"
+        crossorigin="anonymous">
     <link rel="stylesheet" href="/css/webfriend.css" crossorigin="anonymous">
 
     <script src="/js/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
-    <script src="/js/bootstrap.bundle.min.js" integrity="sha384-3ziFidFTgxJXHMDttyPJKDuTlmxJlwbSkojudK/CkRqKDOmeSbN6KLrGdrBQnT2n" crossorigin="anonymous"></script>
-    <script src="/js/jquery.simple.websocket.js" integrity="sha384-ury8ZTZTL/MZjBRspE5eEuVBT/ViWa51jliCwSWw200vMClJMMPgdIRVq9bOAqWo" crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.bundle.min.js" integrity="sha384-3ziFidFTgxJXHMDttyPJKDuTlmxJlwbSkojudK/CkRqKDOmeSbN6KLrGdrBQnT2n"
+        crossorigin="anonymous"></script>
+    <script src="/js/jquery.simple.websocket.js" integrity="sha384-ury8ZTZTL/MZjBRspE5eEuVBT/ViWa51jliCwSWw200vMClJMMPgdIRVq9bOAqWo"
+        crossorigin="anonymous"></script>
     <script src="/js/mrdoob-stats.min.js"></script>
+    <script src="/js/d3.min.js"></script>
     <script src="/js/codemirror.js"></script>
     <script src="/js/codemirror/addons/active-line.js"></script>
+    <script src="/js/codemirror/addons/show-hint.js"></script>
     <script src="/js/codemirror/modes/friendscript.js"></script>
     <script src="/js/stapes.min.js"></script>
+    <script src="/js/webfriend-editor.js"></script>
     <script src="/js/webfriend.js"></script>
 
     <title>Webfriend - Friendscript Editor</title>
 </head>
+
 <body>
-    <script>
-    $(function(){
-        var lastSave = null;
-        var isLoaded = false;
-        var AUTOSAVE_INTERVAL = 10000;
-        var MIN_AUTOSAVE_INTERVAL_MS = 5000;
-
-        var getActiveBuffer = function() {
-            var active = $('.editor-workspaces .nav-link.active').parent();
-
-            if (active) {
-                var activeBuffer = active.attr('data-editor-buffer');
-
-                if (activeBuffer && activeBuffer.length) {
-                    return {
-                        'element': active,
-                        'index': activeBuffer,
-                    };
-                }
-            }
-
-            return null;
-        };
-
-        var autosave = function(){
-            if (lastSave && (Date.now() - lastSave) < MIN_AUTOSAVE_INTERVAL_MS) {
-                return;
-            }
-
-            var buffer = getActiveBuffer();
-
-            if (buffer) {
-                // only autosave "untitled" (e.g.: numeric) buffers
-                if (parseInt(buffer.index) === NaN) {
-                    return
-                }
-
-                webfriend.updateBuffer(buffer.index, {
-                    'buffer':   buffer.index,
-                    'filename': buffer.element.find('.filename').text(),
-                    'content':  editor.getValue(),
-                });
-
-                lastSave = Date.now();
-            }
-        };
-
-        var autoload = function() {
-            if (!isLoaded) {
-                var buffer = getActiveBuffer();
-
-                if (buffer) {
-                    var stored = webfriend.retrieveBuffer(buffer.index);
-
-                    if (stored) {
-                        editor.setValue(stored.content)
-                    }
-
-                    isLoaded = true;
-                }
-            }
-        };
-
-        var updateStatusBar = function(cm) {
-            var sb = $('.editor-statusbar');
-            var cursor = cm.getCursor();
-
-            sb.find('.line').text(cursor.line+1);
-            sb.find('.ch').text(cursor.ch);
-        };
-
-        var editor = CodeMirror(document.getElementById('editor'), {
-            mode:            'friendscript',
-            theme:           'webfriend',
-            indentUnit:      4,
-            tabSize:         4,
-            lineNumbers:     true,
-            autofocus:       true,
-            styleActiveLine: true,
-        });
-
-        editor.on('cursorActivity', updateStatusBar);
-        editor.on('changes', autosave);
-        setInterval(autosave, AUTOSAVE_INTERVAL);
-
-        autoload();
-        updateStatusBar(editor);
-    });
-    </script>
-
-    <div class="editor-workspaces">
-        <ul class="nav nav-tabs">
-            <li class="nav-item dropdown workspace-selector">
-                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                    Default
-                </a>
-                <div class="dropdown-menu">
-                    <a class="dropdown-item" href="#">
-                        <i class="fa fa-fw fa-check"></i>
-                        Default
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="#">
-                        <i class="fa fa-fw fa-plus"></i>
-                        Add Workspace
-                    </a>
-                </div>
-            </li>
-
-            <li class="nav-item" data-editor-buffer="0">
-                <a class="nav-link active" href="#">
-                    <i class="fa fa-fw fa-hashtag file-icon"></i>
-                    <span class="filename">untitled</span>
-                    <i class="fa fa-fw fa-times"></i>
-                </a>
-            </li>
-
-            <li class="nav-item" data-editor-buffer="1">
-                <a class="nav-link" href="#">
-                    <i class="fa fa-fw fa-hashtag file-icon"></i>
-                    <span class="filename">other.fs</span>
-                    <i class="fa fa-fw fa-times"></i>
-                </a>
-            </li>
-        </ul>
-    </div>
-
-    <div id="editor"></div>
-
-    <div class="editor-statusbar">
-        <div class="statusbar-cursor">
-            Ln <span class="line">-</span>,
-            Col <span class="ch">-</span>
-        </div>
-    </div>
 </body>
 </html>

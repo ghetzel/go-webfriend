@@ -210,34 +210,6 @@ var Webfriend = Stapes.subclass({
             });
         }
     },
-
-    updateBuffer: function(index, document) {
-        if (window.localStorage) {
-            if (document) {
-                localStorage.setItem('webfriend.editor.buffer.' + index, JSON.stringify(document));
-            }
-        } else {
-            throw 'Local Storage is not available.';
-        }
-    },
-
-    retrieveBuffer: function(index) {
-        if (window.localStorage) {
-            var document = localStorage.getItem('webfriend.editor.buffer.' + index);
-
-            if (document) {
-                return JSON.parse(document);
-            } else {
-                return {};
-            }
-        } else {
-            throw 'Local Storage is not available.';
-        }
-    },
-
-    clearBuffer: function(index) {
-        localStorage.removeItem('webfriend.editor.buffer.' + index);
-    },
 });
 
 $(document).ready(function(){
