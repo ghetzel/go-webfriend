@@ -4,9 +4,15 @@
 <div id="stats"></div>
 <script>
 $(function(){
-    $.each(webfriend.imageStats, function(i, panel){
+    $.each(webfriend.stats, function(i, panel){
         panel.dom.style.cssText = 'position: relative';
-        panel.showPanel(i);
+
+        if (i <= 1) {
+            panel.showPanel(i);
+        } else {
+            panel.showPanel(i + 1);
+        }
+
         $('#stats').append(panel.dom);
     });
 

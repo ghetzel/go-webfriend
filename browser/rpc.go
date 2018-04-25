@@ -67,6 +67,10 @@ func NewRPC(wsUrl string) (*RPC, error) {
 	}
 }
 
+func (self *RPC) SynthesizeEvent(message RpcMessage) {
+	self.recv <- &message
+}
+
 func (self *RPC) startReading() {
 	for {
 		if self.closing {

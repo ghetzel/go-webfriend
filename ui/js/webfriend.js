@@ -13,7 +13,16 @@ var Webfriend = Stapes.subclass({
         this.imageStream = null;
         this.commandStream = null;
         this.lastHeader = null;
-        this.imageStats = [ new Stats(), new Stats() ];
+        this.maxDataSeen = 0;
+        this.stats = [
+                new Stats(),
+                new Stats(),
+                new Stats(),
+        ];
+
+        this.statsDownloadPanel = new Stats.Panel('DL', '#F2620C', '#361603');
+        this.stats[2].addPanel(this.statsDownloadPanel);
+
         this.targetElementId = '#browser';
     },
 
@@ -122,8 +131,12 @@ var Webfriend = Stapes.subclass({
             // with the begin call at the end, this will measure the time *between* every
             // subsequent frame.
             try {
-                $.each(this.imageStats, function(i, panel){
-                    panel.end();
+                $.each(this.stats, function(i, panel){
+                    try {
+                        panel.end();
+                    } catch(e) {
+                        ;
+                    }
                 });
             } catch (e) {
                 ;
@@ -143,8 +156,12 @@ var Webfriend = Stapes.subclass({
             } catch(e) {
                 console.error(e)
             } finally {
-                $.each(this.imageStats, function(i, panel){
-                    panel.begin();
+                $.each(this.stats, function(i, panel){
+                    try {
+                        panel.begin();
+                    } catch(e) {
+                        ;
+                    }
                 });
             }
         }.bind(this);
@@ -179,18 +196,40 @@ var Webfriend = Stapes.subclass({
         }.bind(this);
 
         this.commandStream.onmessage = function(event) {
-            var reply = $.parseJSON(event.data);
+            if (event.data && event.data.length) {
+                var reply = $.parseJSON(event.data);
 
-            if (this.deferredReply) {
-                if (reply.success) {
-                    this.deferredReply.resolve(reply);
-                } else {
-                    this.deferredReply.reject(reply);
+                if (reply.event) {
+                    this.processRemoteEvent(reply.event, reply.params);
+                } else if (this.deferredReply) {
+                    if (reply.success) {
+                        this.deferredReply.resolve(reply);
+                    } else {
+                        this.deferredReply.reject(reply);
+                    }
                 }
             }
         }.bind(this);
 
         return p;
+    },
+
+    processRemoteEvent: function(name, params) {
+        // console.debug('EVENT', name, params);
+
+        switch (name) {
+        case 'Webfriend.urlChanged':
+            $('#urlbar input[name="url"]').val(params.url);
+            break;
+
+        case 'Network.dataReceived':
+            if (params.dataLength > this.maxDataSeen) {
+                this.maxDataSeen = params.dataLength;
+            }
+
+            this.statsDownloadPanel.update(params.dataLength, this.maxDataSeen);
+            break;
+        }
     },
 
     stopCommandStream: function(){

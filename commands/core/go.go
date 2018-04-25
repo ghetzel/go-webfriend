@@ -93,9 +93,12 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 			var commandIssued = time.Now()
 			var totalTime time.Duration
 
-			if rv, err := self.browser.Tab().RPC(`Page`, `navigate`, map[string]interface{}{
-				`url`: u.String(),
-			}); err == nil {
+			// if a scheme wasn't given, prepend HTTPS
+			if u.Scheme == `` {
+				u.Scheme = `https`
+			}
+
+			if rv, err := self.browser.Tab().Navigate(u.String()); err == nil {
 				if args.WaitForLoad {
 					// wait for the first event matching the given pattern
 					if event, err := waiter.Wait(args.Timeout); err != nil {

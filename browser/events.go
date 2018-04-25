@@ -69,6 +69,14 @@ func (self *Event) String() string {
 	}
 }
 
+func (self *Event) P() *maputil.Map {
+	return maputil.M(self.Params)
+}
+
+func (self *Event) R() *maputil.Map {
+	return maputil.M(self.Result)
+}
+
 func eventFromRpcResponse(resp *RpcMessage) *Event {
 	var err error
 

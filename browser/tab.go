@@ -20,6 +20,11 @@ var consoleEvents = `Console.messageAdded`
 
 type TabID string
 
+type PageInfo struct {
+	URL   string `json:"url"`
+	State string `json:"state"`
+}
+
 type Tab struct {
 	browser              *Browser
 	target               *devtool.Target
@@ -35,6 +40,7 @@ type Tab struct {
 	mostRecentDimensions []int
 	screencasting        bool
 	castlock             sync.Mutex
+	mostRecentInfo       *PageInfo
 }
 
 func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
@@ -48,12 +54,35 @@ func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
 	return tab, tab.connect()
 }
 
+func (self *Tab) Info() *PageInfo {
+	return self.mostRecentInfo
+}
+
 func (self *Tab) ID() string {
 	return self.target.ID
 }
 
 func (self *Tab) Disconnect() error {
 	return self.rpc.Close()
+}
+
+func (self *Tab) Navigate(url string) (*RpcMessage, error) {
+	self.mostRecentInfo = &PageInfo{
+		URL:   url,
+		State: `initial`,
+	}
+
+	self.rpc.SynthesizeEvent(RpcMessage{
+		ID:     0,
+		Method: `Webfriend.urlChanged`,
+		Params: map[string]interface{}{
+			`url`: url,
+		},
+	})
+
+	return self.browser.Tab().RPC(`Page`, `navigate`, map[string]interface{}{
+		`url`: url,
+	})
 }
 
 func (self *Tab) DOM() *Document {
@@ -102,7 +131,7 @@ func (self *Tab) GetMostRecentFrame() (int64, []byte, int, int) {
 	return 0, nil, 0, 0
 }
 
-func (self *Tab) ResetMostRecentInfo() {
+func (self *Tab) ResetMostRecentFrame() {
 	self.mostRecentFrameId = 0
 	self.mostRecentFrame = nil
 }
@@ -197,12 +226,13 @@ func (self *Tab) startEventReceiver() {
 
 		// dispatch events to waiters
 		self.waiters.Range(func(_ interface{}, waiterI interface{}) bool {
-			if waiter, ok := waiterI.(*EventWaiter); ok {
-				if waiter.Match(event) {
-					waiter.Events <- event
-					return false
+			go func() {
+				if waiter, ok := waiterI.(*EventWaiter); ok {
+					if waiter.Match(event) {
+						waiter.Events <- event
+					}
 				}
-			}
+			}()
 
 			return true
 		})
@@ -273,6 +303,46 @@ func (self *Tab) registerInternalEvents() {
 				element.RefreshAttributes()
 			} else {
 				log.Warningf("Got attribute update event for unknown node %d", nid)
+			}
+		}
+	})
+
+	// monitor page URL and load state
+	self.RegisterEventHandler(`Page.*`, func(event *Event) {
+		if p := event.P(); p != nil {
+			var oldUrl string
+			var newUrl string
+
+			if self.mostRecentInfo != nil {
+				switch event.Name {
+				case `Page.frameNavigated`:
+					oldUrl = self.mostRecentInfo.URL
+					self.mostRecentInfo.State = `initial`
+					self.mostRecentInfo.URL = p.String(`frame.url`)
+					newUrl = self.mostRecentInfo.URL
+
+				case `Page.frameStartedLoading`:
+					self.mostRecentInfo.State = `started`
+
+				case `Page.frameStoppedLoading`:
+					self.mostRecentInfo.State = `done`
+
+				case `Page.navigatedWithinDocument`:
+					oldUrl = self.mostRecentInfo.URL
+					self.mostRecentInfo.URL = p.String(`url`)
+					newUrl = self.mostRecentInfo.URL
+				}
+			}
+
+			if newUrl != `` {
+				self.rpc.SynthesizeEvent(RpcMessage{
+					ID:     0,
+					Method: `Webfriend.urlChanged`,
+					Params: map[string]interface{}{
+						`oldUrl`: oldUrl,
+						`url`:    newUrl,
+					},
+				})
 			}
 		}
 	})

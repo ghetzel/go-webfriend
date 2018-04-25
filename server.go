@@ -39,6 +39,7 @@ type clientSession struct {
 	lastFrameW      int
 	lastFrameH      int
 	lastFrameId     int64
+	waiterId        string
 }
 
 func (self *clientSession) prep() {
@@ -64,30 +65,58 @@ func (self *clientSession) prep() {
 }
 
 func (self *clientSession) RunCommandChannel() {
+	var rw sync.Mutex
+
 	self.prep()
 	defer self.Stop()
 
 	log.Warningf("[cmd] Session %v: started command channel", self.Session)
 
+	if id, err := self.Tab.RegisterEventHandler(`*`, func(event *browser.Event) {
+		// special case some events so we don't pointlessly send data to the client(s) twice
+		switch event.Name {
+		case `Page.screencastFrame`:
+			return
+		}
+
+		rw.Lock()
+		defer rw.Unlock()
+
+		if err := self.Conn.WriteJSON(map[string]interface{}{
+			`event`:  event.Name,
+			`params`: event.P().Value(),
+		}); err != nil {
+			self.Stop()
+		}
+	}); err == nil {
+		self.waiterId = id
+	} else {
+		log.Errorf("[%v] Failed to register handler: %v", self.Session, err)
+	}
+
 	for {
 		if _, msg, err := self.Conn.ReadMessage(); err == nil {
 			snippet := string(msg)
+
+			rw.Lock()
 
 			if scope, err := self.Server.env.EvaluateString(snippet); err == nil {
 				if err := self.Conn.WriteJSON(map[string]interface{}{
 					`success`: true,
 					`scope`:   scope.Data(),
 				}); err != nil {
+					rw.Unlock()
 					return
 				}
-			} else {
-				if err := self.Conn.WriteJSON(map[string]interface{}{
-					`success`: false,
-					`error`:   err.Error(),
-				}); err != nil {
-					return
-				}
+			} else if err := self.Conn.WriteJSON(map[string]interface{}{
+				`success`: false,
+				`error`:   err.Error(),
+			}); err != nil {
+				rw.Unlock()
+				return
 			}
+
+			rw.Unlock()
 		} else {
 			return
 		}
@@ -96,6 +125,7 @@ func (self *clientSession) RunCommandChannel() {
 
 func (self *clientSession) Stop() error {
 	log.Infof("Removing session %v", self.Session)
+	defer self.Tab.RemoveWaiter(self.waiterId)
 	defer self.Server.sessions.Delete(self.Session)
 	return self.Conn.Close()
 }
@@ -307,6 +337,22 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 				} else {
 					reqerr = fmt.Errorf("Must specify a connection identifier via Sec-Websocket-Protocol")
 				}
+			} else {
+				reqerr = fmt.Errorf("Tab %v does not exist", tab)
+			}
+		} else {
+			reqerr = fmt.Errorf("No browser session available")
+		}
+
+		httputil.RespondJSON(w, reqerr)
+	})
+
+	router.Get(`/api/tabs/current/info`, func(w http.ResponseWriter, req *http.Request) {
+		var reqerr error
+
+		if self.env.browser != nil {
+			if tab := self.env.browser.Tab(); tab != nil {
+				httputil.RespondJSON(w, tab.Info())
 			} else {
 				reqerr = fmt.Errorf("Tab %v does not exist", tab)
 			}

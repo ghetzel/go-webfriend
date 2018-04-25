@@ -23,8 +23,13 @@ var EditorFile = Stapes.subclass({
             this.cm.setValue(buffer.content);
         }
 
+        this.position = this.cm.cursorCoords(false);
+        this.cursor = this.cm.getCursor();
+
         this.cm.on('cursorActivity', function(cm) {
             this.editor.updateStatusBar(this, cm);
+            this.position = cm.cursorCoords(false);
+            this.cursor = this.cm.getCursor();
         }.bind(this));
 
         this.cm.on('changes', function(cm){
@@ -39,6 +44,13 @@ var EditorFile = Stapes.subclass({
             'timestamp': Date.now(),
         });
     },
+
+    activate: function() {
+        this.element.style('display', 'block');
+        this.cm.focus();
+        this.cm.scrollIntoView(this.position);
+        this.cm.setCursor(this.cursor);
+    }
 });
 
 var Editor = Stapes.subclass({
@@ -66,14 +78,13 @@ var Editor = Stapes.subclass({
 
     loadBuffers: function() {
         $.each(this.getAllBuffers(), function(i, buffer) {
-            console.log(i, buffer)
             this.createFile(buffer);
         }.bind(this));
     },
 
     createFile: function (buffer) {
         if ($.isPlainObject(buffer) && Object.keys(buffer).length) {
-            buffer.index = (buffer.index || this.editors.length).toString();
+            buffer.index = this.editors.length.toString();
         } else {
             buffer = {
                 'index': this.editors.length,
@@ -105,10 +116,6 @@ var Editor = Stapes.subclass({
             .append('ul')
             .attr('class', 'nav nav-tabs workspace-selector');
 
-        filebar
-            .append('ul')
-            .attr('class', 'nav nav-tabs open-files');
-
         var actions = filebar
             .append('ul')
             .attr('class', 'nav nav-tabs file-actions');
@@ -117,6 +124,10 @@ var Editor = Stapes.subclass({
             .append('li').attr('class', 'nav-item')
             .append('a').attr('class', 'nav-link new-file')
             .append('i').attr('class', 'fa fa-fw fa-plus');
+
+        filebar
+            .append('ul')
+            .attr('class', 'nav nav-tabs open-files');
 
         // Files View
         // -----------------------------------------------------------------------------------------
@@ -141,51 +152,74 @@ var Editor = Stapes.subclass({
         this.files = '#editor > .files';
         this.statusbar = '#editor > .statusbar';
 
+        $(window).on('click', function(e){
+            var el = $(e.target);
+
+            $.each($(this.container + ' .open-files .nav-item'), function(i, item){
+                if ($.contains(item, e.target)) {
+                    var a = el.closest('a');
+                    this.switchToEditor(a.attr('data-editor-buffer'));
+                }
+            }.bind(this));
+
+        }.bind(this));
+
         $(this.container + ' .new-file').on('click', function(){
-            this.createFile()
+            this.createFile();
         }.bind(this));
     },
 
     updateFilebar: function () {
-        var li = d3.select(this.filebar + ' .open-files')
+        var files = d3.select(this.filebar + ' .open-files')
             .selectAll('li')
-            .data(this.editors)
-            .enter()
+            .data(this.editors);
+
+        var aNew = files.enter()
             .append('li')
-            .attr('class', 'nav-item');
+            .attr('class', 'nav-item')
+            .append('a')
+            .attr('href', '#')
+            .attr('data-editor-buffer', function (d) {
+                return d.file.index;
+            });
 
-        li.exit().remove();
+        aNew.append('i')
+            .attr('class', 'fa fa-fw fa-hashtag file-icon');
 
-        // li > a (enter selection)
-        var a = li.append('a')
+        aNew.append('span')
+            .attr('class', 'filename')
+            .text(function (d) {
+                return (d.file.filename || 'Untitled-' + d.file.index);
+            });
+
+        aNew.append('i')
+            .attr('class', 'fa fa-fw fa-times')
+
+        files.merge(files)
+            .select('a')
             .attr('class', function (d) {
-                if (d.editor.activeIndex == d.index) {
+                console.debug('active', d);
+
+                if (d.editor.activeIndex == d.file.index) {
                     return 'nav-link active';
                 } else {
                     return 'nav-link';
                 }
-            })
-            .attr('href', '#')
-            .attr('data-editor-buffer', function (d) {
-                return d.index;
-            })
-
-        // li > a > file type icon
-        a.append('i').attr('class', 'fa fa-fw fa-hashtag file-icon');
-
-        // li > a > filename span
-        a.append('span')
-            .attr('class', 'filename')
-            .text(function (d) {
-                return (d.file.filename || 'untitled');
             });
 
-        // li > a > close icon
-        a.append('i')
-            .attr('class', 'fa fa-fw fa-times')
+        files.exit().remove();
+    },
+
+    updateVisibleEditor: function(editor) {
+        if (editor) {
+            $('#editor .files > .editor-file').css('display', 'none');
+            editor.file.activate();
+        }
     },
 
     switchToEditor: function (index) {
+        console.debug('switch to', index);
+
         if (index) {
             this.activeIndex = index;
             this.update();
@@ -210,6 +244,7 @@ var Editor = Stapes.subclass({
         var editor = this.getEditorByIndex(this.activeIndex);
 
         if (editor) {
+            this.updateVisibleEditor(editor);
             this.updateStatusBar(editor.file, editor.file.cm);
         }
     },
@@ -223,6 +258,7 @@ var Editor = Stapes.subclass({
             sb.find('.ch').text(cursor.ch + 1);
         }
     },
+
 
     updateBuffer: function (index, document) {
         if (window.localStorage) {
@@ -263,8 +299,4 @@ var Editor = Stapes.subclass({
 
         return buffers;
     },
-});
-
-$(document).ready(function () {
-    window.editor = new Editor();
 });

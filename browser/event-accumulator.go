@@ -1,6 +1,10 @@
 package browser
 
-import "github.com/gobwas/glob"
+import (
+	"sync"
+
+	"github.com/gobwas/glob"
+)
 
 type eventAccumulator struct {
 	id      string
@@ -8,6 +12,7 @@ type eventAccumulator struct {
 	filter  glob.Glob
 	stopped bool
 	Events  []*Event
+	evlock  sync.Mutex
 }
 
 func (self *eventAccumulator) AppendIfMatch(event *Event) bool {
@@ -15,12 +20,33 @@ func (self *eventAccumulator) AppendIfMatch(event *Event) bool {
 		return false
 	}
 
+	self.evlock.Lock()
+	defer self.evlock.Unlock()
+
 	if self.filter.Match(event.Name) {
 		self.Events = append(self.Events, event)
 		return true
 	}
 
 	return false
+}
+
+func (self *eventAccumulator) Range() <-chan *Event {
+	events := make(chan *Event)
+
+	go func() {
+		self.evlock.Lock()
+		defer self.evlock.Unlock()
+
+		for _, event := range self.Events {
+			events <- event
+		}
+
+		self.Events = nil
+		close(events)
+	}()
+
+	return events
 }
 
 func (self *eventAccumulator) Stop() {

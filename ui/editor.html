@@ -1,4 +1,6 @@
---- layout: none ---
+---
+layout: none
+---
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,13 +31,18 @@
     <script src="/js/codemirror/addons/active-line.js"></script>
     <script src="/js/codemirror/addons/show-hint.js"></script>
     <script src="/js/codemirror/modes/friendscript.js"></script>
-    <script src="/js/stapes.min.js"></script>
     <script src="/js/webfriend-editor.js"></script>
+    <script src="/js/stapes.min.js"></script>
     <script src="/js/webfriend.js"></script>
 
     <title>Webfriend - Friendscript Editor</title>
 </head>
 
 <body>
+    <script>
+    $(document).ready(function () {
+        window.editor = new Editor();
+    });
+    </script>
 </body>
 </html>
