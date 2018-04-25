@@ -1,7 +1,7 @@
 'use strict';
 
 window.uuidv4 = function() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
@@ -13,15 +13,42 @@ var Webfriend = Stapes.subclass({
         this.imageStream = null;
         this.commandStream = null;
         this.lastHeader = null;
+        this.dataSeen = 0;
         this.maxDataSeen = 0;
+        this.eventCount = 0;
+        this.maxEventCount = 0;
         this.stats = [
-                new Stats(),
-                new Stats(),
-                new Stats(),
+            new Stats(),
+            new Stats(),
+            new Stats(),
+            new Stats(),
         ];
 
         this.statsDownloadPanel = new Stats.Panel('DL', '#F2620C', '#361603');
         this.stats[2].addPanel(this.statsDownloadPanel);
+
+        this.statsEventsPanel = new Stats.Panel('EVT', '#FF4F4C', '#420403');
+        this.stats[3].addPanel(this.statsEventsPanel);
+
+        setInterval(function(){
+            var c = this.eventCount;
+            this.eventCount = 0;
+
+            if (c > this.maxEventCount) {
+                this.maxEventCount = c
+            }
+
+            this.statsEventsPanel.update(c, this.maxEventCount);
+
+            var d = this.dataSeen;
+            this.dataSeen = 0;
+
+            if (d > this.maxDataSeen) {
+                this.maxDataSeen = c
+            }
+
+            this.statsDownloadPanel.update(d, this.maxDataSeen);
+        }.bind(this), 250);
 
         this.targetElementId = '#browser';
     },
@@ -216,6 +243,7 @@ var Webfriend = Stapes.subclass({
 
     processRemoteEvent: function(name, params) {
         // console.debug('EVENT', name, params);
+        this.eventCount += 1;
 
         switch (name) {
         case 'Webfriend.urlChanged':
@@ -223,11 +251,7 @@ var Webfriend = Stapes.subclass({
             break;
 
         case 'Network.dataReceived':
-            if (params.dataLength > this.maxDataSeen) {
-                this.maxDataSeen = params.dataLength;
-            }
-
-            this.statsDownloadPanel.update(params.dataLength, this.maxDataSeen);
+            this.dataSeen += params.dataLength;
             break;
         }
     },

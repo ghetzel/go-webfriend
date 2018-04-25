@@ -2,14 +2,14 @@
 
 var EditorFile = Stapes.subclass({
     constructor: function (buffer, editor) {
-        this.index = buffer.index;
+        this.id = buffer.id;
         this.editor = editor;
         this.element = d3.select(this.editor.files)
             .append('div')
             .attr('class', 'editor-file')
-            .attr('id', 'editor_' + buffer.index)
+            .attr('id', 'editor_' + buffer.id)
 
-        this.cm = CodeMirror(document.getElementById('editor_' + buffer.index), {
+        this.cm = CodeMirror(document.getElementById('editor_' + buffer.id), {
             mode: 'friendscript',
             theme: 'webfriend',
             indentUnit: 4,
@@ -37,9 +37,13 @@ var EditorFile = Stapes.subclass({
         }.bind(this));
     },
 
+    text: function() {
+        return this.cm.getValue();
+    },
+
     persist: function() {
-        this.editor.updateBuffer(this.index, {
-            'index': this.index,
+        this.editor.updateBuffer(this.id, {
+            'id': this.id,
             'content': this.cm.getValue(),
             'timestamp': Date.now(),
         });
@@ -50,7 +54,7 @@ var EditorFile = Stapes.subclass({
         this.cm.focus();
         this.cm.scrollIntoView(this.position);
         this.cm.setCursor(this.cursor);
-    }
+    },
 });
 
 var Editor = Stapes.subclass({
@@ -70,10 +74,19 @@ var Editor = Stapes.subclass({
 
         if (!this.editors.length) {
             var buffer = this.createFile();
-            this.switchToEditor(buffer.index);
+            this.switchToEditor(buffer.id);
         } else {
-            this.switchToEditor(this.editors[0].file.index);
+            this.switchToEditor(this.editors[0].file.id);
         }
+
+        this.setupEvents();
+    },
+
+    setupEvents: function() {
+        $('.script-execute').on('click', function(e){
+            this.executeCurrentBuffer();
+            e.preventDefault();
+        }.bind(this));
     },
 
     loadBuffers: function() {
@@ -83,25 +96,24 @@ var Editor = Stapes.subclass({
     },
 
     createFile: function (buffer) {
-        if ($.isPlainObject(buffer) && Object.keys(buffer).length) {
-            buffer.index = this.editors.length.toString();
-        } else {
+        if (!buffer) {
             buffer = {
-                'index': this.editors.length,
+                'id': Date.now().toString(),
                 'content': '',
             };
         }
 
-
-        this.updateBuffer(buffer.index, buffer);
-        buffer = this.retrieveBuffer(buffer.index);
+        this.updateBuffer(buffer.id, buffer);
+        buffer = this.retrieveBuffer(buffer.id);
 
         this.editors.push({
             'editor': this,
             'file': new EditorFile(buffer, this),
         });
 
-        this.updateFilebar();
+        this.update();
+        this.switchToEditor(buffer.id);
+
         return buffer;
     },
 
@@ -123,7 +135,10 @@ var Editor = Stapes.subclass({
         actions
             .append('li').attr('class', 'nav-item')
             .append('a').attr('class', 'nav-link new-file')
-            .append('i').attr('class', 'fa fa-fw fa-plus');
+            .on('click', function(){
+                this.createFile();
+            }.bind(this))
+            .append('i').attr('class', 'fa fa-fw fa-plus')
 
         filebar
             .append('ul')
@@ -152,21 +167,18 @@ var Editor = Stapes.subclass({
         this.files = '#editor > .files';
         this.statusbar = '#editor > .statusbar';
 
-        $(window).on('click', function(e){
-            var el = $(e.target);
+        // $(window).on('click', function(e){
+        //     var el = $(e.target);
 
-            $.each($(this.container + ' .open-files .nav-item'), function(i, item){
-                if ($.contains(item, e.target)) {
-                    var a = el.closest('a');
-                    this.switchToEditor(a.attr('data-editor-buffer'));
-                }
-            }.bind(this));
+        //     $.each($(this.container + ' .open-files .nav-item'), function(i, item){
+        //         if ($.contains(item, e.target)) {
+        //             var a = el.closest('a');
+        //             this.switchToEditor(a.attr('data-editor-buffer'));
+        //         }
+        //     }.bind(this));
 
-        }.bind(this));
+        // }.bind(this));
 
-        $(this.container + ' .new-file').on('click', function(){
-            this.createFile();
-        }.bind(this));
     },
 
     updateFilebar: function () {
@@ -174,40 +186,68 @@ var Editor = Stapes.subclass({
             .selectAll('li')
             .data(this.editors);
 
-        var aNew = files.enter()
+        // BEGIN enter selection
+        var tab = files.enter()
             .append('li')
             .attr('class', 'nav-item')
-            .append('a')
+
+        var fileLink = tab.append('a')
             .attr('href', '#')
-            .attr('data-editor-buffer', function (d) {
-                return d.file.index;
+            .on('click', function(d) {
+                var el = $(this);
+                var id = el.parent().attr('data-editor-id');
+
+                if (id) {
+                    console.debug('clicked on', id, d.file.id);
+                    d.editor.switchToEditor(id);
+                }
             });
 
-        aNew.append('i')
-            .attr('class', 'fa fa-fw fa-hashtag file-icon');
+        fileLink.append('i')
+            .attr('class', 'fa fa-fw fa-hashtag file-icon')
 
-        aNew.append('span')
+        fileLink
+            .append('span')
             .attr('class', 'filename')
             .text(function (d) {
-                return (d.file.filename || 'Untitled-' + d.file.index);
+                return (d.file.filename || 'Untitled');
             });
 
-        aNew.append('i')
-            .attr('class', 'fa fa-fw fa-times')
+        tab.append('a')
+            .attr('href', '#')
+            .attr('data-action', 'close-file')
+            .on('click', function(d) {
+                var el = $(this);
+                var id = el.parent().attr('data-editor-id');
 
-        files.merge(files)
-            .select('a')
+                if (id) {
+                    d.editor.remove(id);
+                }
+            })
+            .append('i')
+            .attr('class', 'fa fa-fw fa-times');
+
+        // END enter selection
+
+        tab.merge(files)
+            .attr('data-editor-id', function(d){
+                return d.file.id;
+            })
+            .selectAll('a')
             .attr('class', function (d) {
-                console.debug('active', d);
-
-                if (d.editor.activeIndex == d.file.index) {
+                if (this.activeIndex == d.file.id) {
                     return 'nav-link active';
                 } else {
                     return 'nav-link';
                 }
-            });
+            }.bind(this));
 
-        files.exit().remove();
+        files.exit()
+            .transition()
+            .duration(100)
+            .ease(d3.easeLinear)
+            .style('opacity', 0)
+            .remove();
     },
 
     updateVisibleEditor: function(editor) {
@@ -217,20 +257,18 @@ var Editor = Stapes.subclass({
         }
     },
 
-    switchToEditor: function (index) {
-        console.debug('switch to', index);
-
-        if (index) {
-            this.activeIndex = index;
+    switchToEditor: function (id) {
+        if (id) {
+            this.activeIndex = id;
             this.update();
         }
     },
 
-    getEditorByIndex: function(index) {
+    getEditorByIndex: function(id) {
         var out = null;
 
         $.each(this.editors, function(i, editor){
-            if (editor.file.index == index) {
+            if (editor.file.id == id) {
                 out = editor;
             }
         });
@@ -246,11 +284,13 @@ var Editor = Stapes.subclass({
         if (editor) {
             this.updateVisibleEditor(editor);
             this.updateStatusBar(editor.file, editor.file.cm);
+        } else if (this.editors.length === 0) {
+            $('#editor .files').empty();
         }
     },
 
     updateStatusBar: function (file, cm) {
-        if (this.activeIndex == file.index) {
+        if (this.activeIndex == file.id) {
             var sb = $('#editor .statusbar');
             var cursor = cm.getCursor();
 
@@ -260,18 +300,18 @@ var Editor = Stapes.subclass({
     },
 
 
-    updateBuffer: function (index, document) {
+    updateBuffer: function (id, document) {
         if (window.localStorage) {
-            localStorage.setItem('webfriend.editor.buffer.' + index, JSON.stringify(document));
-            console.debug('Saved buffer', index);
+            localStorage.setItem('webfriend.editor.buffer.' + id, JSON.stringify(document));
+            console.debug('Saved buffer', id);
         } else {
             throw 'Local Storage is not available.';
         }
     },
 
-    retrieveBuffer: function (index) {
+    retrieveBuffer: function (id) {
         if (window.localStorage) {
-            var document = localStorage.getItem('webfriend.editor.buffer.' + index);
+            var document = localStorage.getItem('webfriend.editor.buffer.' + id);
 
             if (document) {
                 return JSON.parse(document);
@@ -281,10 +321,6 @@ var Editor = Stapes.subclass({
         } else {
             throw 'Local Storage is not available.';
         }
-    },
-
-    clearBuffer: function (index) {
-        localStorage.removeItem('webfriend.editor.buffer.' + index);
     },
 
     getAllBuffers: function () {
@@ -298,5 +334,31 @@ var Editor = Stapes.subclass({
         }.bind(this));
 
         return buffers;
+    },
+
+    remove: function(id) {
+        localStorage.removeItem('webfriend.editor.buffer.' + id);
+
+        this.editors = $.grep(this.editors, function(v){
+            return v.file.id != id;
+        }.bind(this));
+
+        this.update();
+    },
+
+    executeCurrentBuffer: function() {
+        if (this.activeIndex) {
+            console.debug('Execute buffer', this.activeIndex);
+
+            var editor = this.getEditorByIndex(this.activeIndex);
+
+            if (editor) {
+                webfriend.command(editor.file.text()).done(function(reply){
+                    console.log(reply);
+                }.bind(this)).fail(function(reply){
+                    console.error(reply);
+                }.bind(this))
+            }
+        }
     },
 });

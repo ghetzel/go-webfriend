@@ -11,6 +11,9 @@ type FieldArgs struct {
 
 	// Whether to clear the existing contents of the field before entering new data.
 	Autoclear bool `json:"autoclear" default:"true"`
+
+	// Whether to automatically send an "Enter" keystroke after typing in the given value
+	Enter bool `json:"enter" default:"true"`
 }
 
 // Locate and enter data into a form input field.
@@ -33,6 +36,13 @@ func (self *Commands) Field(selector browser.Selector, args *FieldArgs) (string,
 		}
 
 		_, err := self.Type(args.Value, nil)
+
+		if args.Enter {
+			self.Key(`Enter`, &KeyArgs{
+				KeyCode: 13,
+			})
+		}
+
 		return field.Text(), err
 	} else if l := len(elements); l > 1 {
 		return ``, browser.TooManyMatchesErr(selector, 1, l)

@@ -24,7 +24,7 @@ type TypeArgs struct {
 	KeyDownJitter time.Duration `json:"key_down_jitter"`
 
 	// How long to wait between issuing individual keystrokes.
-	Delay time.Duration `json:"delay" default:"50ms"`
+	Delay time.Duration `json:"delay" default:"30ms"`
 
 	// An amount of time to randomly vary the delay duration from between keystrokes.
 	DelayJitter time.Duration `json:"delay_jitter"`

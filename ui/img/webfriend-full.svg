@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="127mm"
-   height="127mm"
-   viewBox="0 0 127 127"
+   width="117.22357mm"
+   height="95.250008mm"
+   viewBox="0 0 117.22357 95.250008"
    version="1.1"
    id="svg990"
    sodipodi:docname="webfriend-full.svg"
@@ -57,8 +57,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.98994949"
-     inkscape:cx="103.35493"
-     inkscape:cy="215.9696"
+     inkscape:cx="19.724955"
+     inkscape:cy="196.3284"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -79,7 +79,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -87,14 +87,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-7.5595236,-21.077381)">
-    <rect
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.09922302;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="rect860-9"
-       width="127"
-       height="127"
-       x="7.5595236"
-       y="21.077381" />
+     transform="translate(-12.447737,-47.630638)">
     <circle
        style="display:inline;fill:#79a4d9;fill-opacity:1;stroke-width:0.26458332"
        id="path817-1"
@@ -108,57 +101,6 @@
        d="m 92.604167,97.239583 c 7.669473,-2.738177 18.115223,-0.321107 23.582493,-7.540435 3.1717,-5.841053 -0.9955,-13.909786 -7.8029,-14.24853 -6.68426,-0.624681 -14.363598,1.037461 -19.130439,6.013545 -2.981112,3.501023 2.27692,8.341902 4.410293,3.272858 2.179405,7.444622 -7.996039,8.695732 -11.355974,13.274258 -2.368844,7.334491 9.297728,9.700121 9.496759,1.357642 l 0.388547,-1.08798 z m 3.328824,4.485887 c -7.075715,0.89098 -13.582749,8.00721 -12.646325,15.24627 2.428767,5.0626 11.745208,2.48124 11.186809,9.83362 0.476062,8.6255 -8.228389,16.24022 -4.393915,24.9076 5.044091,4.52943 12.31197,-1.68472 15.70214,-6.03903 3.92668,-5.11351 7.51042,-10.54255 12.26364,-14.93462 4.96913,-6.53968 7.54098,-16.05348 3.69551,-23.69984 -3.29531,-6.2288 -10.53356,-2.93124 -15.64653,-5.32649 -3.18876,-1.4253 -7.267885,-2.797981 -10.16136,0.0125 M 60.854166,93.270833 c -5.753845,3.155381 -7.098698,13.287637 -14.805806,12.657837 -4.805009,2.64786 3.280297,11.69334 7.360702,13.3808 4.887737,3.06488 13.098747,2.76041 14.340699,9.87884 1.55165,8.22729 -8.642765,14.04 -7.506952,21.55574 2.288004,3.56475 -1.22683,9.78649 -3.542242,3.33979 -0.785809,-8.16082 -6.860368,-13.81396 -10.537193,-20.67753 -4.881049,-5.85077 7.522871,-12.9909 -0.568916,-16.81446 -5.786942,-1.61842 -10.52949,-5.13424 -11.031679,-11.36414 -3.68702,-5.11766 -2.106785,-11.596126 -1.409713,-17.367251 0.813843,-4.612104 2.180368,-9.124997 4.043079,-13.421434 5.927172,-3.847493 16.174056,-2.342435 19.117955,4.463615 -0.31163,4.473058 -11.607536,8.76454 -2.922248,11.724335 6.029999,1.500794 6.444912,-11.892755 11.915992,-5.029808 1.375476,3.171151 -1.221528,7.060643 -4.453678,7.673666 z"
        id="path823-2"
        inkscape:connector-curvature="0" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#365e92;fill-opacity:1;stroke:#365e92;stroke-width:0.26458332;stroke-opacity:1"
-       x="24.090349"
-       y="43.00108"
-       id="text952-5"><tspan
-         sodipodi:role="line"
-         id="tspan950-0"
-         x="24.090349"
-         y="43.00108"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:'Neutra Text';-inkscape-font-specification:'Neutra Text';fill:#365e92;fill-opacity:1;stroke:#365e92;stroke-width:0.26458332;stroke-opacity:1">web</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#6cc161;fill-opacity:1;stroke:#6cc161;stroke-width:0.26458332;stroke-opacity:1"
-       x="47.141891"
-       y="43.001076"
-       id="text952-6-3"><tspan
-         sodipodi:role="line"
-         id="tspan950-2-6"
-         x="47.141891"
-         y="43.001076"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:'Neutra Text';-inkscape-font-specification:'Neutra Text';fill:#6cc161;fill-opacity:1;stroke:#6cc161;stroke-width:0.26458332;stroke-opacity:1">   friend</tspan></text>
-    <rect
-       y="21.077381"
-       x="7.5595236"
-       height="127"
-       width="127"
-       id="rect1123"
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1.09922302;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-    <text
-       id="text1131"
-       y="43.00108"
-       x="24.090349"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#365e92;fill-opacity:1;stroke:#365e92;stroke-width:0.26458332;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:'Neutra Text';-inkscape-font-specification:'Neutra Text';fill:#365e92;fill-opacity:1;stroke:#365e92;stroke-width:0.26458332;stroke-opacity:1"
-         y="43.00108"
-         x="24.090349"
-         id="tspan1129"
-         sodipodi:role="line">web</tspan></text>
-    <text
-       id="text1135"
-       y="43.001076"
-       x="47.141891"
-       style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#6cc161;fill-opacity:1;stroke:#6cc161;stroke-width:0.26458332;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:22.57777786px;font-family:'Neutra Text';-inkscape-font-specification:'Neutra Text';fill:#6cc161;fill-opacity:1;stroke:#6cc161;stroke-width:0.26458332;stroke-opacity:1"
-         y="43.001076"
-         x="47.141891"
-         id="tspan1133"
-         sodipodi:role="line">   friend</tspan></text>
     <circle
        r="47.625"
        cy="95.255646"

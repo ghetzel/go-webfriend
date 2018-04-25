@@ -149,3 +149,42 @@ func (self *Commands) Highlight(selector browser.Selector) error {
 		return err
 	}
 }
+
+type InspectArgs struct {
+	// The X-coordinate to inspect.
+	X float64 `json:"x"`
+
+	// The Y-coordinate to inspect.
+	Y float64 `json:"y"`
+
+	// Whether to highlight the inspected DOM element or not.
+	Highlight bool `json:"highlight" default:"true"`
+}
+
+// Retrieve the element at the given coordinates, optionally highlighting it.
+func (self *Commands) Inspect(args *InspectArgs) (*browser.Element, error) {
+	if args == nil {
+		args = &InspectArgs{}
+	}
+
+	defaults.SetDefaults(args)
+
+	if rv, err := self.browser.Tab().RPC(`DOM`, `getNodeForLocation`, map[string]interface{}{
+		`x`: args.X,
+		`y`: args.Y,
+	}); err == nil {
+		if element, ok := self.browser.Tab().DOM().Element(int(rv.R().Int(`nodeId`))); ok {
+			if args.Highlight {
+				if err := element.Highlight(); err != nil {
+					return nil, err
+				}
+			}
+
+			return element, nil
+		} else {
+			return nil, fmt.Errorf("No element was found at the given coordinates.")
+		}
+	} else {
+		return nil, err
+	}
+}

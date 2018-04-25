@@ -67,9 +67,19 @@
     <div id="main">
         <div id="arena">{{ template "content" . }}</div>
         <div id="sidebar">
+            <div class="toggle">
+                <a class="script-execute" title="Execute Script (F9)">
+                    <i class="fa fa-fw fa-play"></i>
+                </a>
+
+                <!-- <a class="chevron" data-toggle="collapse" data-target="#pane">
+                    <i class="fa fa-fw fa-chevron-right"></i>
+                </a> -->
+            </div>
+            <div id="pane" class="editor-container collapse show"></div>
             <script>
             $(document).ready(function () {
-                window.editor = new Editor('#sidebar');
+                window.editor = new Editor('#sidebar .editor-container');
             });
             </script>
         </div>

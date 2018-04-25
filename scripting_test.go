@@ -368,6 +368,7 @@ func TestExpressions(t *testing.T) {
         $dd = 50
         $dd /= 10
         $f = "This {a}" + ' is {b}' + " and done"
+
         put begin
             this is some stuff
         end -> $put_a

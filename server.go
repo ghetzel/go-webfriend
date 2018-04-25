@@ -100,10 +100,12 @@ func (self *clientSession) RunCommandChannel() {
 
 			rw.Lock()
 
-			if scope, err := self.Server.env.EvaluateString(snippet); err == nil {
+			if _, err := self.Server.env.EvaluateString(snippet); err == nil {
+				data := self.Server.env.scope().Data()
+
 				if err := self.Conn.WriteJSON(map[string]interface{}{
 					`success`: true,
-					`scope`:   scope.Data(),
+					`scope`:   data,
 				}); err != nil {
 					rw.Unlock()
 					return

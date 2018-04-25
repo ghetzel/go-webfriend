@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -60,6 +61,10 @@ func (self *Element) ToMap() map[string]interface{} {
 	}
 
 	return output
+}
+
+func (self *Element) MarshalJSON() ([]byte, error) {
+	return json.Marshal(self.ToMap())
 }
 
 // Satisifies the fmt.Stringer interface.

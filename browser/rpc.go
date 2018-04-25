@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ghetzel/go-stockutil/log"
+	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/gorilla/websocket"
 )
 
@@ -40,6 +41,14 @@ type RpcMessage struct {
 	Params map[string]interface{} `json:"params,omitempty"`
 	Result map[string]interface{} `json:"result,omitempty"`
 	Error  map[string]interface{} `json:"error,omitempty"`
+}
+
+func (self *RpcMessage) P() *maputil.Map {
+	return maputil.M(self.Params)
+}
+
+func (self *RpcMessage) R() *maputil.Map {
+	return maputil.M(self.Result)
 }
 
 func (self *RpcMessage) String() string {

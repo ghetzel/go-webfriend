@@ -276,7 +276,10 @@ func intIfYouCan(in interface{}) interface{} {
 
 // if the input is a struct, convert it into a map
 func mapifyStruct(in interface{}) interface{} {
-	if typeutil.IsArray(in) {
+	if m, ok := in.(mappable); ok {
+		return m.ToMap()
+
+	} else if typeutil.IsArray(in) {
 		elems := make([]interface{}, sliceutil.Len(in))
 
 		// work a little to get structs/mappable objects turned into maps

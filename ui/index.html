@@ -10,7 +10,7 @@ $(function(){
         if (i <= 1) {
             panel.showPanel(i);
         } else {
-            panel.showPanel(i + 1);
+            panel.showPanel(3);
         }
 
         $('#stats').append(panel.dom);
@@ -24,17 +24,26 @@ $(function(){
     });
 
     $(document).on('keydown keyup keypress', function(e) {
-        if (e.target.nodeName === 'BODY') {
-            webfriend.command('key', e.key, {
-                action:  (e.type === 'keyup' ? 'release' : 'press'),
-                alt:     e.altKey,
-                control: e.ctrlKey,
-                meta:    e.metaKey,
-                shift:   e.shiftKey,
-                keycode: e.keyCode,
-            });
+        switch (e.key) {
+        case 'F9':
+            if (e.type == 'keydown' && editor) {
+                editor.executeCurrentBuffer();
+                return
+            }
 
-            e.preventDefault();
+        default:
+            if (e.target.nodeName === 'BODY') {
+                webfriend.command('key', e.key, {
+                    action:  (e.type === 'keyup' ? 'release' : 'press'),
+                    alt:     e.altKey,
+                    control: e.ctrlKey,
+                    meta:    e.metaKey,
+                    shift:   e.shiftKey,
+                    keycode: e.keyCode,
+                });
+
+                e.preventDefault();
+            }
         }
     });
 
@@ -94,7 +103,15 @@ $(function(){
             break;
         }
 
-        webfriend.command('mouse', args);
+
+        // webfriend.command('mouse', args);
+        webfriend.command('inspect', {
+            x: args.x,
+            y: args.y,
+        }).done(function(reply){
+            console.debug(reply.scope.result);
+        });
+
         e.preventDefault();
     });
 
@@ -106,8 +123,16 @@ $(function(){
         $(window).resize(webfriend.resizeScreen.bind(webfriend));
         webfriend.resizeScreen();
 
-        var url = $('#urlbar input[name=url]').val();
-        webfriend.command('go', url);
+        $.ajax({
+            url: '/api/tabs/current/info',
+            success: function(data) {
+                if ($.isPlainObject(data) && data.url) {
+                    $('#urlbar input[name=url]').val(data.url);
+                } else {
+                    webfriend.command('go', location.protocol + '//' + location.host + '/home');
+                }
+            },
+        });
     }).fail(function(){
         console.error('Connect failed');
     });
