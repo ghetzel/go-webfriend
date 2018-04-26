@@ -1,73 +1,60 @@
 'use strict';
 
-var EditorFile = Stapes.subclass({
-    constructor: function (buffer, editor) {
-        this.id = buffer.id;
-        this.editor = editor;
-        this.element = d3.select(this.editor.files)
-            .append('div')
-            .attr('class', 'editor-file')
-            .attr('id', 'editor_' + buffer.id)
-
-        this.cm = CodeMirror(document.getElementById('editor_' + buffer.id), {
-            mode: 'friendscript',
-            theme: 'webfriend',
-            indentUnit: 4,
-            tabSize: 4,
-            lineNumbers: true,
-            autofocus: true,
-            styleActiveLine: true,
-        });
-
-        if (buffer.content) {
-            this.cm.setValue(buffer.content);
-        }
-
-        this.position = this.cm.cursorCoords(false);
-        this.cursor = this.cm.getCursor();
-
-        this.cm.on('cursorActivity', function(cm) {
-            this.editor.updateStatusBar(this, cm);
-            this.position = cm.cursorCoords(false);
-            this.cursor = this.cm.getCursor();
-        }.bind(this));
-
-        this.cm.on('changes', function(cm){
-            this.persist()
-        }.bind(this));
-    },
-
-    text: function() {
-        return this.cm.getValue();
-    },
-
-    persist: function() {
-        this.editor.updateBuffer(this.id, {
-            'id': this.id,
-            'content': this.cm.getValue(),
-            'timestamp': Date.now(),
-        });
-    },
-
-    activate: function() {
-        this.element.style('display', 'block');
-        this.cm.focus();
-        this.cm.scrollIntoView(this.position);
-        this.cm.setCursor(this.cursor);
-    },
-});
-
+// =================================================================================================
 var Editor = Stapes.subclass({
-    constructor: function (container) {
+    constructor: function (container, options) {
+        this.options = $.extend(true, {
+            toolbar: [{
+                name:     'Execute Script',
+                shortcut: 'F9',
+                class:    'script-execute',
+                icon:     'play',
+                action:   function(){
+                    this.executeCurrentBuffer();
+                }.bind(this),
+            }, {
+                name:     'Inspect Mode',
+                shortcut: 'F10',
+                class:    function() {
+                    if (this.inspectMode) {
+                        return 'inspect-mode active';
+                    } else {
+                        return 'inspect-mode';
+                    }
+                }.bind(this),
+                icon:     'eyedropper',
+                toggle:   true,
+                action:   function() {
+                    var wasInspecting = this.inspectMode;
+                    this.inspectMode = !this.inspectMode;
+
+                    if (wasInspecting) {
+                        webfriend.deactivateInspector();
+                    } else {
+                        webfriend.activateInspector();
+                    }
+                }.bind(this),
+            }, {
+                name:     'Show/Hide Stats',
+                shortcut: 'F8',
+                class:    'toggle-stats',
+                icon:     'bar-chart',
+                action:   function(){
+                    webfriend.toggleStats();
+                }.bind(this),
+            }],
+        }, (options || {}));
+
         this.AUTOSAVE_INTERVAL = 10000;
         this.MIN_AUTOSAVE_INTERVAL_MS = 5000;
         this.SCROLL_FILES_LOOPAROUND = false;
 
-        d3.select(container || 'body').append('div').attr('id', 'editor');
-
+        this.toplevel = (container || 'body');
+        this.toolbar = '#toolbar'
         this.container = '#editor';
         this.editors = [];
         this.activeIndex = null;
+        this.inspectMode = false;
 
         this.buildSkeleton();
         this.loadBuffers();
@@ -80,6 +67,9 @@ var Editor = Stapes.subclass({
         }
 
         this.setupEvents();
+
+        // now that we're an Editor, tell the Webfriend RPC client about it
+        webfriend.attachEditor(this);
     },
 
     setupEvents: function() {
@@ -117,7 +107,43 @@ var Editor = Stapes.subclass({
         return buffer;
     },
 
+    handleEvent: function(event) {
+        var handled = false;
+
+        if (event.type == 'keydown') {
+            $.each(this.options.toolbar, function(_, tb) {
+                if (event.key === tb.shortcut) {
+                    console.debug('[editor]', 'handled', event.type, event.key, '->', tb.name)
+                    tb.action();
+                    this.updateToolbar();
+
+                    handled = true;
+                }
+            }.bind(this));
+        }
+
+        return handled;
+    },
+
     buildSkeleton: function () {
+        // clear out existing elements in top-level container
+        d3.select(this.toplevel)
+            .selectAll('*')
+            .remove()
+
+        d3.select(this.toplevel)
+            .attr('class', 'WebfriendEditor')
+
+        // add toolbar container
+        d3.select(this.toplevel)
+            .append('div')
+            .attr('id', 'toolbar');
+
+        // add editor container
+        d3.select(this.toplevel)
+            .append('div')
+            .attr('id', 'editor')
+
         // Filebar
         // -----------------------------------------------------------------------------------------
         var filebar = d3.select(this.container)
@@ -181,6 +207,52 @@ var Editor = Stapes.subclass({
 
     },
 
+    updateToolbar: function() {
+        var toolbar = d3.select(this.toolbar)
+            .selectAll('a')
+            .data(this.options.toolbar)
+
+        var a = toolbar.enter()
+            .append('a')
+            .on('click', function(d) {
+                d.action();
+                this.updateToolbar();
+            }.bind(this));
+
+        a.append('i')
+            .attr('class', function(d) {
+                return 'fa fa-fw fa-' + d.icon;
+            });
+
+        a.append('span')
+            .attr('class', 'shortcut')
+            .text(function(d){
+                if (d.shortcut) {
+                    return d.shortcut;
+                } else {
+                    return '';
+                }
+            });
+
+        d3.select(this.toolbar)
+            .selectAll('a')
+            .merge(toolbar)
+            .attr('class', function(d) {
+                if ($.isFunction(d.class)) {
+                    return d.class(d);
+                } else {
+                    return d.class;
+                }
+            })
+            .attr('title', function(d) {
+                if (d.shortcut) {
+                    return d.name + ' (' + d.shortcut + ')';
+                } else {
+                    return d.name;
+                }
+            });
+    },
+
     updateFilebar: function () {
         var files = d3.select(this.filebar + ' .open-files')
             .selectAll('li')
@@ -226,7 +298,6 @@ var Editor = Stapes.subclass({
             })
             .append('i')
             .attr('class', 'fa fa-fw fa-times');
-
         // END enter selection
 
         tab.merge(files)
@@ -241,6 +312,16 @@ var Editor = Stapes.subclass({
                     return 'nav-link';
                 }
             }.bind(this));
+
+        // tab.merge(files)
+        //     .selectAll('*[data-action="close-file"] i')
+        //     .attr('class', function(d){
+        //         if (d.file.isClean()) {
+        //             return 'fa fa-fw fa-times';
+        //         } else {
+        //             return 'fa fa-fw fa-circle';
+        //         }
+        //     });
 
         files.exit()
             .transition()
@@ -277,6 +358,7 @@ var Editor = Stapes.subclass({
     },
 
     update: function() {
+        this.updateToolbar();
         this.updateFilebar();
 
         var editor = this.getEditorByIndex(this.activeIndex);
@@ -360,5 +442,68 @@ var Editor = Stapes.subclass({
                 }.bind(this))
             }
         }
+    },
+});
+
+// =================================================================================================
+var EditorFile = Stapes.subclass({
+    constructor: function (buffer, editor) {
+        this.id = buffer.id;
+        this.editor = editor;
+        this.generation = 0;
+        this.element = d3.select(this.editor.files)
+            .append('div')
+            .attr('class', 'editor-file')
+            .attr('id', 'editor_' + buffer.id)
+
+        this.cm = CodeMirror(document.getElementById('editor_' + buffer.id), {
+            mode: 'friendscript',
+            theme: 'webfriend',
+            indentUnit: 4,
+            tabSize: 4,
+            lineNumbers: true,
+            autofocus: true,
+            styleActiveLine: true,
+        });
+
+        if (buffer.content) {
+            this.cm.setValue(buffer.content);
+        }
+
+        this.position = this.cm.cursorCoords(false);
+        this.cursor = this.cm.getCursor();
+
+        this.cm.on('cursorActivity', function(cm) {
+            this.editor.updateStatusBar(this, cm);
+            this.position = cm.cursorCoords(false);
+            this.cursor = this.cm.getCursor();
+        }.bind(this));
+
+        this.cm.on('changes', function(cm){
+            this.persist();
+        }.bind(this));
+    },
+
+    text: function() {
+        return this.cm.getValue();
+    },
+
+    persist: function() {
+        this.editor.updateBuffer(this.id, {
+            'id': this.id,
+            'content': this.cm.getValue(),
+            'timestamp': Date.now(),
+        });
+    },
+
+    activate: function() {
+        this.element.style('display', 'block');
+        this.cm.focus();
+        this.cm.scrollIntoView(this.position);
+        this.cm.setCursor(this.cursor);
+    },
+
+    isClean: function() {
+        return this.cm.isClean(this.generation);
     },
 });

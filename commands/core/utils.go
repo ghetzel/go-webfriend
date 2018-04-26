@@ -133,20 +133,25 @@ func (self *Commands) SwitchRoot(selector browser.Selector) error {
 	return fmt.Errorf(`Not Implemented Yet`)
 }
 
-// Highlight all nodes matching the given selector.
+// Highlight the node matching the given selector, or clear all highlights if
+// the selector is "none"
 func (self *Commands) Highlight(selector browser.Selector) error {
-	docroot := self.browser.Tab().DOM()
-
-	if elements, err := docroot.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
-		for _, element := range elements {
-			if err := element.Highlight(); err != nil {
-				return err
-			}
-		}
-
-		return nil
+	if selector.IsNone() {
+		return self.browser.Tab().AsyncRPC(`DOM`, `hideHighlight`, nil)
 	} else {
-		return err
+		docroot := self.browser.Tab().DOM()
+
+		if elements, err := docroot.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
+			for _, element := range elements {
+				if err := element.Highlight(); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		} else {
+			return err
+		}
 	}
 }
 
@@ -170,8 +175,8 @@ func (self *Commands) Inspect(args *InspectArgs) (*browser.Element, error) {
 	defaults.SetDefaults(args)
 
 	if rv, err := self.browser.Tab().RPC(`DOM`, `getNodeForLocation`, map[string]interface{}{
-		`x`: args.X,
-		`y`: args.Y,
+		`x`: int(args.X),
+		`y`: int(args.Y),
 	}); err == nil {
 		if element, ok := self.browser.Tab().DOM().Element(int(rv.R().Int(`nodeId`))); ok {
 			if args.Highlight {

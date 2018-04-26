@@ -22,6 +22,10 @@ type Dimensions struct {
 
 type Selector string
 
+func (self Selector) IsNone() bool {
+	return (self == `none`)
+}
+
 type Element struct {
 	document       *Document
 	parent         int

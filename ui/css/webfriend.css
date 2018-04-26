@@ -7,7 +7,10 @@
 }
 
 #arena {
+    background: #111111;
+    position: relative;
     flex: 1;
+    flex-direction: column;
     width: 100%;
 }
 
@@ -15,9 +18,10 @@
     display: flex;
     align-content: flex-start;
     justify-content: stretch;
+    width: 40vw;
 }
 
-#sidebar > .toggle {
+#toolbar {
     background: #222222;
     border-left: 1px solid #555555;
     border-right: 1px solid #555555;
@@ -28,48 +32,69 @@
     justify-content: flex-start;
 }
 
-#sidebar > .toggle a {
-    height: 3vw;
-    display: flex;
-    flex-direction: column;
-    align-content: center;
-    justify-content: center;
+#toolbar a {
+    display: block;
+    padding-top: 0.5vh;
+    margin-bottom: 1vh;
+    text-align: center;
 }
 
-#sidebar > .toggle a:hover {
+#toolbar a > * {
+    display: block;
+}
+
+#toolbar a i {
+    font-size: 2vh;
+    width: 3vw;
+    height: 2vh;
+}
+
+#toolbar a .shortcut {
+    display: block;
+    color: #888888;
+    text-align: center;
+    font-size: 10pt;
+    user-select: none;
+}
+
+#toolbar a:hover {
     background: #555555;
 }
 
-#sidebar > .toggle .script-execute i {
+#toolbar a.active {
+    background: #555555;
+    color: white;
+}
+
+#toolbar a.active > * {
+    color: white;
+}
+
+#toolbar .script-execute i {
     color: #96D789;
 }
 
-
-#sidebar > .toggle .chevron {
+#toolbar .chevron {
     justify-self: center;
 }
 
-#sidebar > .toggle i {
+#toolbar i {
     color: white;
     width: 100%;
     display: inline-block;
 }
 
-#sidebar > .editor-container {
-    width: 40vw;
-}
-
 #browser {
+    background: #111111;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-select: none;
     image-rendering: optimizeSpeed;
-    object-fit: scale-down;
 }
 
 #stats {
     position: absolute;
-    top: 0;
+    top: 11%;
     right: 1em;
     z-index: 10000;
     width: 80px;
@@ -77,6 +102,32 @@
 
 #stats>* {
     margin: 0.5em;
+}
+
+#inspect {
+    /* position: absolute; */
+    top: 0;
+    left: 0;
+    width:  100%;
+    height: 10%;
+    background: #222222;
+    border-bottom: 1px solid #555555;
+    color: white;
+}
+
+#inspect.active {
+    display: block;
+}
+
+#inspect.active ~ #browser {
+    height: 90%;
+}
+
+#inspect > .inspect-title {
+    background-color: #333333;
+    border-bottom: 2px solid #555555;
+    padding: 0.25em 1em;
+    font-family: monospace;
 }
 
 .caret {

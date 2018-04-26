@@ -7,16 +7,24 @@ window.uuidv4 = function() {
     });
 }
 
+var DOCTYPE_SVG = '<?xml version="1.0" standalone="no"?>' + '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
+
 var Webfriend = Stapes.subclass({
-    constructor: function(options){
+    constructor: function(container, options){
         this.options = (options || {});
         this.imageStream = null;
         this.commandStream = null;
         this.lastHeader = null;
+
+        this.image = null;
         this.dataSeen = 0;
         this.maxDataSeen = 0;
         this.eventCount = 0;
         this.maxEventCount = 0;
+        this.frameCount = 0;
+        this.maxFrameCount = 0;
+
+        this.editor = null;
         this.stats = [
             new Stats(),
             new Stats(),
@@ -31,6 +39,7 @@ var Webfriend = Stapes.subclass({
         this.stats[3].addPanel(this.statsEventsPanel);
 
         setInterval(function(){
+            // events
             var c = this.eventCount;
             this.eventCount = 0;
 
@@ -50,11 +59,169 @@ var Webfriend = Stapes.subclass({
             this.statsDownloadPanel.update(d, this.maxDataSeen);
         }.bind(this), 250);
 
-        this.targetElementId = '#browser';
+        this.targetElement = container;
+
+        $(this.targetElement).on('resize', function(){
+            console.debug('resize')
+            this.resizeScreen();
+        }.bind(this));
+
+        this.setupStats();
+        this.setupKeybindings();
     },
 
-    setScreenTarget: function(targetElementId) {
-        this.targetElementId = targetElementId;
+    attachEditor: function(editor) {
+        this.editor = editor;
+    },
+
+    setupStats: function() {
+        if (this.options.statsContainer) {
+            $.each(this.stats, function(i, panel){
+                panel.dom.style.cssText = 'position: relative';
+
+                if (i <= 1) {
+                    panel.showPanel(i);
+                } else {
+                    panel.showPanel(3);
+                }
+
+                $(this.options.statsContainer).append(panel.dom);
+            }.bind(this));
+        }
+    },
+
+    activateInspector: function() {
+        this.editor.inspectMode = true;
+        $('#inspect').addClass('active');
+        console.debug('Activated inspector')
+    },
+
+    deactivateInspector: function() {
+        this.command('highlight', 'none');
+        $('#inspect').removeClass('active');
+        this.editor.inspectMode = false;
+        this.editor.update();
+        console.debug('Deactivated inspector')
+    },
+
+    toggleStats: function() {
+        $('#stats').toggle();
+    },
+
+    setupKeybindings: function() {
+        var lastKnownButton = 0;
+
+        $(this.targetElement).on('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        $(document).on('keydown keyup keypress', function(e) {
+            if (this.editor && this.editor.handleEvent(e)) {
+                return false;
+            } else {
+                if (e.target.nodeName === 'BODY') {
+                    this.command('key', e.key, {
+                        action:  (e.type === 'keyup' ? 'release' : 'press'),
+                        alt:     e.altKey,
+                        control: e.ctrlKey,
+                        meta:    e.metaKey,
+                        shift:   e.shiftKey,
+                        keycode: e.keyCode,
+                    });
+
+                    e.preventDefault();
+                }
+            }
+        }.bind(this));
+
+        $(this.targetElement).on('mousemove mousedown mouseup mousewheel', function(e) {
+            var parentOffset = $(this.targetElement).offset();
+            var relX = e.pageX - parentOffset.left;
+            var relY = e.pageY - parentOffset.top;
+
+            var args = {
+                x: relX,
+                y: relY,
+            };
+
+            var btn = e.button;
+
+            if (e.type == 'mousemove') {
+                btn = lastKnownButton;
+            } else {
+                lastKnownButton = btn;
+            }
+
+            args['count'] = e.detail;
+
+            switch (btn) {
+            case 1:
+                args['button'] = 'middle';
+                break;
+
+            case 2:
+                args['button'] = 'right';
+                break;
+
+            default:
+                args['button'] = 'left';
+                break;
+            }
+
+            switch (e.type) {
+            case 'mousedown':
+                $('*').blur();
+                args['action'] = 'press';
+                break;
+
+            case 'mouseup':
+                args['action'] = 'release';
+                break;
+
+            case 'mousewheel':
+                args['action'] = 'scroll';
+                args['wheelX'] = -1*e.originalEvent.wheelDeltaX;
+                args['wheelY'] = -1*e.originalEvent.wheelDeltaY;
+
+                break;
+            default:
+                args['action'] = 'move';
+                break;
+            }
+
+            if (this.editor && this.editor.inspectMode) {
+                this.command('inspect', {
+                    x: args.x,
+                    y: args.y,
+                }).done(function(reply){
+                    this.updateInspectNode(reply.scope.result);
+
+                    if (args.action === 'press' && args.button === 'left') {
+                        this.deactivateInspector();
+                    }
+                }.bind(this));
+            } else {
+                this.command('mouse', args);
+            }
+
+            e.preventDefault();
+        }.bind(this));
+    },
+
+    updateInspectNode: function(node) {
+        var inspect = $('#inspect');
+
+        var title = node.name;
+
+        if ($.isPlainObject(node.attributes)) {
+            if (node.attributes.id) {
+                title += '#' + node.attributes.id;
+            } else if (node.attributes.class) {
+                title += '.' + node.attributes.class.replace(/\s+/g, '.');
+            }
+        }
+
+        inspect.find('.inspect-title').text(title);
     },
 
     friendlify: function(arg) {
@@ -171,14 +338,35 @@ var Webfriend = Stapes.subclass({
 
             try {
                 if ($.type(event.data) === 'string') {
-                    this.lastHeader = $.parseJSON(event.data);
-                    var img = $(this.targetElementId);
+                    if (this.image && this.image.src) {
+                        URL.revokeObjectURL(this.image.src);
+                    }
 
-                    img.css('width', this.lastHeader.width);
-                    img.css('height', this.lastHeader.height);
-                } else if (this.lastHeader) {
-                    var img = $(this.targetElementId).get(0);
-                    img.src = URL.createObjectURL(event.data);
+                    this.lastHeader = $.parseJSON(event.data);
+                    this.image = new Image();
+
+                    this.image.width = this.lastHeader.width;
+                    this.image.height = this.lastHeader.height;
+
+                    this.image.onload = function(){
+                        var canvas = $(this.targetElement).get(0);
+                        var ctx = canvas.getContext('2d');
+
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        if (canvas.width != this.image.width) {
+                            canvas.width = this.image.width;
+                        }
+
+                        if (canvas.height != this.image.height) {
+                            canvas.height = this.image.height;
+                        }
+
+                        ctx.drawImage(this.image, 0, 0);
+                    }.bind(this);
+
+                } else if (this.lastHeader && this.image) {
+                    this.image.src = URL.createObjectURL(event.data);
                 }
             } catch(e) {
                 console.error(e)
@@ -264,17 +452,20 @@ var Webfriend = Stapes.subclass({
     },
 
     resizeScreen: function() {
-        var screen = $(this.targetElementId).parent();
+        var screen = $(this.targetElement).parent();
+        var extraY = 0;
+
+        if ($('#inspect').css('display') != 'none') {
+            extraY = $('#inspect').height();
+        }
+
+        console.debug(screen.width(), screen.height(), extraY)
 
         if (screen.width() && screen.height() ) {
             return this.command('resize', {
                 width:  screen.width(),
-                height: screen.height(),
+                height: (screen.height() - extraY),
             });
         }
     },
-});
-
-$(document).ready(function(){
-    window.webfriend = new Webfriend();
 });
