@@ -49,6 +49,10 @@ func NewEnvironment(browser *browser.Browser) *Environment {
 	return environment
 }
 
+func (self *Environment) Browser() *browser.Browser {
+	return self.browser
+}
+
 func (self *Environment) EvaluateReader(reader io.Reader, scope ...*scripting.Scope) (*scripting.Scope, error) {
 	var data []byte
 	var errchan = make(chan error)
@@ -96,11 +100,11 @@ func (self *Environment) Evaluate(script *scripting.Friendscript, scope ...*scri
 
 	for _, block := range script.Blocks() {
 		if err := self.evaluateBlock(block); err != nil {
-			return self.scope(), err
+			return self.Scope(), err
 		}
 	}
 
-	return self.scope(), nil
+	return self.Scope(), nil
 }
 
 func (self *Environment) replCompleter(d prompt.Document) []prompt.Suggest {
@@ -229,7 +233,7 @@ func (self *Environment) evaluateReplBuiltin(line string) (bool, error) {
 
 func (self *Environment) pushScope(scope *scripting.Scope) {
 	// if len(self.stack) > 0 {
-	// 	log.Debugf("PUSH scope(%d) is masked", self.scope().Level())
+	// 	log.Debugf("PUSH scope(%d) is masked", self.Scope().Level())
 	// } else {
 	// 	log.Debugf("PUSH scope(%d) is ROOT", scope.Level())
 	// }
@@ -237,13 +241,13 @@ func (self *Environment) pushScope(scope *scripting.Scope) {
 	self.stack = append(self.stack, scope)
 
 	if self.script != nil {
-		scripting.SetScope(self.scope())
+		scripting.SetScope(self.Scope())
 	}
 
-	// log.Debugf("PUSH scope(%d) is active", self.scope().Level())
+	// log.Debugf("PUSH scope(%d) is active", self.Scope().Level())
 }
 
-func (self *Environment) scope() *scripting.Scope {
+func (self *Environment) Scope() *scripting.Scope {
 	if len(self.stack) > 0 {
 		return self.stack[len(self.stack)-1]
 	} else {
@@ -258,10 +262,10 @@ func (self *Environment) popScope() *scripting.Scope {
 		self.stack = self.stack[0 : len(self.stack)-1]
 
 		if self.script != nil {
-			scripting.SetScope(self.scope())
+			scripting.SetScope(self.Scope())
 		}
 
-		// log.Debugf("POP  scope(%d) is active", self.scope().Level())
+		// log.Debugf("POP  scope(%d) is active", self.Scope().Level())
 
 		return top
 	} else if len(self.stack) == 1 {
@@ -333,9 +337,9 @@ func (self *Environment) evaluateAssignment(assignment *scripting.Assignment, fo
 		// clear out all the left-hand side variables
 		for _, lhs := range assignment.LeftHandSide {
 			if forceDeclare {
-				self.scope().Declare(lhs)
+				self.Scope().Declare(lhs)
 			} else {
-				self.scope().Set(lhs, nil)
+				self.Scope().Set(lhs, nil)
 			}
 		}
 	}
@@ -349,10 +353,10 @@ func (self *Environment) evaluateAssignment(assignment *scripting.Assignment, fo
 				for i, rhs := range sliceutil.Sliceify(rhs) {
 					if i < totalLhsCount {
 						if result, err := assignment.Operator.Evaluate(
-							self.scope().Get(assignment.LeftHandSide[i]),
+							self.Scope().Get(assignment.LeftHandSide[i]),
 							rhs,
 						); err == nil {
-							self.scope().Set(assignment.LeftHandSide[i], result)
+							self.Scope().Set(assignment.LeftHandSide[i], result)
 						} else {
 							return err
 						}
@@ -367,10 +371,10 @@ func (self *Environment) evaluateAssignment(assignment *scripting.Assignment, fo
 	for i, lhs := range assignment.LeftHandSide {
 		if i < len(assignment.RightHandSide) {
 			if result, err := assignment.Operator.Evaluate(
-				self.scope().Get(lhs),
+				self.Scope().Get(lhs),
 				assignment.RightHandSide[i],
 			); err == nil {
-				self.scope().Set(lhs, result)
+				self.Scope().Set(lhs, result)
 			} else {
 				return err
 			}
@@ -388,7 +392,7 @@ func (self *Environment) evaluateDirective(directive *scripting.Directive) error
 		return fmt.Errorf("'include' not implemented yet")
 	case scripting.DeclareDirective:
 		for _, varname := range directive.VariableNames() {
-			self.scope().Declare(varname)
+			self.Scope().Declare(varname)
 		}
 	}
 
@@ -411,10 +415,10 @@ func (self *Environment) evaluateCommand(command *scripting.Command, forceDeclar
 				// if there is an output variable destination, set that in the current scope
 				if resultVar := command.OutputName(); resultVar != `` {
 					if forceDeclare {
-						self.scope().Declare(resultVar)
+						self.Scope().Declare(resultVar)
 					}
 
-					self.scope().Set(resultVar, result)
+					self.Scope().Set(resultVar, result)
 					return resultVar, nil
 				}
 
@@ -433,7 +437,7 @@ func (self *Environment) evaluateCommand(command *scripting.Command, forceDeclar
 func (self *Environment) evaluateConditional(conditional *scripting.Conditional) (bool, error) {
 	var blocks = make([]*scripting.Block, 0)
 	var trueBranch bool
-	var conditionScope = scripting.NewScope(self.scope())
+	var conditionScope = scripting.NewScope(self.Scope())
 	self.pushScope(conditionScope)
 	defer self.popScope()
 
@@ -524,7 +528,7 @@ func (self *Environment) evaluateLoop(loop *scripting.Loop) error {
 	var i int
 	var sourceVar string
 	var destVars []string
-	var loopScope = scripting.NewScope(self.scope())
+	var loopScope = scripting.NewScope(self.Scope())
 
 	loopScope.Declare(`index`)
 

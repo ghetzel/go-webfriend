@@ -10,6 +10,7 @@ import (
 	"github.com/ghetzel/go-stockutil/log"
 	webfriend "github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/server"
 )
 
 func main() {
@@ -88,7 +89,7 @@ func main() {
 
 			go func() {
 				if c.Bool(`server`) {
-					exiterr <- webfriend.NewServer(script).ListenAndServe(c.String(`address`))
+					exiterr <- server.NewServer(script).ListenAndServe(c.String(`address`))
 					return
 				} else if c.Bool(`interactive`) {
 					if scope, err := script.REPL(); err == nil {

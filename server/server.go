@@ -1,6 +1,4 @@
-package webfriend
-
-//go:generate esc -o static.go -pkg webfriend -modtime 1500000000 -prefix ui ui
+package server
 
 import (
 	"fmt"
@@ -12,6 +10,7 @@ import (
 	"github.com/ghetzel/diecast"
 	"github.com/ghetzel/go-stockutil/httputil"
 	"github.com/ghetzel/go-stockutil/log"
+	webfriend "github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/gorilla/websocket"
 	"github.com/husobee/vestigo"
@@ -101,7 +100,7 @@ func (self *clientSession) RunCommandChannel() {
 			rw.Lock()
 
 			if _, err := self.Server.env.EvaluateString(snippet); err == nil {
-				data := self.Server.env.scope().Data()
+				data := self.Server.env.Scope().Data()
 
 				if err := self.Conn.WriteJSON(map[string]interface{}{
 					`success`: true,
@@ -133,13 +132,13 @@ func (self *clientSession) Stop() error {
 }
 
 type Server struct {
-	env      *Environment
+	env      *webfriend.Environment
 	server   *negroni.Negroni
 	upgrader websocket.Upgrader
 	sessions sync.Map
 }
 
-func NewServer(env *Environment) *Server {
+func NewServer(env *webfriend.Environment) *Server {
 	return &Server{
 		env: env,
 	}
@@ -260,8 +259,8 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 	router.Get(`/api/tabs/current/script`, func(w http.ResponseWriter, req *http.Request) {
 		var reqerr error
 
-		if self.env.browser != nil {
-			if tab := self.env.browser.Tab(); tab != nil {
+		if self.env.Browser() != nil {
+			if tab := self.env.Browser().Tab(); tab != nil {
 				if sid := req.Header.Get(`Sec-Websocket-Protocol`); sid != `` {
 					if conn, err := self.upgrader.Upgrade(w, req, http.Header{
 						`Sec-Websocket-Protocol`: []string{sid},
@@ -299,8 +298,8 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 	router.Get(`/api/tabs/current/screencast`, func(w http.ResponseWriter, req *http.Request) {
 		var reqerr error
 
-		if self.env.browser != nil {
-			if tab := self.env.browser.Tab(); tab != nil {
+		if self.env.Browser() != nil {
+			if tab := self.env.Browser().Tab(); tab != nil {
 				if !tab.IsScreencasting() {
 					if err := tab.StartScreencast(
 						int(httputil.QInt(req, `q`, 65)),
@@ -352,8 +351,8 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 	router.Get(`/api/tabs/current/info`, func(w http.ResponseWriter, req *http.Request) {
 		var reqerr error
 
-		if self.env.browser != nil {
-			if tab := self.env.browser.Tab(); tab != nil {
+		if self.env.Browser() != nil {
+			if tab := self.env.Browser().Tab(); tab != nil {
 				httputil.RespondJSON(w, tab.Info())
 			} else {
 				reqerr = fmt.Errorf("Tab %v does not exist", tab)
