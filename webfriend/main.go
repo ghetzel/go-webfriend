@@ -61,7 +61,7 @@ func main() {
 		}
 	}
 
-	app.Action = func(c *cli.Context) {
+	app.Action = func(c *cli.Context) error {
 		log.Infof("Starting %s %s", c.App.Name, c.App.Version)
 		chrome = browser.NewBrowser()
 		chrome.Headless = !c.Bool(`debug`)
@@ -134,12 +134,15 @@ func main() {
 			case err := <-exiterr:
 				if err != nil {
 					log.Error(err)
+					return err
 				}
 			}
 		} else {
 			log.Criticalf("could not launch browser: %v", err)
-			return
+			return err
 		}
+
+		return nil
 	}
 
 	app.Run(os.Args)

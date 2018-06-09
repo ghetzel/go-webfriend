@@ -28,16 +28,20 @@ func main() {
 		return nil
 	}
 
-	app.Action = func(c *cli.Context) {
+	app.Action = func(c *cli.Context) error {
 		if out, err := os.Create(`documentation.gob`); err == nil {
 			docs := webfriend.NewEnvironment(nil).Documentation()
 
 			if err := gob.NewEncoder(out).Encode(docs); err != nil {
 				log.Fatal(err)
+				return err
 			}
 		} else {
 			log.Fatal(err)
+			return err
 		}
+
+		return nil
 	}
 
 	app.Run(os.Args)
