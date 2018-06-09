@@ -102,12 +102,19 @@ func main() {
 					var input io.Reader
 
 					if c.NArg() > 0 {
-						if file, err := os.Open(c.Args().First()); err == nil {
-							log.Debug("Friendscript being read from file %s", file.Name())
-							input = file
-						} else {
-							exiterr <- fmt.Errorf("file error: %v", err)
-							return
+						filename := c.Args().First()
+
+						switch filename {
+						case `-`:
+							input = os.Stdin
+						default:
+							if file, err := os.Open(c.Args().First()); err == nil {
+								log.Debug("Friendscript being read from file %s", file.Name())
+								input = file
+							} else {
+								exiterr <- fmt.Errorf("file error: %v", err)
+								return
+							}
 						}
 					} else {
 						exiterr <- fmt.Errorf("Must specify a Friendscript filename to execute.")
