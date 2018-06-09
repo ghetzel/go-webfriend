@@ -248,6 +248,10 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 		})
 	})
 
+	router.Get(`/api/documentation`, func(w http.ResponseWriter, req *http.Request) {
+		httputil.RespondJSON(w, self.env.Documentation())
+	})
+
 	router.Post(`/api/tabs/current/script`, func(w http.ResponseWriter, req *http.Request) {
 		if scope, err := self.env.EvaluateReader(req.Body); err == nil {
 			httputil.RespondJSON(w, scope.Data())

@@ -16,7 +16,7 @@ deps:
 	@go list github.com/pointlander/peg || go get github.com/pointlander/peg
 	go get .
 	go vet .
-	dep ensure -v
+	dep ensure
 
 test: fmt deps
 	go test $(PKGS)

@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"path/filepath"
 	"reflect"
+	"sort"
 	"strings"
 
 	"github.com/ghetzel/go-stockutil/log"
@@ -80,8 +81,23 @@ type parsedSource struct {
 
 func (self *Environment) Documentation() []ModuleDoc {
 	docs := make([]ModuleDoc, 0)
+	modnames := []string{`core`}
+	remaining := make([]string, 0)
 
-	for name, module := range self.modules {
+	for name, _ := range self.modules {
+		if name == `core` {
+			continue
+		} else {
+			remaining = append(remaining, name)
+		}
+	}
+
+	sort.Strings(remaining)
+	modnames = append(modnames, remaining...)
+
+	for _, name := range modnames {
+		module := self.modules[name]
+
 		doc := ModuleDoc{
 			Name:     name,
 			Commands: make([]CallDoc, 0),
