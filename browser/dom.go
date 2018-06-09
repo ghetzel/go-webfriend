@@ -135,6 +135,23 @@ func (self *Document) Root() (*Element, error) {
 	return self.root, nil
 }
 
+// Retrieve the current document's dimensions (scroll width and height).
+func (self *Document) PageSize() (float64, float64, error) {
+	if root, err := self.Root(); err == nil {
+		if result, err := root.Evaluate(`return [document.documentElement.scrollWidth, document.documentElement.scrollHeight]`); err == nil {
+			if sz := typeutil.V(result).Slice(); len(sz) == 2 {
+				return sz[0].Float(), sz[1].Float(), nil
+			} else {
+				return 0, 0, fmt.Errorf("Invalid response while retrieving page dimensions")
+			}
+		} else {
+			return 0, 0, err
+		}
+	} else {
+		return 0, 0, err
+	}
+}
+
 // Select one or more elements from the current DOM.
 func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, error) {
 	if queryRoot == nil {

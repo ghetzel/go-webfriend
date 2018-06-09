@@ -49,5 +49,5 @@ func (self *Commands) Click(selector browser.Selector, args *ClickArgs) ([]*brow
 
 // Click the page at the given X, Y coordinates.
 func (self *Commands) ClickAt(x int, y int) ([]browser.Element, error) {
-	return nil, fmt.Errorf(`NI`)
+	return nil, fmt.Errorf(`Not Implemented`)
 }

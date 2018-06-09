@@ -2,6 +2,7 @@ package browser
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 	"sync/atomic"
@@ -122,7 +123,29 @@ func (self *RPC) Call(method string, params map[string]interface{}, timeout time
 		Params: params,
 	}
 
-	return self.Send(message, timeout)
+	if reply, err := self.Send(message, timeout); err == nil {
+		if len(reply.Error) > 0 {
+			errmap := maputil.M(reply.Error)
+
+			errmsg := fmt.Sprintf("Message %d, Error %d", reply.ID, errmap.Int(`code`))
+
+			if msg := errmap.String(`message`); msg != `` {
+				errmsg += `: ` + msg
+			} else {
+				errmsg += `: Unknown Error`
+			}
+
+			if data := errmap.String(`data`); data != `` {
+				errmsg += ` - ` + data
+			}
+
+			return nil, errors.New(errmsg)
+		} else {
+			return reply, nil
+		}
+	} else {
+		return nil, err
+	}
 }
 
 func (self *RPC) CallAsync(method string, params map[string]interface{}) error {

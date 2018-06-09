@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
@@ -64,6 +65,12 @@ func (self *Element) ToMap() map[string]interface{} {
 		output[`text`] = self.value
 	}
 
+	if position, err := self.Position(); err == nil {
+		output[`position`] = position
+	} else {
+		log.Warningf("Error retrieving element position: %v", err)
+	}
+
 	return output
 }
 
@@ -92,7 +99,20 @@ func (self *Element) ID() int {
 
 // Retrieve the current position and dimensions of the element.
 func (self *Element) Position() (Dimensions, error) {
-	return Dimensions{}, fmt.Errorf(`Not Implemented Yet`)
+	if result, err := self.Evaluate(`return Object.assign({}, this.getBoundingClientRect().toJSON())`); err == nil {
+		dimensions := maputil.M(result)
+
+		return Dimensions{
+			Width:  int(dimensions.Int(`width`)),
+			Height: int(dimensions.Int(`height`)),
+			Top:    int(dimensions.Int(`top`)),
+			Left:   int(dimensions.Int(`left`)),
+			Bottom: int(dimensions.Int(`bottom`)),
+			Right:  int(dimensions.Int(`right`)),
+		}, nil
+	} else {
+		return Dimensions{}, err
+	}
 }
 
 // Loads all child elements under this element.

@@ -235,10 +235,10 @@
   revision = "931426f7535ac39720c8909d70ece5a41a2502a6"
 
 [[projects]]
+  branch = "master"
   name = "github.com/mcuadros/go-defaults"
   packages = ["."]
-  revision = "ac8540f0fc7e0fb5f1eb9e25c6fd0b8db8f97eed"
-  version = "v1.1.0"
+  revision = "e1c978be3307be96ef03a0bd25d719ab50d277e4"
 
 [[projects]]
   branch = "master"
@@ -367,6 +367,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0c60769fe37f607bcaa7e3a48793b3e895695978eac07841ef5f9a01833e1334"
+  inputs-digest = "1b041d8976ffe3ca0d86d12687d034c9a1c93c80add3f56f1ea59847f61cf6c4"
   solver-name = "gps-cdcl"
   solver-version = 1

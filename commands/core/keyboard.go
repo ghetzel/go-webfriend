@@ -6,12 +6,15 @@ import (
 )
 
 type KeyArgs struct {
+	// The keyboard action to take; either "press" or "release"
 	Action  string `json:"action" default:"press"`
 	Alt     bool   `json:"alt,omitempty"`
 	Control bool   `json:"control,omitempty"`
 	Meta    bool   `json:"meta,omitempty"`
 	Shift   bool   `json:"shift,omitempty"`
-	KeyCode int    `json:"keycode,omitempty"`
+
+	// The numeric decimal keycode to send.
+	KeyCode int `json:"keycode,omitempty"`
 }
 
 func (self *Commands) Key(domKeyName string, args *KeyArgs) error {

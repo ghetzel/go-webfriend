@@ -468,7 +468,7 @@ func (self *Tab) RegisterEventHandler(eventGlob string, callback EventCallbackFu
 func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error) {
 	if oid := result.String(`objectId`); oid != `` {
 		if rv, err := self.RPC(`Runtime`, `getProperties`, map[string]interface{}{
-			`objectID`:               oid,
+			`objectId`:               oid,
 			`ownProperties`:          true,
 			`accessorPropertiesOnly`: false,
 		}); err == nil {
@@ -497,9 +497,12 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 
 				// go through the results and populate the output map
 				for _, elem := range maputil.M(rv.Result).Slice(`result`) {
-					if elemM := maputil.M(elem); elemM.Bool(`enumerable`) {
+					elemM := maputil.M(elem)
+					valueM := maputil.M(elemM.Get(`value`))
+
+					if elemM.Bool(`enumerable`) {
 						if key := elemM.String(`name`); key != `` {
-							if elemV, err := self.getJavascriptResponse(maputil.M(elemM.Get(`value`))); err == nil {
+							if elemV, err := self.getJavascriptResponse(valueM); err == nil {
 								out[key] = elemV
 							} else {
 								return nil, fmt.Errorf("key %s: %v", key, err)

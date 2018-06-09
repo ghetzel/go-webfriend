@@ -148,7 +148,7 @@ func (self *Scope) set(key string, value interface{}) {
 	value = intIfYouCan(value)
 	value = mapifyStruct(value)
 
-	log.Infof("SSET scope(%d)[%v] = %T(%v)", self.Level(), key, value, value)
+	// log.Infof("SSET scope(%d)[%v] = %T(%v)", self.Level(), key, value, value)
 	maputil.DeepSet(self.data, strings.Split(key, `.`), value)
 }
 
