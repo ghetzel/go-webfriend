@@ -29,7 +29,7 @@ type GoArgs struct {
 	// Whether to block until the page has finished loading.
 	WaitForLoad bool `json:"wait_for_load" default:"true"`
 
-	// The amount of time, in milliseconds, to wait for the the to load.
+	// The amount of time to wait for the page to load.
 	Timeout time.Duration `json:"timeout" default:"30s"`
 
 	// Whether the resources stack that is queried in page::resources and

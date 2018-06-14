@@ -41,7 +41,9 @@ type ScreenshotResponse struct {
 	Size    int64            `json:"size,omitempty"`
 }
 
-func (self *Commands) Screenshot(destinationI interface{}, args *ScreenshotArgs) (*ScreenshotResponse, error) {
+// Render the current page as a PNG or JPEG image, writing it to the given filename or writable
+// destination object.
+func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) (*ScreenshotResponse, error) {
 	if args == nil {
 		args = &ScreenshotArgs{}
 	}
@@ -50,24 +52,24 @@ func (self *Commands) Screenshot(destinationI interface{}, args *ScreenshotArgs)
 	docroot := self.browser.Tab().DOM()
 	response := &ScreenshotResponse{}
 
-	var destination io.Writer
+	var writer io.Writer
 
-	if destinationI != nil {
-		if filename, ok := destinationI.(string); ok {
+	if destination != nil {
+		if filename, ok := destination.(string); ok {
 			if file, err := os.Create(filename); err == nil {
 				defer file.Close()
-				destination = file
+				writer = file
 			} else {
 				return nil, err
 			}
-		} else if w, ok := destinationI.(io.Writer); ok {
-			destination = w
+		} else if w, ok := destination.(io.Writer); ok {
+			writer = w
 		} else {
-			return nil, fmt.Errorf("Unsupported destination %T; expected string or io.Writer", destinationI)
+			return nil, fmt.Errorf("Unsupported destination %T; expected string or io.Writer", destination)
 		}
 	}
 
-	if destination == nil {
+	if writer == nil {
 		return nil, fmt.Errorf("A destination for the screenshot must be specified")
 	}
 
@@ -139,7 +141,7 @@ func (self *Commands) Screenshot(destinationI interface{}, args *ScreenshotArgs)
 		if data := reply.R().String(`data`); data != `` {
 			decoder := base64.NewDecoder(base64.StdEncoding, bytes.NewBufferString(data))
 
-			if n, err := io.Copy(destination, decoder); err == nil {
+			if n, err := io.Copy(writer, decoder); err == nil {
 				response.Size = n
 
 				return response, nil

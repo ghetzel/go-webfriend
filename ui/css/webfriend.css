@@ -284,3 +284,59 @@
 #editor .filebar .workspace-selector .nav-link {
     background: transparent;
 }
+
+.fs-sidebar {
+    background: #242424;
+    padding:    0;
+}
+
+.fs-modules {
+    position: relative;
+}
+
+.fs-sidebar .nav-link {
+    color: white;
+}
+
+.fs-sidebar .nav-link:hover {
+    background: #111111;
+    color: #96D789;
+}
+
+.fs-sidebar ul {
+    padding: 0;
+}
+
+.fs-sidebar li {
+    list-style-type: none;
+}
+
+.fs-sidebar ul .nav-link {
+    padding: 0 2em;
+}
+
+.fs-sidebar > .nav-item > ul {
+    margin-bottom: 1.25em;
+}
+
+.fs-sidebar > .nav-item > .nav-link {
+    background: #111111;
+    color: #79A4D9;
+    font-weight: bold;
+    margin-bottom: 0.25em;
+}
+
+.fs-modules .fs-module-commands {
+    margin-top: 1em;
+    margin-left: 1em;
+}
+
+.fs-modules .fs-module-commands .fs-command {
+    border-top: 2px solid #DDDDDD;
+    margin-bottom: 2em;
+    padding-top: 1em;
+}
+
+.fs-modules h3 {
+    font-family: monospace;
+}

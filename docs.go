@@ -16,23 +16,24 @@ import (
 )
 
 type DocItem struct {
-	Name        string   `json:"name"`
-	Type        string   `json:"types"`
-	Required    bool     `json:"required"`
-	Description string   `json:"description"`
-	Examples    []string `json:"examples,omitempty"`
+	Name         string      `json:"name,omitempty"`
+	Type         string      `json:"types"`
+	Required     bool        `json:"required,omitempty"`
+	Description  string      `json:"description,omitempty"`
+	DefaultValue interface{} `json:"default,omitempty"`
+	Examples     []string    `json:"examples,omitempty"`
 }
 type CallDoc struct {
 	Name        string     `json:"name"`
-	Description string     `json:"description"`
+	Description string     `json:"description,omitempty"`
 	Argument    *DocItem   `json:"argument,omitempty"`
-	Options     []*DocItem `json:"options"`
+	Options     []*DocItem `json:"options,omitempty"`
 	Return      *DocItem   `json:"return,omitempty"`
 }
 
 type ModuleDoc struct {
 	Name        string    `json:"name"`
-	Description string    `json:"description"`
+	Description string    `json:"description,omitempty"`
 	Commands    []CallDoc `json:"commands"`
 }
 
@@ -129,16 +130,28 @@ func (self *Environment) Documentation() []ModuleDoc {
 					}
 
 					for i, arg := range fnDoc.Args {
-						if i == 0 {
-							cmdDoc.Argument = &DocItem{
-								Name: arg.Name,
-								Type: arg.Type,
+						if subargs, ok := parsed.Structs[arg.Type]; ok {
+							for _, arg := range subargs.Fields {
+								cmdDoc.Options = append(cmdDoc.Options, &DocItem{
+									Name:         arg.FriendscriptName,
+									Type:         arg.Type,
+									Description:  arg.Docs,
+									DefaultValue: stringutil.Autotype(arg.Default),
+								})
 							}
 						} else {
-							cmdDoc.Options = append(cmdDoc.Options, &DocItem{
-								Name: arg.Name,
-								Type: arg.Type,
-							})
+
+							if i == 0 {
+								cmdDoc.Argument = &DocItem{
+									Name: arg.Name,
+									Type: arg.Type,
+								}
+							} else {
+								cmdDoc.Options = append(cmdDoc.Options, &DocItem{
+									Name: arg.Name,
+									Type: arg.Type,
+								})
+							}
 						}
 					}
 				}
@@ -189,6 +202,8 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 						}
 
 						if len(fnDecl.Type.Results.List) > 1 {
+							log.Debugf("ATS: fn=%v rtyp=%T", fnDecl.Name.Name, fnDecl.Type.Results.List[0].Type)
+
 							pFunc.Return = &parsedArg{
 								Type: astTypeToString(fnDecl.Type.Results.List[0].Type),
 							}
@@ -206,9 +221,12 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 										Fields: make([]*parsedStructField, 0),
 									}
 
+									// built list of struct fields, including associated documentation
 									for _, sfield := range structType.Fields.List {
+
 										stc.Fields = append(stc.Fields, &parsedStructField{
 											Name:             sfield.Names[0].Name,
+											Type:             astTypeToString(sfield.Type),
 											FriendscriptName: stringutil.Underscore(sfield.Names[0].Name),
 											Docs:             astCommentGroupToString(sfield.Doc),
 										})
@@ -264,6 +282,8 @@ func astTypeToString(ty ast.Expr) string {
 		return `any`
 	} else if _, ok := ty.(*ast.MapType); ok {
 		return `{}`
+	} else if arrayOf, ok := ty.(*ast.ArrayType); ok {
+		return fmt.Sprintf("[]%v", astTypeToString(arrayOf.Elt))
 	} else {
 		return `UNKNOWN`
 	}

@@ -1,0 +1,96 @@
+---
+layout: basic
+bindings:
+-   name:     docs
+    resource: /api/documentation
+---
+<div class="row">
+    <ul class="col-2 fs-sidebar">
+        {{ range $i, $module := $.bindings.docs }}
+        <li class="nav-item">
+            <a class="nav-link" href="#fs-{{ $module.name }}">
+                {{ titleize $module.name }} Module
+            </a>
+
+            <ul class="">
+            {{ range $j, $command := $module.commands }}
+                <li class="nav-item">
+                    <a class="nav-link" href="#fs-{{ $module.name }}::{{ $command.name }}">
+                        {{ $command.name }}
+                    </a>
+                </li>
+            {{ end }}
+            </ul>
+        </li>
+        {{ end }}
+    </ul>
+
+    <div class="col-10 fs-modules">
+        <h1>Friendscript Reference</h1>
+
+        {{ range $i, $module := $.bindings.docs }}
+        <div class="fs-module" data-fs-module="{{ $module.name }}">
+            <a name="fs-{{ $module.name }}"></a>
+            <h2>{{ titleize $module.name }} Module</h2>
+            {{ if $module.description }}
+            <p>{{ $module.description }}</p>
+            {{ end }}
+
+            <div class="fs-module-commands">
+            {{ range $j, $command := $module.commands }}
+                <div class="fs-command" data-fs-command="{{ $module.name }}::{{ $command.name }}">
+                    <a name="fs-{{ $module.name }}::{{ $command.name }}"></a>
+                    <h3>
+                        {{ $command.name }}
+                        {{ if $command.argument }}
+                            {{ upper $command.argument.name }}
+                        {{ end }}
+
+                        {{ if $command.options }}
+                        {<br />
+                            {{ range $k, $opt := $command.options }}
+                            &nbsp;
+                            {{ $opt.name }}: &laquo;{{ $opt.types }}&raquo;
+                            <br />
+                            {{ end }}
+                        }
+                        {{ end }}
+                    </h3>
+                    {{ if $command.description }}
+                    <br />
+                    <p>{{ $command.description }}</p>
+                    {{ else }}
+                    <p><i>No description provided.</i></p>
+                    {{ end }}
+
+                    {{ if $command.options }}
+                    <h4>Parameters</h4>
+
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Data Type</th>
+                                <th>Default Value</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $k, $opt := $command.options }}
+                        <tr>
+                            <th>{{ $opt.name }}</th>
+                            <td>{{ $opt.types }}</td>
+                            <td>{{ or $opt.default `-` }}</td>
+                            <td>{{ $opt.description }}</td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                    {{ end }}
+                </div>
+            {{ end }}
+            </div>
+        </div>
+        {{ end }}
+    </div>
+</div>

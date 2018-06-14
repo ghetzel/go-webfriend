@@ -1,37 +1,12 @@
+---
+includes:
+    head: /_includes/head.html
+---
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-
-    <link rel="stylesheet" href="/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/codemirror.css">
-    <link rel="stylesheet" href="/css/editor/show-hint.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/editor/webfriend.css" crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/font-hind.css" integrity="sha384-EU3gxFIXEx0F6RDsVUTUQpjd+V6dOgH935HL/47t8xqMxngzJw6psDsqQYPOUe16"
-        crossorigin="anonymous">
-    <link rel="stylesheet" href="/css/webfriend.css" crossorigin="anonymous">
-
-    <script src="/js/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
-    <script src="/js/bootstrap.bundle.min.js" integrity="sha384-3ziFidFTgxJXHMDttyPJKDuTlmxJlwbSkojudK/CkRqKDOmeSbN6KLrGdrBQnT2n"
-        crossorigin="anonymous"></script>
-    <script src="/js/jquery.simple.websocket.js" integrity="sha384-ury8ZTZTL/MZjBRspE5eEuVBT/ViWa51jliCwSWw200vMClJMMPgdIRVq9bOAqWo"
-        crossorigin="anonymous"></script>
-    <script src="/js/mrdoob-stats.min.js"></script>
-    <script src="/js/d3.min.js"></script>
-    <script src="/js/codemirror.js"></script>
-    <script src="/js/codemirror/addons/active-line.js"></script>
-    <script src="/js/codemirror/addons/show-hint.js"></script>
-    <script src="/js/codemirror/modes/friendscript.js"></script>
-    <script src="/js/stapes.min.js"></script>
-    <script src="/js/webfriend-editor.js"></script>
-    <script src="/js/webfriend.js"></script>
-
+    {{ template "head" }}
     <title>Webfriend</title>
 </head>
 
@@ -62,6 +37,14 @@
         <a class="navbar-brand ml-4 d-none d-sm-block" href="/">
             <img src="/img/logo-text-darkbg.svg" height="28" class="mb-2">
         </a>
+
+        <ul class="navbar-nav mr-4">
+            <li class="nav-item">
+                <a class="nav-link" href="/docs">
+                    <i class="fa fa-fw fa-2x fa-question-circle"></i>
+                </a>
+            </li>
+        </ul>
     </nav>
 
     <div id="main">

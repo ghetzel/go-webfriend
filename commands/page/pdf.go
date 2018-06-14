@@ -12,18 +12,20 @@ import (
 type PdfArgs struct {
 }
 
-func (self *Commands) Pdf(filenameOrWriter interface{}, args *PdfArgs) error {
+// Render the current page as a PDF document, writing it to the given filename or writable
+// destination object.
+func (self *Commands) Pdf(destination interface{}, args *PdfArgs) error {
 	var dest io.Writer
 
-	switch filenameOrWriter.(type) {
+	switch destination.(type) {
 	case string:
-		if d, err := os.Create(filenameOrWriter.(string)); err == nil {
+		if d, err := os.Create(destination.(string)); err == nil {
 			dest = d
 		} else {
 			return err
 		}
 	case io.Writer:
-		dest = filenameOrWriter.(io.Writer)
+		dest = destination.(io.Writer)
 	default:
 		return fmt.Errorf("Must specify either a filename or io.Writer destination")
 	}

@@ -47,7 +47,15 @@ func (self *Commands) Click(selector browser.Selector, args *ClickArgs) ([]*brow
 	}
 }
 
+type ClickAtArgs struct {
+	// The X-coordinate to click at
+	X int `json:"x"`
+
+	// The Y-coordinate to click at
+	Y int `json:"y"`
+}
+
 // Click the page at the given X, Y coordinates.
-func (self *Commands) ClickAt(x int, y int) ([]browser.Element, error) {
+func (self *Commands) ClickAt(args *ClickAtArgs) ([]browser.Element, error) {
 	return nil, fmt.Errorf(`Not Implemented`)
 }

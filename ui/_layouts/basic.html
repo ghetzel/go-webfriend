@@ -1,0 +1,44 @@
+---
+includes:
+    head: /_includes/head.html
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {{ template "head" }}
+    <title>Webfriend</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="/">
+            <img src="/img/webfriend.svg" height="38">
+        </a>
+
+        <a class="navbar-brand d-none d-sm-block" href="/">
+            <img src="/img/logo-text-darkbg.svg" height="18" class="mb-2">
+        </a>
+
+        <ul class="navbar-nav mr-4">
+            <li class="nav-item">
+                <a class="nav-link" href="/">
+                    <i class="fa fa-fw fa-globe"></i>
+                    Editor
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="/docs">
+                    <i class="fa fa-fw fa-question-circle"></i>
+                    Documentation
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container-fluid">
+        {{ template "content" . }}
+    </div>
+</body>
+
+</html>
