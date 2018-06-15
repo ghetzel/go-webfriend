@@ -180,7 +180,8 @@ func (self *Element) Focus() error {
 
 // Click on the current element.
 func (self *Element) Click() error {
-	return fmt.Errorf(`NI`)
+	_, err := self.Evaluate(`return this.click()`)
+	return err
 }
 
 func (self *Element) Highlight() error {

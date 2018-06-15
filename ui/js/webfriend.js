@@ -252,7 +252,7 @@ var Webfriend = Stapes.subclass({
         }
     },
 
-    command: function(scriptOrCommand, first, rest) {
+    command: function(scriptOrCommand, first, rest, tagCommand) {
         if (!this.commandStream || this.commandStream.readyState != 1) {
             throw 'Command Stream is not available to accept commands';
         }
@@ -270,10 +270,14 @@ var Webfriend = Stapes.subclass({
         }
 
         // console.debug('SEND', scriptOrCommand);
-
         this.deferredReply = $.Deferred(function(){
             // console.debug('SENT')
         }.bind(this));
+
+        if (tagCommand) {
+            scriptOrCommand = "put '" + uuidv4() + "' -> $invocation;" + scriptOrCommand;
+        }
+
         this.commandStream.send(scriptOrCommand);
         return this.deferredReply;
     },
@@ -449,8 +453,7 @@ var Webfriend = Stapes.subclass({
             break;
 
         case 'Webfriend.scriptContextEvent':
-            // HACK: well this sucks...need a way to distinguish between events we "want" and ones we don't
-            if (params.label == 'core::mouse' || params.label == 'core::inspect') {
+            if (!params.scope || !params.scope.invocation) {
                 return;
             }
 

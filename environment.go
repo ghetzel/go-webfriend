@@ -669,6 +669,7 @@ func (self *Environment) emitContext(ctx *scripting.Context, isDone bool) {
 				`type`:   ctx.Type,
 				`offset`: ctx.AbsoluteStartOffset,
 				`length`: ctx.Length,
+				`scope`:  self.Scope().Data(),
 			}
 
 			if ctx.Label != `` {
@@ -677,7 +678,8 @@ func (self *Environment) emitContext(ctx *scripting.Context, isDone bool) {
 
 			// emit duration in microseconds
 			if isDone {
-				params[`took`] = (ctx.Took.Round(time.Microsecond).Nanoseconds() / 1000)
+				params[`took_us`] = (ctx.Took.Round(time.Microsecond).Nanoseconds() / 1000)
+				params[`took`] = ctx.Took.Round(time.Microsecond).String()
 			}
 
 			if ctx.Error != nil {

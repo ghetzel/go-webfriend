@@ -39,6 +39,7 @@ type clientSession struct {
 	lastFrameH      int
 	lastFrameId     int64
 	waiterId        string
+	rw              sync.Mutex
 }
 
 func (self *clientSession) prep() {
@@ -49,7 +50,11 @@ func (self *clientSession) prep() {
 		for {
 			select {
 			case <-pinger.C:
-				if err := self.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				self.rw.Lock()
+				err := self.Conn.WriteMessage(websocket.PingMessage, nil)
+				self.rw.Unlock()
+
+				if err != nil {
 					self.Stop()
 					return
 				}
@@ -64,8 +69,6 @@ func (self *clientSession) prep() {
 }
 
 func (self *clientSession) RunCommandChannel() {
-	var rw sync.Mutex
-
 	self.prep()
 	defer self.Stop()
 
@@ -78,8 +81,8 @@ func (self *clientSession) RunCommandChannel() {
 			return
 		}
 
-		rw.Lock()
-		defer rw.Unlock()
+		self.rw.Lock()
+		defer self.rw.Unlock()
 
 		if err := self.Conn.WriteJSON(map[string]interface{}{
 			`event`:  event.Name,
@@ -98,7 +101,7 @@ func (self *clientSession) RunCommandChannel() {
 			snippet := string(msg)
 
 			_, err := self.Server.env.EvaluateString(snippet)
-			rw.Lock()
+			self.rw.Lock()
 
 			if err == nil {
 				data := self.Server.env.Scope().Data()
@@ -107,18 +110,18 @@ func (self *clientSession) RunCommandChannel() {
 					`success`: true,
 					`scope`:   data,
 				}); err != nil {
-					rw.Unlock()
+					self.rw.Unlock()
 					return
 				}
 			} else if err := self.Conn.WriteJSON(map[string]interface{}{
 				`success`: false,
 				`error`:   err.Error(),
 			}); err != nil {
-				rw.Unlock()
+				self.rw.Unlock()
 				return
 			}
 
-			rw.Unlock()
+			self.rw.Unlock()
 		} else {
 			return
 		}

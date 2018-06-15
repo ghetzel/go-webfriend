@@ -67,6 +67,7 @@ var Editor = Stapes.subclass({
         this.activeIndex = null;
         this.executingIndex = null;
         this.inspectMode = false;
+        this.running = false;
 
         this.buildSkeleton();
         this.loadBuffers();
@@ -442,6 +443,12 @@ var Editor = Stapes.subclass({
 
     executeCurrentBuffer: function() {
         if (this.activeIndex) {
+            if (this.running) {
+                console.error('Another script is already running.');
+            } else {
+                this.running = true;
+            }
+
             console.debug('Execute buffer', this.activeIndex);
 
             var editor = this.getEditorByIndex(this.activeIndex);
@@ -450,10 +457,12 @@ var Editor = Stapes.subclass({
                 this.executingIndex = this.activeIndex;
                 editor.file.clearMarks();
 
-                webfriend.command(editor.file.text()).done(function(reply){
+                webfriend.command(editor.file.text(), null, null, true).done(function(reply){
                     console.log(reply);
+                    this.running = false;
                 }.bind(this)).fail(function(reply){
                     console.error(reply);
+                    this.running = false;
                 }.bind(this))
             }
         }
@@ -542,7 +551,7 @@ var EditorFile = Stapes.subclass({
     clearMarks: function() {
         $.each(this.widgets, function(k, widget) {
             widget.clear();
-            console.debug('clear', widget)
+            delete this.widgets[k];
         }.bind(this));
     },
 
@@ -565,7 +574,7 @@ var EditorFile = Stapes.subclass({
 
                 if (widget) {
                     var el = $(widget.node);
-                    el.text('Completed in ' + event.took + '\u03BCs');
+                    el.text('Completed in ' + event.took);
                     el.attr('class', 'fs-line-state fs-state-succeeded');
                     widget.changed();
                 }
@@ -576,7 +585,7 @@ var EditorFile = Stapes.subclass({
 
                 if (widget) {
                     var el = $(widget.node);
-                    el.text('Failed after ' + event.took + '\u03BCs: ' + (event.error || 'Unspecified Error'));
+                    el.text('Failed after ' + event.took + ': ' + (event.error || 'Unspecified Error'));
                     el.attr('class', 'fs-line-state fs-state-failed');
                     widget.changed();
                 }

@@ -13,7 +13,7 @@ type FieldArgs struct {
 	Autoclear bool `json:"autoclear" default:"true"`
 
 	// Whether to automatically send an "Enter" keystroke after typing in the given value
-	Enter bool `json:"enter" default:"true"`
+	Enter bool `json:"enter"`
 }
 
 // Locate and enter data into a form input field.
