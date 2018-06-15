@@ -42,6 +42,17 @@ var Editor = Stapes.subclass({
                 action:   function(){
                     webfriend.toggleStats();
                 }.bind(this),
+            }, {
+                name:     'Clear Results',
+                shortcut: 'Escape',
+                icon:     'ban',
+                action:   function() {
+                    try {
+                        this.getEditorByIndex(this.activeIndex).file.clearMarks();
+                    } catch (e) {
+                        ;
+                    }
+                }.bind(this),
             }],
         }, (options || {}));
 
@@ -54,6 +65,7 @@ var Editor = Stapes.subclass({
         this.container = '#editor';
         this.editors = [];
         this.activeIndex = null;
+        this.executingIndex = null;
         this.inspectMode = false;
 
         this.buildSkeleton();
@@ -435,12 +447,31 @@ var Editor = Stapes.subclass({
             var editor = this.getEditorByIndex(this.activeIndex);
 
             if (editor) {
+                this.executingIndex = this.activeIndex;
+                editor.file.clearMarks();
+
                 webfriend.command(editor.file.text()).done(function(reply){
                     console.log(reply);
                 }.bind(this)).fail(function(reply){
                     console.error(reply);
                 }.bind(this))
             }
+        }
+    },
+
+    mark: function(as, event) {
+        var editor = this.getEditorByIndex(this.executingIndex);
+
+        if (editor) {
+            editor.file.mark(as, event);
+        }
+    },
+
+    clearMarks: function(as, event) {
+        var editor = this.getEditorByIndex(this.executingIndex);
+
+        if (editor) {
+            editor.file.clearMarks();
         }
     },
 });
@@ -451,6 +482,7 @@ var EditorFile = Stapes.subclass({
         this.id = buffer.id;
         this.editor = editor;
         this.generation = 0;
+        this.widgets = {};
         this.element = d3.select(this.editor.files)
             .append('div')
             .attr('class', 'editor-file')
@@ -505,5 +537,52 @@ var EditorFile = Stapes.subclass({
 
     isClean: function() {
         return this.cm.isClean(this.generation);
+    },
+
+    clearMarks: function() {
+        $.each(this.widgets, function(k, widget) {
+            widget.clear();
+            console.debug('clear', widget)
+        }.bind(this));
+    },
+
+    mark: function(as, event) {
+        var lineCh = this.cm.posFromIndex(event.offset + event.length);
+
+        if (lineCh && event) {
+            var key = lineCh.line + ':' + lineCh.ch;
+
+            switch (as) {
+            case 'executing':
+                var widget = $('<div></div>')
+                    .attr('class', 'fs-line-state fs-state-executing')
+                    .text('Running...');
+
+                this.widgets[key] = this.cm.addLineWidget(lineCh.line, widget.get(0), true);
+                break;
+            case 'succeeded':
+                var widget = this.widgets[key];
+
+                if (widget) {
+                    var el = $(widget.node);
+                    el.text('Completed in ' + event.took + '\u03BCs');
+                    el.attr('class', 'fs-line-state fs-state-succeeded');
+                    widget.changed();
+                }
+
+                break;
+            default:
+                var widget = this.widgets[key];
+
+                if (widget) {
+                    var el = $(widget.node);
+                    el.text('Failed after ' + event.took + '\u03BCs: ' + (event.error || 'Unspecified Error'));
+                    el.attr('class', 'fs-line-state fs-state-failed');
+                    widget.changed();
+                }
+
+                break;
+            }
+        }
     },
 });

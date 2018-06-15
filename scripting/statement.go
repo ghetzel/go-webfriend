@@ -12,6 +12,7 @@ import (
 type Statement struct {
 	node  *node32
 	block *Block
+	ctx   *Context
 }
 
 type StatementType int
@@ -49,6 +50,20 @@ func (self StatementType) String() string {
 	default:
 		return `UnknownStatement`
 	}
+}
+
+func (self *Statement) SourceContext() *Context {
+	if self.ctx == nil {
+		self.ctx = &Context{
+			Type:                StatementContext,
+			Script:              self.Script(),
+			Parent:              self.block.SourceContext(),
+			AbsoluteStartOffset: int(self.node.begin),
+			Length:              int(self.node.end - self.node.begin),
+		}
+	}
+
+	return self.ctx
 }
 
 func (self *Statement) Script() *Friendscript {

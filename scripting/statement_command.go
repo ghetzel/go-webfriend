@@ -10,6 +10,24 @@ import (
 type Command struct {
 	statement *Statement
 	node      *node32
+	ctx       *Context
+}
+
+func (self *Command) SourceContext() *Context {
+	if self.ctx == nil {
+		mod, name := self.Name()
+
+		self.ctx = &Context{
+			Type:                CommandContext,
+			Label:               fmt.Sprintf("%s::%s", mod, name),
+			Script:              self.statement.Script(),
+			Parent:              self.statement.SourceContext(),
+			AbsoluteStartOffset: int(self.node.begin),
+			Length:              int(self.node.end - self.node.begin),
+		}
+	}
+
+	return self.ctx
 }
 
 func (self *Command) String() string {

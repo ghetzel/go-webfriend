@@ -21,8 +21,10 @@ var consoleEvents = `Console.messageAdded`
 type TabID string
 
 type PageInfo struct {
-	URL   string `json:"url"`
-	State string `json:"state"`
+	URL      string `json:"url"`
+	State    string `json:"state"`
+	loaderId string
+	frameId  string
 }
 
 type Tab struct {
@@ -49,6 +51,10 @@ func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
 		target:          target,
 		events:          make(chan *Event),
 		networkRequests: make([]*Event, 0),
+		mostRecentInfo: &PageInfo{
+			URL:   target.URL,
+			State: `initial`,
+		},
 	}
 
 	return tab, tab.connect()
@@ -66,23 +72,36 @@ func (self *Tab) Disconnect() error {
 	return self.rpc.Close()
 }
 
+func (self *Tab) Emit(method string, params map[string]interface{}) {
+	self.rpc.SynthesizeEvent(RpcMessage{
+		ID:     0,
+		Method: method,
+		Params: params,
+	})
+}
+
 func (self *Tab) Navigate(url string) (*RpcMessage, error) {
 	self.mostRecentInfo = &PageInfo{
 		URL:   url,
 		State: `initial`,
 	}
 
-	self.rpc.SynthesizeEvent(RpcMessage{
-		ID:     0,
-		Method: `Webfriend.urlChanged`,
-		Params: map[string]interface{}{
-			`url`: url,
-		},
-	})
-
-	return self.browser.Tab().RPC(`Page`, `navigate`, map[string]interface{}{
+	self.Emit(`Webfriend.urlChanged`, map[string]interface{}{
 		`url`: url,
 	})
+
+	result, err := self.browser.Tab().RPC(`Page`, `navigate`, map[string]interface{}{
+		`url`: url,
+	})
+
+	if err == nil {
+		r := result.R()
+
+		self.mostRecentInfo.loaderId = r.String(`loaderId`)
+		self.mostRecentInfo.frameId = r.String(`frameId`)
+	}
+
+	return result, err
 }
 
 func (self *Tab) DOM() *Document {
@@ -308,42 +327,28 @@ func (self *Tab) registerInternalEvents() {
 	})
 
 	// monitor page URL and load state
-	self.RegisterEventHandler(`Page.*`, func(event *Event) {
+	self.RegisterEventHandler(`Network.requestWillBeSent`, func(event *Event) {
 		if p := event.P(); p != nil {
 			var oldUrl string
 			var newUrl string
 
 			if self.mostRecentInfo != nil {
-				switch event.Name {
-				case `Page.frameNavigated`:
-					oldUrl = self.mostRecentInfo.URL
-					self.mostRecentInfo.State = `initial`
-					self.mostRecentInfo.URL = p.String(`frame.url`)
-					newUrl = self.mostRecentInfo.URL
-
-				case `Page.frameStartedLoading`:
-					self.mostRecentInfo.State = `started`
-
-				case `Page.frameStoppedLoading`:
-					self.mostRecentInfo.State = `done`
-
-				case `Page.navigatedWithinDocument`:
-					oldUrl = self.mostRecentInfo.URL
-					self.mostRecentInfo.URL = p.String(`url`)
-					newUrl = self.mostRecentInfo.URL
-				}
+				oldUrl = self.mostRecentInfo.URL
+				newUrl = p.String(`documentURL`)
 			}
 
-			if newUrl != `` {
-				self.rpc.SynthesizeEvent(RpcMessage{
-					ID:     0,
-					Method: `Webfriend.urlChanged`,
-					Params: map[string]interface{}{
-						`oldUrl`: oldUrl,
-						`url`:    newUrl,
-					},
-				})
+			if newUrl == `` || newUrl == oldUrl {
+				return
 			}
+
+			if p.String(`frameId`) != self.mostRecentInfo.frameId {
+				return
+			}
+
+			self.Emit(`Webfriend.urlChanged`, map[string]interface{}{
+				`oldUrl`: oldUrl,
+				`url`:    newUrl,
+			})
 		}
 	})
 

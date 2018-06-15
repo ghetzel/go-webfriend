@@ -97,9 +97,10 @@ func (self *clientSession) RunCommandChannel() {
 		if _, msg, err := self.Conn.ReadMessage(); err == nil {
 			snippet := string(msg)
 
+			_, err := self.Server.env.EvaluateString(snippet)
 			rw.Lock()
 
-			if _, err := self.Server.env.EvaluateString(snippet); err == nil {
+			if err == nil {
 				data := self.Server.env.Scope().Data()
 
 				if err := self.Conn.WriteJSON(map[string]interface{}{
@@ -149,6 +150,8 @@ func (self *Server) ListenAndServe(address string) error {
 		return err
 	}
 
+	// fire up a goroutine to retrieve screencast frames from tabs with active debug
+	// sessions running, and dispatch each (non duplicate) frame to each client.
 	go func() {
 		for {
 			self.sessions.Range(func(sid interface{}, v interface{}) bool {
@@ -253,6 +256,14 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 	})
 
 	router.Post(`/api/tabs/current/script`, func(w http.ResponseWriter, req *http.Request) {
+		if browser := self.env.Browser(); browser != nil {
+			if tab := browser.Tab(); tab != nil {
+				tab.Emit(`Webfriend.scriptPosted`, map[string]interface{}{
+					`from`: req.RemoteAddr,
+				})
+			}
+		}
+
 		if scope, err := self.env.EvaluateReader(req.Body); err == nil {
 			httputil.RespondJSON(w, scope.Data())
 		} else {
@@ -263,8 +274,8 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 	router.Get(`/api/tabs/current/script`, func(w http.ResponseWriter, req *http.Request) {
 		var reqerr error
 
-		if self.env.Browser() != nil {
-			if tab := self.env.Browser().Tab(); tab != nil {
+		if browser := self.env.Browser(); browser != nil {
+			if tab := browser.Tab(); tab != nil {
 				if sid := req.Header.Get(`Sec-Websocket-Protocol`); sid != `` {
 					if conn, err := self.upgrader.Upgrade(w, req, http.Header{
 						`Sec-Websocket-Protocol`: []string{sid},

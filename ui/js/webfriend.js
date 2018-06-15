@@ -216,11 +216,14 @@ var Webfriend = Stapes.subclass({
         if ($.isPlainObject(node.attributes)) {
             if (node.attributes.id) {
                 title += '#' + node.attributes.id;
-            } else if (node.attributes.class) {
-                title += '.' + node.attributes.class.replace(/\s+/g, '.');
+            } else if (node.attributes.class && node.attributes.class.trim().length) {
+                var cls = node.attributes.class.trim();
+
+                title += '.' + cls.replace(/\s+/g, '.');
             }
         }
 
+        console.debug(node)
         inspect.find('.inspect-title').text(title);
     },
 
@@ -410,6 +413,7 @@ var Webfriend = Stapes.subclass({
             p.resolve();
         }.bind(this);
 
+        // two kinds of message come back on the command stream: events and replies
         this.commandStream.onmessage = function(event) {
             if (event.data && event.data.length) {
                 var reply = $.parseJSON(event.data);
@@ -436,6 +440,37 @@ var Webfriend = Stapes.subclass({
         switch (name) {
         case 'Webfriend.urlChanged':
             $('#urlbar input[name="url"]').val(params.url);
+            break;
+
+        case 'Webfriend.scriptPosted':
+            if (this.editor) {
+                this.editor.clearMarks();
+            }
+            break;
+
+        case 'Webfriend.scriptContextEvent':
+            // HACK: well this sucks...need a way to distinguish between events we "want" and ones we don't
+            if (params.label == 'core::mouse' || params.label == 'core::inspect') {
+                return;
+            }
+
+            if (this.editor) {
+                var state = '';
+
+                if (params.action === 'started') {
+                    state = 'executing';
+                } else if (params.action === 'finished') {
+                    if (params.error) {
+                        state = 'failed';
+                    } else {
+                        state = 'succeeded';
+                    }
+                }
+
+                this.editor.mark(state, params);
+            }
+
+            console.debug(name, params)
             break;
 
         case 'Network.dataReceived':

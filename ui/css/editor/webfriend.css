@@ -117,3 +117,19 @@
   text-decoration: underline;
   color: white !important;
 }
+
+.CodeMirror-linewidget .fs-line-state {
+  background-color: #6272a4;
+  color: #f8f8f2;
+  padding: 0 0.33em;
+}
+
+.CodeMirror-linewidget .fs-state-succeeded {
+  background-color: #B6ED42;
+  color: black;
+}
+
+.CodeMirror-linewidget .fs-state-failed {
+  background-color: #ED5E4D;
+  color: white;
+}

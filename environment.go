@@ -251,7 +251,6 @@ func (self *Environment) Scope() *scripting.Scope {
 	if len(self.stack) > 0 {
 		return self.stack[len(self.stack)-1]
 	} else {
-		log.Fatal("illegal scope retrieval from empty stack")
 		return nil
 	}
 }
@@ -402,6 +401,8 @@ func (self *Environment) evaluateDirective(directive *scripting.Directive) error
 func (self *Environment) evaluateCommand(command *scripting.Command, forceDeclare bool) (string, error) {
 	modname, name := command.Name()
 	log.Debugf("EXEC %v::%v", modname, name)
+	ctx := command.SourceContext()
+	self.emitContext(ctx, false)
 
 	if first, rest, err := command.Args(); err == nil {
 		// locate the module this command belongs to
@@ -410,6 +411,7 @@ func (self *Environment) evaluateCommand(command *scripting.Command, forceDeclar
 
 			// tell that module to execute the command, giving it the name and arguments
 			if result, err := module.ExecuteCommand(name, first, rest); err == nil {
+				self.emitContext(ctx, true)
 				// log.Debugf("CMND returned %T(%v)", result, result)
 
 				// if there is an output variable destination, set that in the current scope
@@ -419,19 +421,23 @@ func (self *Environment) evaluateCommand(command *scripting.Command, forceDeclar
 					}
 
 					self.Scope().Set(resultVar, result)
+
 					return resultVar, nil
 				}
 
 				return ``, nil
 			} else {
-				return ``, err
+				ctx.Error = err
 			}
 		} else {
-			return ``, fmt.Errorf("Cannot locate module %q", modname)
+			ctx.Error = fmt.Errorf("Cannot locate module %q", modname)
 		}
 	} else {
-		return ``, fmt.Errorf("invalid arguments: %v", err)
+		ctx.Error = fmt.Errorf("invalid arguments: %v", err)
 	}
+
+	self.emitContext(ctx, true)
+	return ``, ctx.Error
 }
 
 func (self *Environment) evaluateConditional(conditional *scripting.Conditional) (bool, error) {
@@ -644,4 +650,41 @@ func (self *Environment) evaluateLoopIterationStart(loop *scripting.Loop, scope 
 	}
 
 	return sourceVar, destVars, nil
+}
+
+func (self *Environment) emitContext(ctx *scripting.Context, isDone bool) {
+	if browser := self.Browser(); browser != nil {
+		if tab := browser.Tab(); tab != nil {
+			ctxAction := `started`
+
+			if isDone {
+				ctxAction = `finished`
+				ctx.Took = time.Since(ctx.StartedAt)
+			} else {
+				ctx.StartedAt = time.Now()
+			}
+
+			params := map[string]interface{}{
+				`action`: ctxAction,
+				`type`:   ctx.Type,
+				`offset`: ctx.AbsoluteStartOffset,
+				`length`: ctx.Length,
+			}
+
+			if ctx.Label != `` {
+				params[`label`] = ctx.Label
+			}
+
+			// emit duration in microseconds
+			if isDone {
+				params[`took`] = (ctx.Took.Round(time.Microsecond).Nanoseconds() / 1000)
+			}
+
+			if ctx.Error != nil {
+				params[`error`] = ctx.Error.Error()
+			}
+
+			tab.Emit(`Webfriend.scriptContextEvent`, params)
+		}
+	}
 }

@@ -11,6 +11,7 @@ type Block struct {
 	friendscript *Friendscript
 	node         *node32
 	parent       *Statement
+	ctx          *Context
 }
 
 type BlockType int
@@ -33,6 +34,20 @@ func (self BlockType) String() string {
 	default:
 		return `UnknownBlock`
 	}
+}
+
+// Return the character offset and length of this block's source code.
+func (self *Block) SourceContext() *Context {
+	if self.ctx == nil {
+		self.ctx = &Context{
+			Type:                BlockContext,
+			Script:              self.friendscript,
+			AbsoluteStartOffset: int(self.node.begin),
+			Length:              int(self.node.end - self.node.begin),
+		}
+	}
+
+	return self.ctx
 }
 
 func (self *Block) Script() *Friendscript {
