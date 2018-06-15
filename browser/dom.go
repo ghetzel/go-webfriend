@@ -12,6 +12,8 @@ import (
 	"github.com/ghetzel/go-stockutil/typeutil"
 )
 
+var ElementPollTimeout = time.Second
+
 type Document struct {
 	tab      *Tab
 	parent   *Document
@@ -72,7 +74,7 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 			}
 		}
 
-		log.Debugf("Store element %d", element.ID())
+		log.Debugf("Store element %d: %v", element.ID(), element)
 		self.elements.Store(nodeId, element)
 
 		if !collapsed {
@@ -95,9 +97,14 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 
 // Retrieve a known element by its Node ID
 func (self *Document) Element(id int) (*Element, bool) {
-	if v, ok := self.elements.Load(id); ok {
-		if el, ok := v.(*Element); ok {
-			return el, true
+	start := time.Now()
+	deadline := start.Add(ElementPollTimeout)
+
+	for t := start; t.Before(deadline); t = time.Now() {
+		if v, ok := self.elements.Load(id); ok {
+			if el, ok := v.(*Element); ok {
+				return el, true
+			}
 		}
 	}
 
@@ -167,8 +174,9 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 		`selector`: selector,
 	}); err == nil {
 		results := make([]*Element, 0)
+		ids := maputil.M(rv.Result).Slice(`nodeIds`)
 
-		for _, nid := range maputil.M(rv.Result).Slice(`nodeIds`) {
+		for _, nid := range ids {
 			if element, ok := self.Element(int(nid.Int())); ok {
 				results = append(results, element)
 			}
@@ -177,6 +185,21 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 		return results, nil
 	} else {
 		return nil, err
+	}
+}
+
+// Remove the given element from the document.
+func (self *Document) RemoveElement(element *Element) error {
+	if element != nil {
+		defer self.elements.Delete(element.ID())
+
+		_, err := self.tab.RPC(`DOM`, `removeNode`, map[string]interface{}{
+			`nodeId`: element.ID(),
+		})
+
+		return err
+	} else {
+		return nil
 	}
 }
 

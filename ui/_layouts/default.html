@@ -50,11 +50,31 @@ includes:
     <div id="main">
         <div id="arena">{{ template "content" . }}</div>
         <div id="sidebar">
-            <script>
-            $(document).ready(function () {
-                window.editor = new Editor('#sidebar');
-            });
-            </script>
+            <div id="editarea">
+                <script>
+                $(document).ready(function () {
+                    window.editor = new Editor('#editarea');
+                });
+                </script>
+            </div>
+            <div id="inspect">
+                <div class="inspect-title">&nbsp;</div>
+                <div class="inspect-body">
+                    <div class="inspect-attributes">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th style="width: 33%">Attribute</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- <div class="inspect-metrics">&nbsp;</div> -->
+                </div>
+            </div>
         </div>
     </div>
 
@@ -85,7 +105,7 @@ includes:
 
                 e.preventDefault();
                 return false
-            })
+            });
         });
     </script>
 </body>

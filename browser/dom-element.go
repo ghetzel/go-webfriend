@@ -8,6 +8,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/mathutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 )
@@ -24,7 +25,7 @@ type Dimensions struct {
 type Selector string
 
 func (self Selector) IsNone() bool {
-	return (self == `none`)
+	return (self == `none` || self == ``)
 }
 
 type Element struct {
@@ -184,14 +185,25 @@ func (self *Element) Click() error {
 	return err
 }
 
-func (self *Element) Highlight() error {
+// Remove the element.
+func (self *Element) Remove() error {
+	_, err := self.Evaluate(`this.remove()`)
+	return err
+}
+
+func (self *Element) Highlight(r int, g int, b int, a float64) error {
+	r = int(mathutil.Clamp(float64(r), 0, 255))
+	g = int(mathutil.Clamp(float64(g), 0, 255))
+	b = int(mathutil.Clamp(float64(b), 0, 255))
+	a = mathutil.Clamp(a, 0, 1)
+
 	return self.document.tab.AsyncRPC(`Overlay`, `highlightNode`, map[string]interface{}{
 		`highlightConfig`: map[string]interface{}{
 			`contentColor`: map[string]interface{}{
-				`r`: 0,
-				`g`: 128,
-				`b`: 128,
-				`a`: 0.5,
+				`r`: r,
+				`g`: g,
+				`b`: b,
+				`a`: a,
 			},
 		},
 		`nodeId`: self.id,

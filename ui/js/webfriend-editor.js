@@ -43,12 +43,12 @@ var Editor = Stapes.subclass({
                     webfriend.toggleStats();
                 }.bind(this),
             }, {
-                name:     'Clear Results',
+                name:     'Clear Log',
                 shortcut: 'Escape',
                 icon:     'ban',
                 action:   function() {
                     try {
-                        this.getEditorByIndex(this.activeIndex).file.clearMarks();
+                        this.clearLog();
                     } catch (e) {
                         ;
                     }
@@ -68,6 +68,12 @@ var Editor = Stapes.subclass({
         this.executingIndex = null;
         this.inspectMode = false;
         this.running = false;
+        this.features = {
+            toolbar:   true,
+            filebar:   false,
+            logger:    true,
+            statusbar: true,
+        }
 
         this.buildSkeleton();
         this.loadBuffers();
@@ -147,10 +153,12 @@ var Editor = Stapes.subclass({
         d3.select(this.toplevel)
             .attr('class', 'WebfriendEditor')
 
-        // add toolbar container
-        d3.select(this.toplevel)
-            .append('div')
-            .attr('id', 'toolbar');
+        if (this.features.toolbar) {
+            // add toolbar container
+            d3.select(this.toplevel)
+                .append('div')
+                .attr('id', 'toolbar');
+        }
 
         // add editor container
         d3.select(this.toplevel)
@@ -159,29 +167,33 @@ var Editor = Stapes.subclass({
 
         // Filebar
         // -----------------------------------------------------------------------------------------
-        var filebar = d3.select(this.container)
-            .append('div')
-            .attr('class', 'filebar');
+        if (this.features.filebar) {
+            var filebar = d3.select(this.container)
+                .append('div')
+                .attr('class', 'filebar');
 
-        filebar
-            .append('ul')
-            .attr('class', 'nav nav-tabs workspace-selector');
+            filebar
+                .append('ul')
+                .attr('class', 'nav nav-tabs workspace-selector');
 
-        var actions = filebar
-            .append('ul')
-            .attr('class', 'nav nav-tabs file-actions');
+            var actions = filebar
+                .append('ul')
+                .attr('class', 'nav nav-tabs file-actions');
 
-        actions
-            .append('li').attr('class', 'nav-item')
-            .append('a').attr('class', 'nav-link new-file')
-            .on('click', function(){
-                this.createFile();
-            }.bind(this))
-            .append('i').attr('class', 'fa fa-fw fa-plus')
+            actions
+                .append('li').attr('class', 'nav-item')
+                .append('a').attr('class', 'nav-link new-file')
+                .on('click', function(){
+                    this.createFile();
+                }.bind(this))
+                .append('i').attr('class', 'fa fa-fw fa-plus')
 
-        filebar
-            .append('ul')
-            .attr('class', 'nav nav-tabs open-files');
+            filebar
+                .append('ul')
+                .attr('class', 'nav nav-tabs open-files');
+
+            this.filebar = '#editor > .filebar';
+        }
 
         // Files View
         // -----------------------------------------------------------------------------------------
@@ -189,22 +201,46 @@ var Editor = Stapes.subclass({
             .append('div')
             .attr('class', 'files');
 
+        this.files = '#editor > .files';
+
+        // Logs
+        // -----------------------------------------------------------------------------------------
+        if (this.features.logger) {
+            var logger = d3.select(this.container)
+                .append('div')
+                .attr('class', 'logger');
+
+            var ltb = logger
+                .append('div')
+                .attr('class', 'logger-toolbar');
+
+            ltb.append('div')
+                .attr('class', 'title')
+                .text('Logs')
+
+
+            logger.append('div').attr('class', 'logger-logs');
+
+            this.logger = '#editor > .logger';
+        }
+
         // Statusbar
         // -----------------------------------------------------------------------------------------
-        var sb = d3.select(this.container)
-            .append('div')
-            .attr('class', 'statusbar')
-            .append('div')
-            .attr('class', 'statusbar-cursor');
+        if (this.features.statusbar) {
+            var sb = d3.select(this.container)
+                .append('div')
+                .attr('class', 'statusbar')
+                .append('div')
+                .attr('class', 'statusbar-cursor');
 
-        sb.append('span').text('Line ');
-        sb.append('span').attr('class', 'line').text('-');
-        sb.append('span').text(',Col ');
-        sb.append('span').attr('class', 'ch').text('-');
+            sb.append('span').text('Line ');
+            sb.append('span').attr('class', 'line').text('-');
+            sb.append('span').text(',Col ');
+            sb.append('span').attr('class', 'ch').text('-');
 
-        this.filebar = '#editor > .filebar';
-        this.files = '#editor > .files';
-        this.statusbar = '#editor > .statusbar';
+            this.statusbar = '#editor > .statusbar';
+        }
+
 
         // $(window).on('click', function(e){
         //     var el = $(e.target);
@@ -220,7 +256,33 @@ var Editor = Stapes.subclass({
 
     },
 
+    log: function(severity, message, rightside) {
+        if (this.features.logger) {
+            var logs = $(this.logger + ' .logger-logs');
+
+            var line = $('<div></div>').addClass('log-' + severity);
+
+            line.append($('<span></span>').text(message));
+
+            if (rightside) {
+                line.append(
+                    $('<span></span>').addClass('right-side').text(rightside)
+                );
+            }
+
+            logs.append(line);
+        }
+    },
+
+    clearLog: function() {
+        $(this.logger + ' .logger-logs').empty();
+    },
+
     updateToolbar: function() {
+        if (!this.features.toolbar) {
+            return;
+        }
+
         var toolbar = d3.select(this.toolbar)
             .selectAll('a')
             .data(this.options.toolbar)
@@ -267,6 +329,10 @@ var Editor = Stapes.subclass({
     },
 
     updateFilebar: function () {
+        if (!this.features.filebar) {
+            return;
+        }
+
         var files = d3.select(this.filebar + ' .open-files')
             .selectAll('li')
             .data(this.editors);
@@ -443,44 +509,18 @@ var Editor = Stapes.subclass({
 
     executeCurrentBuffer: function() {
         if (this.activeIndex) {
-            if (this.running) {
-                console.error('Another script is already running.');
-            } else {
-                this.running = true;
-            }
-
             console.debug('Execute buffer', this.activeIndex);
 
             var editor = this.getEditorByIndex(this.activeIndex);
 
             if (editor) {
                 this.executingIndex = this.activeIndex;
-                editor.file.clearMarks();
-
                 webfriend.command(editor.file.text(), null, null, true).done(function(reply){
                     console.log(reply);
-                    this.running = false;
                 }.bind(this)).fail(function(reply){
-                    console.error(reply);
-                    this.running = false;
+                    this.log('error', 'Friendscript failed: ' + reply.error);
                 }.bind(this))
             }
-        }
-    },
-
-    mark: function(as, event) {
-        var editor = this.getEditorByIndex(this.executingIndex);
-
-        if (editor) {
-            editor.file.mark(as, event);
-        }
-    },
-
-    clearMarks: function(as, event) {
-        var editor = this.getEditorByIndex(this.executingIndex);
-
-        if (editor) {
-            editor.file.clearMarks();
         }
     },
 });
@@ -546,52 +586,5 @@ var EditorFile = Stapes.subclass({
 
     isClean: function() {
         return this.cm.isClean(this.generation);
-    },
-
-    clearMarks: function() {
-        $.each(this.widgets, function(k, widget) {
-            widget.clear();
-            delete this.widgets[k];
-        }.bind(this));
-    },
-
-    mark: function(as, event) {
-        var lineCh = this.cm.posFromIndex(event.offset + event.length);
-
-        if (lineCh && event) {
-            var key = lineCh.line + ':' + lineCh.ch;
-
-            switch (as) {
-            case 'executing':
-                var widget = $('<div></div>')
-                    .attr('class', 'fs-line-state fs-state-executing')
-                    .text('Running...');
-
-                this.widgets[key] = this.cm.addLineWidget(lineCh.line, widget.get(0), true);
-                break;
-            case 'succeeded':
-                var widget = this.widgets[key];
-
-                if (widget) {
-                    var el = $(widget.node);
-                    el.text('Completed in ' + event.took);
-                    el.attr('class', 'fs-line-state fs-state-succeeded');
-                    widget.changed();
-                }
-
-                break;
-            default:
-                var widget = this.widgets[key];
-
-                if (widget) {
-                    var el = $(widget.node);
-                    el.text('Failed after ' + event.took + ': ' + (event.error || 'Unspecified Error'));
-                    el.attr('class', 'fs-line-state fs-state-failed');
-                    widget.changed();
-                }
-
-                break;
-            }
-        }
     },
 });

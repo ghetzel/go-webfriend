@@ -133,9 +133,29 @@ func (self *Commands) SwitchRoot(selector browser.Selector) error {
 	return fmt.Errorf(`Not Implemented Yet`)
 }
 
+type HighlightArgs struct {
+	// The red component of the highlight color (0 <= r < 256)
+	R int `json:"r" default:"0"`
+
+	// The green component of the highlight color (0 <= g < 256)
+	G int `json:"g" default:"128"`
+
+	// The blue component of the highlight color (0 <= b < 256)
+	B int `json:"b" default:"128"`
+
+	// The alpha component of the highlight color (0.0 <= a <= 1.0)
+	A float64 `json:"a" default:"0.5"`
+}
+
 // Highlight the node matching the given selector, or clear all highlights if
 // the selector is "none"
-func (self *Commands) Highlight(selector browser.Selector) error {
+func (self *Commands) Highlight(selector browser.Selector, args *HighlightArgs) error {
+	if args == nil {
+		args = &HighlightArgs{}
+	}
+
+	defaults.SetDefaults(args)
+
 	if selector.IsNone() {
 		return self.browser.Tab().AsyncRPC(`DOM`, `hideHighlight`, nil)
 	} else {
@@ -143,7 +163,7 @@ func (self *Commands) Highlight(selector browser.Selector) error {
 
 		if elements, err := docroot.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
 			for _, element := range elements {
-				if err := element.Highlight(); err != nil {
+				if err := element.Highlight(args.R, args.G, args.B, args.A); err != nil {
 					return err
 				}
 			}
@@ -164,6 +184,18 @@ type InspectArgs struct {
 
 	// Whether to highlight the inspected DOM element or not.
 	Highlight bool `json:"highlight" default:"true"`
+
+	// The red component of the highlight color (0 <= r < 256)
+	R int `json:"r" default:"0"`
+
+	// The green component of the highlight color (0 <= g < 256)
+	G int `json:"g" default:"128"`
+
+	// The blue component of the highlight color (0 <= b < 256)
+	B int `json:"b" default:"128"`
+
+	// The alpha component of the highlight color (0.0 <= a <= 1.0)
+	A float64 `json:"a" default:"0.5"`
 }
 
 // Retrieve the element at the given coordinates, optionally highlighting it.
@@ -180,7 +212,7 @@ func (self *Commands) Inspect(args *InspectArgs) (*browser.Element, error) {
 	}); err == nil {
 		if element, ok := self.browser.Tab().DOM().Element(int(rv.R().Int(`nodeId`))); ok {
 			if args.Highlight {
-				if err := element.Highlight(); err != nil {
+				if err := element.Highlight(args.R, args.G, args.B, args.A); err != nil {
 					return nil, err
 				}
 			}
@@ -191,5 +223,55 @@ func (self *Commands) Inspect(args *InspectArgs) (*browser.Element, error) {
 		}
 	} else {
 		return nil, err
+	}
+}
+
+type RemoveArgs struct {
+	Parent browser.Selector `json:"parent"`
+}
+
+// Remove all occurrences of the element(s) matching the given selector.
+func (self *Commands) Remove(selector browser.Selector, args *RemoveArgs) (int, error) {
+	if args == nil {
+		args = &RemoveArgs{}
+	}
+
+	defaults.SetDefaults(args)
+
+	if !selector.IsNone() {
+		docroot := self.browser.Tab().DOM()
+
+		var parent *browser.Element
+
+		// if a parent selector was specified, find that element
+		if !args.Parent.IsNone() {
+			if elements, err := docroot.Query(args.Parent, nil); err == nil {
+				if len(elements) == 1 {
+					parent = elements[0]
+				} else {
+					return 0, fmt.Errorf("Ambiguous parent selector: got %d results:", len(elements))
+				}
+			} else {
+				return 0, err
+			}
+		}
+
+		// query for the elements to remove from the found parent, or throughout the whole
+		// document if no parent was given.
+		if elements, err := docroot.Query(selector, parent); err == nil {
+			n := 0
+
+			for _, element := range elements {
+				if err := element.Remove(); err == nil {
+					n += 1
+				}
+			}
+
+			return n, nil
+		} else {
+			return 0, err
+		}
+	} else {
+		return 0, nil
 	}
 }

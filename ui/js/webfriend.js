@@ -92,6 +92,8 @@ var Webfriend = Stapes.subclass({
 
     activateInspector: function() {
         this.editor.inspectMode = true;
+        this.editor.inspectActive = true;
+
         $('#inspect').addClass('active');
         console.debug('Activated inspector')
     },
@@ -99,9 +101,24 @@ var Webfriend = Stapes.subclass({
     deactivateInspector: function() {
         this.command('highlight', 'none');
         $('#inspect').removeClass('active');
+
         this.editor.inspectMode = false;
+        this.editor.inspectActive = false;
+
         this.editor.update();
         console.debug('Deactivated inspector')
+    },
+
+    toggleInspectorPause: function(args) {
+        this.editor.inspectActive = !this.editor.inspectActive;
+
+        if (this.editor.inspectActive) {
+            this.editor.inspectLastPausedOn = null;
+            $('#inspect').removeClass('locked');
+        } else {
+            this.editor.inspectLastPausedOn = args;
+            $('#inspect').addClass('locked');
+        }
     },
 
     toggleStats: function() {
@@ -135,76 +152,90 @@ var Webfriend = Stapes.subclass({
         }.bind(this));
 
         $(this.targetElement).on('mousemove mousedown mouseup mousewheel', function(e) {
-            var parentOffset = $(this.targetElement).offset();
-            var relX = e.pageX - parentOffset.left;
-            var relY = e.pageY - parentOffset.top;
+            try {
+                var parentOffset = $(this.targetElement).offset();
+                var relX = e.pageX - parentOffset.left;
+                var relY = e.pageY - parentOffset.top;
 
-            var args = {
-                x: relX,
-                y: relY,
-            };
+                var args = {
+                    x: relX,
+                    y: relY,
+                };
 
-            var btn = e.button;
+                var btn = e.button;
 
-            if (e.type == 'mousemove') {
-                btn = lastKnownButton;
-            } else {
-                lastKnownButton = btn;
-            }
+                if (e.type == 'mousemove') {
+                    btn = lastKnownButton;
+                } else {
+                    lastKnownButton = btn;
+                }
 
-            args['count'] = e.detail;
+                args['count'] = e.detail;
 
-            switch (btn) {
-            case 1:
-                args['button'] = 'middle';
-                break;
+                switch (btn) {
+                case 1:
+                    args['button'] = 'middle';
+                    break;
 
-            case 2:
-                args['button'] = 'right';
-                break;
+                case 2:
+                    args['button'] = 'right';
+                    break;
 
-            default:
-                args['button'] = 'left';
-                break;
-            }
+                default:
+                    args['button'] = 'left';
+                    break;
+                }
 
-            switch (e.type) {
-            case 'mousedown':
-                $('*').blur();
-                args['action'] = 'press';
-                break;
+                switch (e.type) {
+                case 'mousedown':
+                    $('*').blur();
+                    args['action'] = 'press';
+                    break;
 
-            case 'mouseup':
-                args['action'] = 'release';
-                break;
+                case 'mouseup':
+                    args['action'] = 'release';
+                    break;
 
-            case 'mousewheel':
-                args['action'] = 'scroll';
-                args['wheelX'] = -1*e.originalEvent.wheelDeltaX;
-                args['wheelY'] = -1*e.originalEvent.wheelDeltaY;
+                case 'mousewheel':
+                    args['action'] = 'scroll';
+                    args['wheelX'] = -1*e.originalEvent.wheelDeltaX;
+                    args['wheelY'] = -1*e.originalEvent.wheelDeltaY;
 
-                break;
-            default:
-                args['action'] = 'move';
-                break;
-            }
+                    break;
+                default:
+                    args['action'] = 'move';
+                    break;
+                }
 
-            if (this.editor && this.editor.inspectMode) {
-                this.command('inspect', {
-                    x: args.x,
-                    y: args.y,
-                }).done(function(reply){
-                    this.updateInspectNode(reply.scope.result);
-
+                if (this.editor && this.editor.inspectMode) {
                     if (args.action === 'press' && args.button === 'left') {
-                        this.deactivateInspector();
+                        this.toggleInspectorPause(args);
                     }
-                }.bind(this));
-            } else {
-                this.command('mouse', args);
-            }
 
-            e.preventDefault();
+                    if (this.editor.inspectActive) {
+                        this.command('inspect', {
+                            x: args.x,
+                            y: args.y,
+                        }).done(function(reply){
+                            this.updateInspectNode(reply.scope.result);
+                        }.bind(this));
+                    } else {
+                        args = this.editor.inspectLastPausedOn;
+
+                        this.command('inspect', {
+                            x: args.x,
+                            y: args.y,
+                            r: 242,
+                            g: 98,
+                            b: 12,
+                        });
+                    }
+                } else {
+                    this.command('mouse', args);
+                }
+            } finally {
+                e.preventDefault();
+            }
         }.bind(this));
     },
 
@@ -225,6 +256,19 @@ var Webfriend = Stapes.subclass({
 
         console.debug(node)
         inspect.find('.inspect-title').text(title);
+
+        var attributes = $('.inspect-attributes table tbody');
+
+        attributes.empty();
+
+        $.each(node.attributes, function(k, v) {
+            var row = $('<tr></tr>');
+
+            row.append($('<th></th>').text(k));
+            row.append($('<td></td>').jsonBrowse(v));
+
+            attributes.append(row);
+        });
     },
 
     friendlify: function(arg) {
@@ -458,22 +502,25 @@ var Webfriend = Stapes.subclass({
             }
 
             if (this.editor) {
-                var state = '';
+                var severity = 'info';
+                var message = '';
 
-                if (params.action === 'started') {
-                    state = 'executing';
-                } else if (params.action === 'finished') {
+                console.log(params)
+
+                if (params.action === 'finished') {
                     if (params.error) {
-                        state = 'failed';
+                        severity = 'error';
+                        message = params.label + ' failed: ' + params.error;
                     } else {
-                        state = 'succeeded';
+                        severity = 'notice';
+                        message = params.label + ' succeeded';
                     }
                 }
 
-                this.editor.mark(state, params);
+                if (message.length) {
+                    this.editor.log(severity, message, params.took);
+                }
             }
-
-            console.debug(name, params)
             break;
 
         case 'Network.dataReceived':
@@ -492,12 +539,6 @@ var Webfriend = Stapes.subclass({
     resizeScreen: function() {
         var screen = $(this.targetElement).parent();
         var extraY = 0;
-
-        if ($('#inspect').css('display') != 'none') {
-            extraY = $('#inspect').height();
-        }
-
-        console.debug(screen.width(), screen.height(), extraY)
 
         if (screen.width() && screen.height() ) {
             return this.command('resize', {
