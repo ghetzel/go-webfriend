@@ -538,31 +538,80 @@ var EditorFile = Stapes.subclass({
             .attr('id', 'editor_' + buffer.id)
 
         this.cm = CodeMirror(document.getElementById('editor_' + buffer.id), {
-            mode: 'friendscript',
-            theme: 'webfriend',
-            indentUnit: 4,
-            tabSize: 4,
-            lineNumbers: true,
-            autofocus: true,
-            styleActiveLine: true,
+            mode: {
+                name:       'friendscript',
+                globalVars: true,
+            },
+            theme:             'webfriend',
+            autoCloseBrackets: true,
+            matchBrackets:     true,
+            indentUnit:        4,
+            indentWithTabs:    false,
+            tabSize:           4,
+            lineNumbers:       true,
+            autofocus:         true,
+            styleActiveLine:   true,
+            extraKeys: {
+                'Ctrl-Space': 'autocomplete',
+            },
         });
 
         if (buffer.content) {
             this.cm.setValue(buffer.content);
         }
 
-        this.position = this.cm.cursorCoords(false);
-        this.cursor = this.cm.getCursor();
-
-        this.cm.on('cursorActivity', function(cm) {
-            this.editor.updateStatusBar(this, cm);
-            this.position = cm.cursorCoords(false);
-            this.cursor = this.cm.getCursor();
-        }.bind(this));
+        this.updateInfoAtCursor(this.cm);
+        this.cm.on('cursorActivity', this.updateInfoAtCursor.bind(this));
 
         this.cm.on('changes', function(cm){
             this.persist();
+
+            cm.showHint({
+                completeSingle: false
+            });
         }.bind(this));
+    },
+
+    commandFromToken: function(token) {
+        var inCommand = '';
+
+        if (token.state.lastModule.length) {
+            inCommand += token.state.lastModule + '::';
+        }
+
+        if (token.state.lastCommand.length) {
+            inCommand += token.state.lastCommand;
+        }
+
+        return inCommand;
+    },
+
+    updateInfoAtCursor: function(cm) {
+        this.editor.updateStatusBar(this, cm);
+        this.position = cm.cursorCoords(false);
+        this.cursor = cm.getCursor();
+        this.token = cm.getTokenAt(this.cursor);
+
+        if (this.token) {
+            var lineToken = cm.getTokenAt({
+                line: this.cursor.line,
+            });
+
+            var commandOnCurrentLine = this.commandFromToken(lineToken);
+            var lastCommand = this.commandFromToken(this.token);
+
+            if (commandOnCurrentLine.length) {
+                this.command = commandOnCurrentLine;
+            } else if (this.token.inObject && lastCommand.length) {
+                this.command = lastCommand;
+            } else {
+                this.command = null;
+            }
+        }
+
+        if (this.command) {
+            // update current command info pane
+        }
     },
 
     text: function() {

@@ -31,19 +31,34 @@ CodeMirror.defineMode('friendscript', function (cm, options) {
     return {
         startState: function () {
             return {
-                lastMode: null,
-                inBlock: false,
-                inObject: false,
-                inString: false,
-                inVariable: false,
-                lhs: false,
-                stringType: '',
+                lastMode:     null,
+                inBlock:      false,
+                inObject:     0,
+                inString:     false,
+                inVariable:   false,
+                lhs:          false,
+                stringType:   '',
+                lastModule:   '',
+                lastCommand:  '',
+                lastTag:      '',
+                prefixAtOpen: '',
             };
+        },
+
+        electricInput: /\s{2,}$/,
+
+        indent: function(state, textAfter) {
+            if (textAfter == '}') {
+                return (cm.indentUnit * (state.inObject - 1));
+            } else {
+                return (cm.indentUnit * state.inObject);
+            }
         },
 
         token: function (stream, state) {
             if (stream.sol()) {
                 line += 1;
+                state.lastTag = '';
             }
 
             // we're about to start a string
@@ -82,15 +97,15 @@ CodeMirror.defineMode('friendscript', function (cm, options) {
                 }
             } else if (stream.peek() === '#') {
                 stream.skipToEnd();
-                return "comment";
+                return 'comment';
             } else if (!state.inBlock && stream.peek() == '{') {
-                state.inObject = true;
+                state.inObject += 1;
                 stream.next();
                 return 'bracket';
 
             } else if (stream.peek() == '}') {
                 if (state.inObject) {
-                    state.inObject = false;
+                    state.inObject -= 1;
                 } else if (state.inBlock) {
                     state.inBlock = false;
                 }
@@ -157,9 +172,16 @@ CodeMirror.defineMode('friendscript', function (cm, options) {
                     state.inString = true;
                     return 'keyword';
                 } else if (state.inObject) {
+                    state.lastTag = word;
                     return 'tag';
 
                 } else if (!state.inObject) {
+                    if (stream.peek() === ':') {
+                        state.lastModule = word;
+                    } else {
+                        state.lastCommand = word;
+                    }
+
                     return 'property';
                 }
             }

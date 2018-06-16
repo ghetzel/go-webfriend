@@ -114,8 +114,9 @@
 }
 
 .cm-s-webfriend .CodeMirror-matchingbracket {
-  text-decoration: underline;
-  color: white !important;
+  font-weight:        bold;
+  text-decoration:    none;
+  color:            #96D789 !important;
 }
 
 .CodeMirror-linewidget .fs-line-state {

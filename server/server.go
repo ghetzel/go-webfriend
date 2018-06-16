@@ -216,7 +216,7 @@ func (self *Server) setupServer(address string) error {
 
 	mux := http.NewServeMux()
 
-	ui := diecast.NewServer(`/`, `*.html`)
+	ui := diecast.NewServer(`/`, `*.html`, `/js/codemirror/hints/friendscript-hint.js`)
 	ui.BindingPrefix = fmt.Sprintf("http://%s", address)
 
 	if uidir := os.Getenv(`UI`); uidir == `` {
