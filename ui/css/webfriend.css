@@ -1,3 +1,7 @@
+body {
+    position: relative;
+}
+
 #main {
     padding: 0;
     position: relative;
@@ -405,7 +409,8 @@
     color: white;
 }
 
-.fs-sidebar .nav-link:hover {
+.fs-sidebar .nav-link:hover,
+.fs-sidebar .nav-link.active {
     background: #111111;
     color: #96D789;
 }
@@ -422,11 +427,15 @@
     padding: 0 2em;
 }
 
-.fs-sidebar > .nav-item > ul {
+.fs-sidebar > ul {
+    overflow-y: auto;
+}
+
+.fs-sidebar > ul > .nav-item > ul {
     margin-bottom: 1.25em;
 }
 
-.fs-sidebar > .nav-item > .nav-link {
+.fs-sidebar > ul > .nav-item > .nav-link {
     background: #111111;
     color: #79A4D9;
     font-weight: bold;
@@ -435,7 +444,6 @@
 
 .fs-modules .fs-module-commands {
     margin-top: 1em;
-    margin-left: 1em;
 }
 
 .fs-modules .fs-module-commands .fs-command {
@@ -455,19 +463,19 @@
 
 
 .fs-modules h2 {
-    width: calc(100% + 30px);
+    width: 100%;
     background-color: rgb(31, 38, 44);
-    margin: 0 -15px;
     padding: 4px 15px;
     padding-bottom: 5px;
+    margin-bottom: 0;
     color: #79A4D9;
     font-size: 20pt;
 }
 
 .fs-modules h2 + .fs-module-summary {
-    width: calc(100% + 30px);
+    width: 100%;
     background-color: #555555;
-    margin: 0 -15px;
+    margin-bottom: 0;
     padding: 5px 15px;
     color: white;
 }
@@ -548,15 +556,13 @@
     color: rgb(207, 124, 0);
 }
 
-.fs-modules .fs-type-text.fs-type-map {
+.fs-modules .fs-type-text.fs-type-map,
+.fs-modules .fs-type-text.fs-type-object {
     color: rgb(207, 0, 162);
 }
 
-.fs-modules .fs-command pre {
-    background:  #EEEEEE;
-    margin:        0.5em 1em;
-    padding:       1em;
-    border-radius: 8px;
+.fs-modules .fs-command .CodeMirror {
+    height: auto;
 }
 
 .fs-modules .fs-command h4 {
@@ -566,4 +572,10 @@
 .fs-modules .fs-command h5 {
     margin: 1.5em 0;
     margin-bottom: 1em;
+}
+
+
+/* overrides */
+.collapsing {
+    transition: none !important;
 }

@@ -58,23 +58,28 @@ CodeMirror.defineMode('friendscript', function (cm, options) {
             }
 
             if (state.inString) {
-                while (state.inString && !stream.eol()) {
-                    if (stream.peek() === state.stringType) {
-                        stream.next(); // Skip quote
-                        state.inString = false; // Clear flag
+                if (stream.match(/^end/)) {
+                    state.inString = false;
+                    return 'keyword';
+                } else {
+                    while (state.inString && !stream.eol()) {
+                        if (stream.peek() === state.stringType) {
+                            stream.next(); // Skip quote
+                            state.inString = false; // Clear flag
 
-                        if (stream.peek() == ']') {
-                            state.inVariable = true;
+                            if (stream.peek() == ']') {
+                                state.inVariable = true;
+                            }
+                        } else if (stream.peek() === '\\') {
+                            stream.next();
+                            stream.next();
+                        } else {
+                            stream.match(/^.[^\\\"\']*/);
                         }
-                    } else if (stream.peek() === '\\') {
-                        stream.next();
-                        stream.next();
-                    } else {
-                        stream.match(/^.[^\\\"\']*/);
                     }
-                }
 
-                return 'string';
+                    return 'string';
+                }
             } else if (stream.peek() === '#') {
                 stream.skipToEnd();
                 return "comment";
@@ -148,6 +153,9 @@ CodeMirror.defineMode('friendscript', function (cm, options) {
                     return 'number';
                 } else if (ATOMS.indexOf(word) >= 0) {
                     return 'atom';
+                } else if (!state.inString && word == 'begin') {
+                    state.inString = true;
+                    return 'keyword';
                 } else if (state.inObject) {
                     return 'tag';
 

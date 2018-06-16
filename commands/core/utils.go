@@ -93,6 +93,7 @@ func (self *Commands) Fail(message string) error {
 	return errors.New(message)
 }
 
+// [SKIP]
 // Directly call an RPC method with the given parameters.
 func (self *Commands) Rpc(method string, args map[string]interface{}) (interface{}, error) {
 	mod, meth := stringutil.SplitPair(method, `::`)

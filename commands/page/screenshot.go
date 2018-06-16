@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/ghetzel/go-webfriend/browser"
@@ -32,17 +33,35 @@ type ScreenshotArgs struct {
 }
 
 type ScreenshotResponse struct {
+	// Details about the element that matched the given selector (if any).
 	Element *browser.Element `json:"element,omitempty"`
-	Width   int              `json:"width"`
-	Height  int              `json:"height"`
-	X       int              `json:"x"`
-	Y       int              `json:"y"`
-	Path    string           `json:"path,omitempty"`
-	Size    int64            `json:"size,omitempty"`
+
+	// The width of the screenshot (in pixels).
+	Width int `json:"width"`
+
+	// The height of the screenshot (in pixels).
+	Height int `json:"height"`
+
+	// The X position (relative to the viewport) the screenshot was taken at.
+	X int `json:"x"`
+
+	// The Y position (relative to the viewport) the screenshot was taken at.
+	Y int `json:"y"`
+
+	// The filesystem path that the screenshot was written to.
+	Path string `json:"path,omitempty"`
+
+	// The size of the screenshot (in bytes).
+	Size int64 `json:"size,omitempty"`
 }
 
 // Render the current page as a PNG or JPEG image, writing it to the given filename or writable
 // destination object.
+//
+// If the filename is the string `"temporary"`, a file will be created in the system's
+// temporary area (e.g.: `/tmp`) and the screenshot will be written there.  It is the caller's
+// responsibility to remove the temporary file if desired.  The temporary file path is available in
+// the return object's `path` parameter.
 func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) (*ScreenshotResponse, error) {
 	if args == nil {
 		args = &ScreenshotArgs{}
@@ -56,9 +75,18 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 
 	if destination != nil {
 		if filename, ok := destination.(string); ok {
-			if file, err := os.Create(filename); err == nil {
+			if filename == `temporary` {
+				if temp, err := ioutil.TempFile(``, ``); err == nil {
+					defer temp.Close()
+					writer = temp
+					response.Path = temp.Name()
+				} else {
+					return nil, err
+				}
+			} else if file, err := os.Create(filename); err == nil {
 				defer file.Close()
 				writer = file
+				response.Path = filename
 			} else {
 				return nil, err
 			}
@@ -70,7 +98,7 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 	}
 
 	if writer == nil {
-		return nil, fmt.Errorf("A destination for the screenshot must be specified")
+		return response, fmt.Errorf("A destination for the screenshot must be specified")
 	}
 
 	// if one or both of the dimensions are not explicitly given, fill them in from the current
@@ -85,12 +113,12 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 				args.Height = int(pageHeight)
 			}
 		} else {
-			return nil, fmt.Errorf("Unable to determine page size, and either width or height were not explicitly given.")
+			return response, fmt.Errorf("Unable to determine page size, and either width or height were not explicitly given.")
 		}
 	}
 
 	if err := self.screenshotPopulateArgsFromElement(docroot, args, response); err != nil {
-		return nil, err
+		return response, err
 	}
 
 	// start building screenshot RPC request
@@ -121,7 +149,7 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 			`deviceScaleFactor`: 1.0,
 			`mobile`:            true,
 		}); err != nil {
-			return nil, fmt.Errorf("Failed to resize screen: %v", err)
+			return response, fmt.Errorf("Failed to resize screen: %v", err)
 		}
 	}
 
@@ -146,13 +174,13 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 
 				return response, nil
 			} else {
-				return nil, fmt.Errorf("Error decoding screenshot response: %v", err)
+				return response, fmt.Errorf("Error decoding screenshot response: %v", err)
 			}
 		} else {
-			return nil, fmt.Errorf("Empty response received while capturing screenshot")
+			return response, fmt.Errorf("Empty response received while capturing screenshot")
 		}
 	} else {
-		return nil, err
+		return response, err
 	}
 }
 

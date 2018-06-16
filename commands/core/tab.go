@@ -19,19 +19,22 @@ type NewTabArgs struct {
 
 	// Whether to automatically switch to the newly-created tab as the active
 	// tab for subsequent commands.
-	Autoswitch bool `json:"autoswitch"` // true
+	Autoswitch bool `json:"autoswitch" default:"true"`
 }
 
+// [SKIP]
 // Open a new tab and navigate to the given URL.
 func (self *Commands) NewTab(url string, args *NewTabArgs) (browser.TabID, error) {
 	return ``, fmt.Errorf(`NI`)
 }
 
+// [SKIP]
 // Close the tab identified by the given ID.
 func (self *Commands) CloseTab(id browser.TabID) error {
 	return fmt.Errorf(`NI`)
 }
 
+// [SKIP]
 // Switches the active tab to a given tab.
 func (self *Commands) SwitchTab(id browser.TabID) (*browser.Tab, error) {
 	return nil, fmt.Errorf(`NI`)
@@ -44,7 +47,7 @@ func (self *Commands) Reload() error {
 
 // Stop loading the currently active tab.
 func (self *Commands) Stop() error {
-	return fmt.Errorf(`NI`)
+	return self.browser.Tab().AsyncRPC(`Page`, `stopLoading`, nil)
 }
 
 type Orientation string
@@ -92,7 +95,10 @@ type ResizeArgs struct {
 }
 
 type ResizeResponse struct {
-	Width  int `json:"width"`
+	// The final width of the page after resize.
+	Width int `json:"width"`
+
+	// The final height of the page after resize.
 	Height int `json:"height"`
 }
 

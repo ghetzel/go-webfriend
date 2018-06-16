@@ -22,6 +22,7 @@ type DocItem struct {
 	Description  string      `json:"description,omitempty"`
 	DefaultValue interface{} `json:"default,omitempty"`
 	Examples     []string    `json:"examples,omitempty"`
+	Parameters   []*DocItem  `json:"parameters,omitempty"`
 }
 type CallDoc struct {
 	Name        string     `json:"name"`
@@ -138,6 +139,17 @@ func (self *Environment) Documentation() []ModuleDoc {
 					if r := fnDoc.Return; r != nil {
 						cmdDoc.Return = &DocItem{
 							Type: fmt.Sprintf("%v", r),
+						}
+
+						if subargs, ok := parsed.Structs[cmdDoc.Return.Type]; ok {
+							for _, arg := range subargs.Fields {
+								cmdDoc.Return.Parameters = append(cmdDoc.Return.Parameters, &DocItem{
+									Name:         arg.FriendscriptName,
+									Type:         arg.Type,
+									Description:  arg.Docs,
+									DefaultValue: stringutil.Autotype(arg.Default),
+								})
+							}
 						}
 					}
 

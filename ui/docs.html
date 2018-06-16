@@ -5,27 +5,29 @@ bindings:
     resource: /api/documentation
 ---
 <div class="row">
-    <ul class="col-2 fs-sidebar">
-        {{ range $i, $module := $.bindings.docs }}
-        <li class="nav-item">
-            <a class="nav-link" href="#fs-{{ $module.name }}">
-                {{ titleize $module.name }} Module
-            </a>
+    <nav class="col-2 fs-sidebar" id="sidebar">
+        <ul class="sticky-top">
+            {{ range $i, $module := $.bindings.docs }}
+            <li class="nav-item">
+                <a class="nav-link" href="#fs-{{ $module.name }}" data-toggle="collapse" data-target="#fs-module-{{ $module.name }}-nav">
+                    {{ titleize $module.name }} Module
+                </a>
 
-            <ul class="">
-            {{ range $j, $command := $module.commands }}
-                <li class="nav-item">
-                    <a class="nav-link" href="#fs-{{ $module.name }}::{{ $command.name }}">
-                        {{ $command.name }}
-                    </a>
-                </li>
+                <ul id="fs-module-{{ $module.name }}-nav" class="fs-nav-module collapse show">
+                {{ range $j, $command := $module.commands }}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#fs-{{ $module.name }}::{{ $command.name }}">
+                            {{ $command.name }}
+                        </a>
+                    </li>
+                {{ end }}
+                </ul>
+            </li>
             {{ end }}
-            </ul>
-        </li>
-        {{ end }}
-    </ul>
+        </ul>
+    </nav>
 
-    <div class="col-10 fs-modules">
+    <div class="col-10 fs-modules pt-3">
         {{ range $i, $module := $.bindings.docs }}
         <div class="fs-module" data-fs-module="{{ $module.name }}">
             <a name="fs-{{ $module.name }}"></a>
@@ -40,10 +42,11 @@ bindings:
 
             <div class="fs-module-commands">
             {{ range $j, $command := $module.commands }}
-                <div class="fs-command" data-fs-command="{{ $module.name }}::{{ $command.name }}">
+                <div class="fs-command" id="fs-{{ $module.name }}::{{ $command.name }}">
                     <a name="fs-{{ $module.name }}::{{ $command.name }}"></a>
+
                     <h3>
-                        <b>{{ $command.name }}</b>
+                        <b>{{ if nex $module.name `core` }}{{ $module.name }}::{{ end }}{{ $command.name }}</b>
                         {{ if $command.argument }}
                             <span class="fs-type-text fs-type-{{ lower $command.argument.types }}">{{ upper $command.argument.name }}</span>
                         {{ end }}
@@ -61,7 +64,14 @@ bindings:
                                 {{ end }}
                             </tbody>
                         </table>
-                        <div>}</div>
+                        }
+                        {{ end }}
+                        {{ if $command.return }}
+                        {{   if hasSuffix $command.return.types `Response` }}
+                        -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                        {{   else }}
+                        -> <span class="fs-type-text fs-type-{{ lower $command.return.types }} pr-3">{{ lower $command.return.types }}</span>
+                        {{   end }}
                         {{ end }}
                     </h3>
                     {{ if $command.description }}
@@ -97,6 +107,33 @@ bindings:
                         </tbody>
                     </table>
                     {{ end }}
+
+                    {{ if $command.return.parameters }}
+                    <h4>Return Parameters</h4>
+
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Data Type</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {{ range $k, $opt := $command.return.parameters }}
+                        <tr>
+                            <th>{{ $opt.name }}</th>
+                            <td>
+                                <span class="fs-type fs-type-{{ lower $opt.types }}">{{ lower $opt.types }}</span>
+                            </td>
+                            <td>{{ $opt.description }}</td>
+                        </tr>
+                        {{ end }}
+                        </tbody>
+                    </table>
+                    {{ end }}
+
+                    <a class="spy" name="fs-{{ $module.name }}::{{ $command.name }}"></a>
                 </div>
             {{ end }}
             </div>
@@ -104,3 +141,60 @@ bindings:
         {{ end }}
     </div>
 </div>
+
+<script>
+$(function(){
+    var resyncSidebar = function(){
+        $('.fs-command a.spy').each(function(i, el) {
+            el = $(el);
+            var assoc = el.attr('name');
+            var scrollTop = $(window).scrollTop();
+            var offset = el.offset();
+
+            if ( (offset.top - 64) >= scrollTop) {
+                $('#sidebar .nav-link').removeClass('active');
+                var activate = $('#sidebar *[href="#' + assoc + '"]')
+
+                activate.addClass('active');
+
+                var nearestModule = el.closest('[data-fs-module]');
+
+                if (nearestModule.length) {
+                    $('#sidebar .fs-nav-module').removeClass('show');
+
+                    $('#fs-module-' + nearestModule.attr('data-fs-module') + '-nav')
+                        .closest('.fs-nav-module')
+                        .addClass('show');
+                }
+
+                return false;
+            }
+        });
+    }
+
+    var w = $(window).scroll(resyncSidebar);
+    resyncSidebar();
+
+    $('.fs-modules .fs-command pre').each(function(i, el) {
+        var pre = $(el);
+        var text = pre.text();
+        var editor = $('<div></div>');
+
+        pre.replaceWith(editor);
+
+        text = text.replace(/^\s*/, '');
+        text = text.replace(/\s*$/, '');
+
+        CodeMirror(editor.get(0), {
+            mode: 'friendscript',
+            theme: 'webfriend',
+            indentUnit: 4,
+            tabSize: 4,
+            lineNumbers: true,
+            autofocus: false,
+            styleActiveLine: false,
+            readOnly: 'nocursor',
+        }).setValue(text);
+    });
+});
+</script>

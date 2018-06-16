@@ -3,7 +3,9 @@ package vars
 
 import (
 	"fmt"
+	"sort"
 
+	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
@@ -28,6 +30,19 @@ func (self *Commands) ExecuteCommand(name string, arg interface{}, objargs map[s
 	return utils.CallCommandFunction(self, stringutil.Camelize(name), arg, objargs)
 }
 
+// Return a sorted list of all variable names in the current scope.
+func (self *Commands) Keys() ([]string, error) {
+	data := self.scopeable.Scope().Data()
+	if flattened, err := maputil.CoalesceMap(data, `.`); err == nil {
+		keys := maputil.StringKeys(flattened)
+		sort.Strings(keys)
+		return keys, nil
+	} else {
+		return nil, err
+	}
+}
+
+// Unset the value at the given key.
 func (self *Commands) Clear(key string) {
 	self.scopeable.Scope().Set(key, nil)
 }

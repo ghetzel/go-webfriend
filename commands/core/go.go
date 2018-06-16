@@ -50,13 +50,26 @@ type GoArgs struct {
 }
 
 type GoResponse struct {
-	URL           string             `json:"url"`
-	Status        int                `json:"status"`
+	// The final URL of the page that was loaded.
+	URL string `json:"url"`
+
+	// The HTTP status code of the loaded page.
+	Status int `json:"status"`
+
+	// A map of durations (in milliseconds) that various phases of the page load took.
 	TimingDetails map[string]float64 `json:"timing"`
-	Headers       map[string]string  `json:"headers"`
-	MimeType      string             `json:"mimetype"`
-	RemoteAddress string             `json:"remoteAddress"`
-	Protocol      string             `json:"protocol"`
+
+	// Map of HTTP response headers.
+	Headers map[string]string `json:"headers"`
+
+	// The MIME type of the response content.
+	MimeType string `json:"mimetype"`
+
+	// The remote address of the loaded page.
+	RemoteAddress string `json:"remoteAddress"`
+
+	// The protocol that was negotiated and used to load the page.
+	Protocol string `json:"protocol"`
 }
 
 // Navigate to a URL.
