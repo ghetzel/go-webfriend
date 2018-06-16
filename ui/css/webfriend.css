@@ -439,11 +439,131 @@
 }
 
 .fs-modules .fs-module-commands .fs-command {
-    border-top: 2px solid #DDDDDD;
-    margin-bottom: 2em;
+    border-bottom: 2px solid #96D789;
+    margin-bottom: 1em;
     padding-top: 1em;
+}
+
+.fs-command .fs-command-options {
+    margin-top: 0.125em;
+}
+
+.fs-command .fs-command-opt > *:first-child {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+
+.fs-modules h2 {
+    width: calc(100% + 30px);
+    background-color: rgb(31, 38, 44);
+    margin: 0 -15px;
+    padding: 4px 15px;
+    padding-bottom: 5px;
+    color: #79A4D9;
+    font-size: 20pt;
+}
+
+.fs-modules h2 + .fs-module-summary {
+    width: calc(100% + 30px);
+    background-color: #555555;
+    margin: 0 -15px;
+    padding: 5px 15px;
+    color: white;
+}
+
+.fs-module-summary p {
+    margin: 0;
+}
+
+.fs-module-description {
+    margin-top: 1em;
 }
 
 .fs-modules h3 {
     font-family: monospace;
+    font-size:   14pt;
+}
+
+.fs-modules .fs-type {
+    background-color: #333333;
+    color: white;
+    border-radius: 3px;
+    width: auto;
+    font-size: 90%;
+    padding: 0 5px;
+}
+
+/* Type colors (fills) */
+/* ---------------------------------------------------------------------------*/
+.fs-modules .fs-type.fs-type-any {
+    background-color: rgb(127, 36, 179);
+}
+
+.fs-modules .fs-type.fs-type-bool {
+    background-color: rgb(179, 36, 36);
+}
+
+.fs-modules .fs-type.fs-type-int,
+.fs-modules .fs-type.fs-type-float {
+    background-color: rgb(26, 137, 202);
+}
+
+.fs-modules .fs-type.fs-type-string,
+.fs-modules .fs-type.fs-type-selector {
+    background-color: rgb(69, 161, 32);
+}
+
+.fs-modules .fs-type.fs-type-duration,
+.fs-modules .fs-type.fs-type-time {
+    background-color: rgb(207, 124, 0);
+}
+
+.fs-modules .fs-type.fs-type-map {
+    background-color: rgb(207, 0, 162);
+}
+
+/* Type colors (text) */
+/* ---------------------------------------------------------------------------*/
+.fs-modules .fs-type-text.fs-type-any {
+    color: rgb(127, 36, 179);
+}
+
+.fs-modules .fs-type-text.fs-type-bool {
+    color: rgb(179, 36, 36);
+}
+
+.fs-modules .fs-type-text.fs-type-int,
+.fs-modules .fs-type-text.fs-type-float {
+    color: rgb(26, 137, 202);
+}
+
+.fs-modules .fs-type-text.fs-type-string,
+.fs-modules .fs-type-text.fs-type-selector {
+    color: rgb(69, 161, 32);
+}
+
+.fs-modules .fs-type-text.fs-type-duration,
+.fs-modules .fs-type-text.fs-type-time {
+    color: rgb(207, 124, 0);
+}
+
+.fs-modules .fs-type-text.fs-type-map {
+    color: rgb(207, 0, 162);
+}
+
+.fs-modules .fs-command pre {
+    background:  #EEEEEE;
+    margin:        0.5em 1em;
+    padding:       1em;
+    border-radius: 8px;
+}
+
+.fs-modules .fs-command h4 {
+    margin-top: 1em;
+}
+
+.fs-modules .fs-command h5 {
+    margin: 1.5em 0;
+    margin-bottom: 1em;
 }

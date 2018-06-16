@@ -203,6 +203,34 @@ func (self *Document) RemoveElement(element *Element) error {
 	}
 }
 
+func (self *Document) EvaluateOn(selector Selector, stmt string) (interface{}, error) {
+	var element *Element
+
+	if selector.IsNone() {
+		if root, err := self.Root(); err == nil {
+			element = root
+		} else {
+			return ``, err
+		}
+	} else {
+		if elements, err := self.Query(selector, nil); err == nil {
+			if len(elements) == 1 {
+				element = elements[0]
+			} else {
+				return ``, fmt.Errorf("Ambiguous selector returned %d elements.", len(elements))
+			}
+		} else {
+			return ``, err
+		}
+	}
+
+	if element == nil {
+		return ``, fmt.Errorf("Could not find element.")
+	}
+
+	return element.Evaluate(stmt)
+}
+
 // Highlight all nodes matching the given selector.
 func (self *Document) HighlightAll(selector Selector) error {
 	if root, err := self.Root(); err == nil {

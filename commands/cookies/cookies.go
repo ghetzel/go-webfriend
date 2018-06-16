@@ -1,5 +1,5 @@
-// Commonly used commands for basic browser interaction.
-package core
+// Commands for interacting with the browser's cookie storage backend.
+package cookies
 
 import (
 	"github.com/ghetzel/go-stockutil/stringutil"

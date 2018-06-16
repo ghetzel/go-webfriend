@@ -18,6 +18,7 @@ import (
 	"github.com/ghetzel/go-stockutil/httputil"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/pathutil"
+	"github.com/ghetzel/go-webfriend/utils"
 	"github.com/husobee/vestigo"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/phayes/freeport"
@@ -55,6 +56,7 @@ type Browser struct {
 	activeTabId                 string
 	tabs                        map[string]*Tab
 	tabLock                     sync.Mutex
+	scopeable                   utils.Scopeable
 }
 
 func NewBrowser() *Browser {
@@ -72,6 +74,10 @@ func NewBrowser() *Browser {
 func Start() (*Browser, error) {
 	browser := NewBrowser()
 	return browser, browser.Launch()
+}
+
+func (self *Browser) SetScope(scopeable utils.Scopeable) {
+	self.scopeable = scopeable
 }
 
 func (self *Browser) Launch() error {

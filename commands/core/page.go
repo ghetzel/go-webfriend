@@ -150,6 +150,7 @@ func (self *Commands) Resize(args *ResizeArgs) (*ResizeResponse, error) {
 	}
 }
 
+// [SKIP]
 // Return all currently open tabs.
 func (self *Commands) Tabs() ([]browser.Tab, error) {
 	return nil, fmt.Errorf(`NI`)

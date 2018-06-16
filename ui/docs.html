@@ -26,14 +26,16 @@ bindings:
     </ul>
 
     <div class="col-10 fs-modules">
-        <h1>Friendscript Reference</h1>
-
         {{ range $i, $module := $.bindings.docs }}
         <div class="fs-module" data-fs-module="{{ $module.name }}">
             <a name="fs-{{ $module.name }}"></a>
             <h2>{{ titleize $module.name }} Module</h2>
+            {{ if $module.summary }}
+            <div class="fs-module-summary">{{ markdown $module.summary }}</div>
+            {{ end }}
+
             {{ if $module.description }}
-            <p>{{ $module.description }}</p>
+            <div class="fs-module-description">{{ markdown $module.description }}</div>
             {{ end }}
 
             <div class="fs-module-commands">
@@ -41,24 +43,30 @@ bindings:
                 <div class="fs-command" data-fs-command="{{ $module.name }}::{{ $command.name }}">
                     <a name="fs-{{ $module.name }}::{{ $command.name }}"></a>
                     <h3>
-                        {{ $command.name }}
+                        <b>{{ $command.name }}</b>
                         {{ if $command.argument }}
-                            {{ upper $command.argument.name }}
+                            <span class="fs-type-text fs-type-{{ lower $command.argument.types }}">{{ upper $command.argument.name }}</span>
                         {{ end }}
 
                         {{ if $command.options }}
                         {<br />
-                            {{ range $k, $opt := $command.options }}
-                            &nbsp;
-                            {{ $opt.name }}: &laquo;{{ $opt.types }}&raquo;
-                            <br />
-                            {{ end }}
-                        }
+                        <table class="fs-command-options">
+                            <tbody>
+                                {{ range $k, $opt := $command.options }}
+                                <tr class="fs-command-opt">
+                                    <th>{{ $opt.name }}:</th>
+                                    <td class="fs-type-text fs-type-{{ lower $opt.types }} pr-3">{{ lower $opt.types }}</td>
+                                    <td class="fs-type-text fs-type-{{ lower $opt.types }}">{{ $opt.default }}</td>
+                                </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                        <div>}</div>
                         {{ end }}
                     </h3>
                     {{ if $command.description }}
                     <br />
-                    <p>{{ $command.description }}</p>
+                    <div>{{ markdown $command.description }}</div>
                     {{ else }}
                     <p><i>No description provided.</i></p>
                     {{ end }}
@@ -79,8 +87,10 @@ bindings:
                         {{ range $k, $opt := $command.options }}
                         <tr>
                             <th>{{ $opt.name }}</th>
-                            <td>{{ $opt.types }}</td>
-                            <td>{{ or $opt.default `-` }}</td>
+                            <td>
+                                <span class="fs-type fs-type-{{ lower $opt.types }}">{{ lower $opt.types }}</span>
+                            </td>
+                            <td>{{ or (asStr $opt.default) `-` }}</td>
                             <td>{{ $opt.description }}</td>
                         </tr>
                         {{ end }}

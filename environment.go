@@ -17,16 +17,28 @@ import (
 	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/commands"
+	"github.com/ghetzel/go-webfriend/commands/assert"
+	"github.com/ghetzel/go-webfriend/commands/cookies"
 	"github.com/ghetzel/go-webfriend/commands/core"
+	"github.com/ghetzel/go-webfriend/commands/file"
+	cmdfmt "github.com/ghetzel/go-webfriend/commands/fmt"
 	"github.com/ghetzel/go-webfriend/commands/page"
+	"github.com/ghetzel/go-webfriend/commands/utils"
+	"github.com/ghetzel/go-webfriend/commands/vars"
 	"github.com/ghetzel/go-webfriend/scripting"
 )
 
 var MaxReaderWait = time.Duration(5) * time.Second
 
 type Environment struct {
+	Assert  *assert.Commands
+	Cookies *cookies.Commands
 	Core    *core.Commands
+	File    *file.Commands
+	Fmt     *cmdfmt.Commands
 	Page    *page.Commands
+	Utils   *utils.Commands
+	Vars    *vars.Commands
 	modules map[string]commands.Module
 	browser *browser.Browser
 	script  *scripting.Friendscript
@@ -35,15 +47,32 @@ type Environment struct {
 
 func NewEnvironment(browser *browser.Browser) *Environment {
 	environment := &Environment{
-		Core:    core.New(browser),
-		Page:    page.New(browser),
 		browser: browser,
 		stack:   make([]*scripting.Scope, 0),
 	}
 
+	if environment.browser != nil {
+		environment.browser.SetScope(environment)
+	}
+
+	environment.Assert = assert.New(browser, environment)
+	environment.Cookies = cookies.New(browser, environment)
+	environment.Core = core.New(browser, environment)
+	environment.File = file.New(browser, environment)
+	environment.Fmt = cmdfmt.New(browser, environment)
+	environment.Page = page.New(browser, environment)
+	environment.Utils = utils.New(browser, environment)
+	environment.Vars = vars.New(browser, environment)
+
 	environment.modules = map[string]commands.Module{
-		`core`: environment.Core,
-		`page`: environment.Page,
+		`assert`:  environment.Assert,
+		`cookies`: environment.Cookies,
+		`core`:    environment.Core,
+		`file`:    environment.File,
+		`fmt`:     environment.Fmt,
+		`page`:    environment.Page,
+		`utils`:   environment.Utils,
+		`vars`:    environment.Vars,
 	}
 
 	return environment

@@ -9,7 +9,7 @@ import (
 )
 
 type ClickArgs struct {
-	// The value to enter into the field.
+	// Permit multiple elements to be clicked.
 	Multiple bool `json:"value"`
 
 	// If Multiple clicks are permitted, what is the delay between each click.
@@ -19,6 +19,22 @@ type ClickArgs struct {
 // Click on HTML element(s) matches by selector.  If multiple is true, then all
 // elements matched by selector will be clicked in the order they are returned.
 // Otherwise, an error is returned unless selector matches exactly one element.
+//
+// #### Examples
+//
+// ##### Click on the element with id "login"
+// ```
+// click "#login"
+// ```
+//
+// ##### Click on all `<a>` elements on the page, waiting 150ms between each click.
+// ```
+// click "a" {
+//   multiple: true,
+//   delay:    "150ms",
+// }
+// ```
+//
 func (self *Commands) Click(selector browser.Selector, args *ClickArgs) ([]*browser.Element, error) {
 	if args == nil {
 		args = &ClickArgs{}

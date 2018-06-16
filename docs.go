@@ -33,6 +33,7 @@ type CallDoc struct {
 
 type ModuleDoc struct {
 	Name        string    `json:"name"`
+	Summary     string    `json:"summary,omitempty"`
 	Description string    `json:"description,omitempty"`
 	Commands    []CallDoc `json:"commands"`
 }
@@ -72,10 +73,12 @@ type parsedFunc struct {
 	Docs             string
 	Args             parsedArgSet
 	Return           *parsedArg
+	Skip             bool
 }
 
 type parsedSource struct {
 	Docs      string
+	Summary   string
 	Functions map[string]parsedFunc
 	Structs   map[string]parsedStruct
 }
@@ -104,7 +107,12 @@ func (self *Environment) Documentation() []ModuleDoc {
 			Commands: make([]CallDoc, 0),
 		}
 
-		if parsed, err := parseCommandSourceCode(fmt.Sprintf("commands/%s/*.go", name)); err == nil {
+		sourcePath := fmt.Sprintf("commands/%s/*.go", name)
+
+		log.Debugf("Parsing %q (%T) from %v", name, module, sourcePath)
+
+		if parsed, err := parseCommandSourceCode(sourcePath); err == nil {
+			doc.Summary = parsed.Summary
 			doc.Description = parsed.Docs
 			moduleT := reflect.TypeOf(module)
 
@@ -121,6 +129,10 @@ func (self *Environment) Documentation() []ModuleDoc {
 				}
 
 				if fnDoc, ok := parsed.Functions[key]; ok && fnDoc.Docs != `` {
+					if fnDoc.Skip {
+						continue
+					}
+
 					cmdDoc.Description = fnDoc.Docs
 
 					if r := fnDoc.Return; r != nil {
@@ -159,10 +171,11 @@ func (self *Environment) Documentation() []ModuleDoc {
 				doc.Commands = append(doc.Commands, cmdDoc)
 			}
 		} else {
-			log.Fatal(err)
+			log.Errorf("Error parsing source: %v", err)
 		}
 
 		docs = append(docs, doc)
+		log.Infof("Documented %q: %d commands", doc.Name, len(doc.Commands))
 	}
 
 	return docs
@@ -182,16 +195,42 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 				nil,
 				parser.ParseComments,
 			); err == nil {
+				if parsed.Docs == `` {
+					lines := strings.Split(astCommentGroupToString(source.Doc), "\n")
+					goToDocs := false
+
+					for _, line := range lines {
+						if strings.TrimSpace(line) == `` {
+							goToDocs = true
+							continue
+						}
+
+						if goToDocs {
+							parsed.Docs += line + "\n"
+						} else {
+							parsed.Summary += line + "\n"
+						}
+					}
+
+					parsed.Summary = strings.TrimSpace(parsed.Summary)
+					parsed.Docs = strings.TrimSpace(parsed.Docs)
+				}
+
 				for _, decl := range source.Decls {
 					switch decl.(type) {
 					case *ast.FuncDecl:
 						fnDecl := decl.(*ast.FuncDecl)
 						key := stringutil.Underscore(fnDecl.Name.Name)
+
 						pFunc := parsedFunc{
 							Name:             fnDecl.Name.Name,
 							FriendscriptName: key,
 							Docs:             astCommentGroupToString(fnDecl.Doc),
 							Args:             make(parsedArgSet, len(fnDecl.Type.Params.List)),
+						}
+
+						if strings.Contains(pFunc.Docs, `[SKIP]`) {
+							pFunc.Skip = true
 						}
 
 						for i, inParam := range fnDecl.Type.Params.List {
@@ -201,9 +240,7 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 							}
 						}
 
-						if len(fnDecl.Type.Results.List) > 1 {
-							log.Debugf("ATS: fn=%v rtyp=%T", fnDecl.Name.Name, fnDecl.Type.Results.List[0].Type)
-
+						if fnDecl.Type.Results != nil && len(fnDecl.Type.Results.List) > 1 {
 							pFunc.Return = &parsedArg{
 								Type: astTypeToString(fnDecl.Type.Results.List[0].Type),
 							}
@@ -223,13 +260,46 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 
 									// built list of struct fields, including associated documentation
 									for _, sfield := range structType.Fields.List {
-
-										stc.Fields = append(stc.Fields, &parsedStructField{
+										structField := &parsedStructField{
 											Name:             sfield.Names[0].Name,
 											Type:             astTypeToString(sfield.Type),
 											FriendscriptName: stringutil.Underscore(sfield.Names[0].Name),
 											Docs:             astCommentGroupToString(sfield.Doc),
-										})
+										}
+
+										if sfield.Tag != nil {
+											tags := strings.Split(
+												stringutil.Unwrap(sfield.Tag.Value, "`", "`"),
+												` `,
+											)
+
+											for _, tag := range tags {
+												tag = strings.TrimSpace(tag)
+
+												if strings.HasPrefix(tag, `default:`) {
+													structField.Default = stringutil.Unwrap(
+														strings.TrimPrefix(tag, `default:`),
+														`"`,
+														`"`,
+													)
+
+													var shouldQuote bool
+
+													switch structField.Type {
+													case `string`, `Duration`, `Selector`:
+														shouldQuote = true
+													}
+
+													if shouldQuote {
+														structField.Default = stringutil.Wrap(structField.Default, `"`, `"`)
+													}
+
+													break
+												}
+											}
+										}
+
+										stc.Fields = append(stc.Fields, structField)
 									}
 
 									parsed.Structs[key] = stc
@@ -255,13 +325,26 @@ func astCommentGroupToString(cg *ast.CommentGroup) string {
 
 		for _, c := range cg.List {
 			line := strings.TrimSpace(c.Text)
-			line = strings.TrimPrefix(line, `//`)
-			line = strings.TrimSpace(line)
 
-			out += line + ` `
+			if !strings.HasPrefix(line, `//`) {
+				continue
+			}
+
+			if strings.TrimSpace(line) == `` {
+				out += "\n"
+			} else {
+				out += line + "\n"
+			}
 		}
 
-		return strings.TrimSpace(out)
+		lines := strings.Split(out, "\n")
+
+		for i, _ := range lines {
+			lines[i] = strings.TrimPrefix(lines[i], `//`)
+			lines[i] = strings.TrimPrefix(lines[i], ` `)
+		}
+
+		return strings.TrimSpace(strings.Join(lines, "\n"))
 	}
 
 	return ``
@@ -277,11 +360,21 @@ func astTypeToString(ty ast.Expr) string {
 	}
 
 	if ident, ok := ty.(*ast.Ident); ok {
-		return ident.Name
+		name := ident.Name
+
+		name = strings.TrimPrefix(name, `*`)
+		name = strings.TrimPrefix(name, `u`)
+		name = strings.TrimSuffix(name, `8`)
+		name = strings.TrimSuffix(name, `16`)
+		name = strings.TrimSuffix(name, `32`)
+		name = strings.TrimSuffix(name, `64`)
+		name = strings.TrimSuffix(name, `128`)
+
+		return name
 	} else if _, ok := ty.(*ast.InterfaceType); ok {
 		return `any`
 	} else if _, ok := ty.(*ast.MapType); ok {
-		return `{}`
+		return `map`
 	} else if arrayOf, ok := ty.(*ast.ArrayType); ok {
 		return fmt.Sprintf("[]%v", astTypeToString(arrayOf.Elt))
 	} else {

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/gob"
 	"fmt"
 	"net/http"
 	"os"
@@ -255,7 +256,17 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 	})
 
 	router.Get(`/api/documentation`, func(w http.ResponseWriter, req *http.Request) {
-		httputil.RespondJSON(w, self.env.Documentation())
+		if gen, err := FS(false).Open(`/documentation.gob`); err == nil {
+			var docs []webfriend.ModuleDoc
+
+			if err := gob.NewDecoder(gen).Decode(&docs); err == nil {
+				httputil.RespondJSON(w, docs)
+			} else {
+				httputil.RespondJSON(w, err)
+			}
+		} else {
+			httputil.RespondJSON(w, err)
+		}
 	})
 
 	router.Post(`/api/tabs/current/script`, func(w http.ResponseWriter, req *http.Request) {

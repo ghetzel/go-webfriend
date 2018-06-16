@@ -11,6 +11,7 @@ type ConfigureArgs struct {
 	ReferrerPrefix interface{} `json:"referrer_prefix"` // null
 }
 
+// [SKIP]
 // Configures various features of the Remote Debugging protocol and provides
 // environment setup.
 func (self *Commands) Configure(args *ConfigureArgs) error {

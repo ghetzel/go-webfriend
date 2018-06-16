@@ -1,5 +1,9 @@
-// Commonly used commands for basic browser interaction.
-package core
+// Suite of testing-oriented commands that will trigger errors or failures if they aren't satistifed.
+//
+// The Assert module is aimed at making it easier to write scripts that perform test validation,
+// as is frequently done during automated acceptance testing of web applications.
+//
+package assert
 
 import (
 	"github.com/ghetzel/go-stockutil/stringutil"

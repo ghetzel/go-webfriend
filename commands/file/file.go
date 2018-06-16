@@ -1,5 +1,5 @@
-// Commonly used commands for basic browser interaction.
-package core
+// Commands for reading and writing files.
+package file
 
 import (
 	"github.com/ghetzel/go-stockutil/stringutil"

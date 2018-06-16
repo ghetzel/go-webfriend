@@ -4,45 +4,27 @@ import (
 	"encoding/gob"
 	"os"
 
-	"github.com/ghetzel/cli"
 	"github.com/ghetzel/go-stockutil/log"
+	"github.com/ghetzel/go-stockutil/sliceutil"
 	webfriend "github.com/ghetzel/go-webfriend"
 )
 
 func main() {
-	app := cli.NewApp()
-	app.Name = `webfriend-autodoc`
-	app.EnableBashCompletion = false
+	log.SetLevelString(sliceutil.OrString(os.Getenv(`LOGLEVEL`), `info`))
 
-	app.Flags = []cli.Flag{
-		cli.StringFlag{
-			Name:   `log-level, L`,
-			Usage:  `Level of log output verbosity`,
-			Value:  `debug`,
-			EnvVar: `LOGLEVEL`,
-		},
+	filename := `documentation.gob`
+
+	if len(os.Args) > 1 {
+		filename = os.Args[1]
 	}
 
-	app.Before = func(c *cli.Context) error {
-		log.SetLevelString(c.String(`log-level`))
-		return nil
-	}
+	if out, err := os.Create(filename); err == nil {
+		docs := webfriend.NewEnvironment(nil).Documentation()
 
-	app.Action = func(c *cli.Context) error {
-		if out, err := os.Create(`documentation.gob`); err == nil {
-			docs := webfriend.NewEnvironment(nil).Documentation()
-
-			if err := gob.NewEncoder(out).Encode(docs); err != nil {
-				log.Fatal(err)
-				return err
-			}
-		} else {
+		if err := gob.NewEncoder(out).Encode(docs); err != nil {
 			log.Fatal(err)
-			return err
 		}
-
-		return nil
+	} else {
+		log.Fatal(err)
 	}
-
-	app.Run(os.Args)
 }

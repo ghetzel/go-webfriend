@@ -1,3 +1,4 @@
+// Commands for inspecting and manipulating the current DOM document and browser viewport.
 package page
 
 import (
@@ -7,12 +8,14 @@ import (
 )
 
 type Commands struct {
-	browser *browser.Browser
+	browser   *browser.Browser
+	scopeable utils.Scopeable
 }
 
-func New(browser *browser.Browser) *Commands {
+func New(browser *browser.Browser, scopeable utils.Scopeable) *Commands {
 	return &Commands{
-		browser: browser,
+		browser:   browser,
+		scopeable: scopeable,
 	}
 }
 

@@ -22,7 +22,7 @@ type EnvArgs struct {
 	Fallback interface{} `json:"fallback"`
 
 	// Whether empty values should be ignored or not.
-	IgnoreEmpty bool `json:"ignore_empty" default:"true"`
+	Required bool `json:"required" default:"false"`
 
 	// Whether automatic type detection should be performed or not.
 	DetectType bool `json:"detect_type" default:"true"`
@@ -35,6 +35,21 @@ type EnvArgs struct {
 
 // Retrieves a system environment variable and returns the value of it, or a
 // fallback value if the variable does not exist or (optionally) is empty.
+//
+// #### Examples
+//
+// ##### Get the value of the `USER` environment variable and store it
+// ```
+// env 'USER' -> $user
+// ```
+//
+// ##### Require the `LANG`, `USER`, and `CI` environment variables; and fail they are not set.
+// ```
+// env 'LANG' { required: true }
+// env 'USER' { required: true }
+// env 'CI'   { required: true }
+// ```
+//
 func (self *Commands) Env(name string, args *EnvArgs) (interface{}, error) {
 	if args == nil {
 		args = &EnvArgs{}
@@ -62,7 +77,7 @@ func (self *Commands) Env(name string, args *EnvArgs) (interface{}, error) {
 		}
 
 		return rv, nil
-	} else if !args.IgnoreEmpty {
+	} else if args.Required {
 		return nil, fmt.Errorf("Environment variable %q was not specified", name)
 	} else {
 		return nil, nil
@@ -113,6 +128,7 @@ type RunArgs struct {
 	ResultKey     string      `json:"result_key"`     // result
 }
 
+// [SKIP]
 // Evaluates another Friendscript loaded from another file. The filename is the
 // absolute path or basename of the file to search for in the WEBFRIEND_PATH
 // environment variable to load and evaluate. The WEBFRIEND_PATH variable
@@ -127,6 +143,7 @@ func (self *Commands) Run(filename string, args *RunArgs) (interface{}, error) {
 	return nil, fmt.Errorf(`Not Implemented Yet`)
 }
 
+// [SKIP]
 // Change the current selector scope to be rooted at the given element. If
 // selector is empty, the scope is set to the document element (i.e.: global).
 func (self *Commands) SwitchRoot(selector browser.Selector) error {
@@ -223,55 +240,5 @@ func (self *Commands) Inspect(args *InspectArgs) (*browser.Element, error) {
 		}
 	} else {
 		return nil, err
-	}
-}
-
-type RemoveArgs struct {
-	Parent browser.Selector `json:"parent"`
-}
-
-// Remove all occurrences of the element(s) matching the given selector.
-func (self *Commands) Remove(selector browser.Selector, args *RemoveArgs) (int, error) {
-	if args == nil {
-		args = &RemoveArgs{}
-	}
-
-	defaults.SetDefaults(args)
-
-	if !selector.IsNone() {
-		docroot := self.browser.Tab().DOM()
-
-		var parent *browser.Element
-
-		// if a parent selector was specified, find that element
-		if !args.Parent.IsNone() {
-			if elements, err := docroot.Query(args.Parent, nil); err == nil {
-				if len(elements) == 1 {
-					parent = elements[0]
-				} else {
-					return 0, fmt.Errorf("Ambiguous parent selector: got %d results:", len(elements))
-				}
-			} else {
-				return 0, err
-			}
-		}
-
-		// query for the elements to remove from the found parent, or throughout the whole
-		// document if no parent was given.
-		if elements, err := docroot.Query(selector, parent); err == nil {
-			n := 0
-
-			for _, element := range elements {
-				if err := element.Remove(); err == nil {
-					n += 1
-				}
-			}
-
-			return n, nil
-		} else {
-			return 0, err
-		}
-	} else {
-		return 0, nil
 	}
 }
