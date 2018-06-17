@@ -56,12 +56,6 @@
   version = "v1.16.0"
 
 [[projects]]
-  name = "github.com/ghetzel/diecast"
-  packages = ["."]
-  revision = "0eeab4621f469724e77d9ff36f97f685da8fdd12"
-  version = "1.8.5"
-
-[[projects]]
   name = "github.com/ghetzel/go-stockutil"
   packages = [
     "colorutil",

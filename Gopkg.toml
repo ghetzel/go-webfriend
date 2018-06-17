@@ -14,7 +14,7 @@
   name = "github.com/ghetzel/diecast"
   version = "1.8.5"
 
-  [[constraint]]
+[[constraint]]
   name = "github.com/ghetzel/friendscript"
   branch = "master"
 
