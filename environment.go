@@ -17,6 +17,10 @@ import (
 var MaxReaderWait = time.Duration(5) * time.Second
 
 type Environment struct {
+	Assert  *assert.Commands
+	Cookies *cookies.Commands
+	Core    *core.Commands
+	Page    *page.Commands
 	*friendscript.Environment
 	browser *browser.Browser
 	script  *scripting.Friendscript
@@ -35,10 +39,15 @@ func NewEnvironment(browser *browser.Browser) *Environment {
 	}
 
 	// add in our custom modules and module overrides
-	environment.RegisterModule(``, core.New(browser, environment))
-	environment.RegisterModule(`assert`, assert.New(browser, environment))
-	environment.RegisterModule(`cookies`, cookies.New(browser, environment))
-	environment.RegisterModule(`page`, page.New(browser, environment))
+	environment.Core = core.New(browser, environment)
+	environment.Assert = assert.New(browser, environment)
+	environment.Cookies = cookies.New(browser, environment)
+	environment.Page = page.New(browser, environment)
+
+	environment.RegisterModule(``, environment.Core)
+	environment.RegisterModule(`assert`, environment.Assert)
+	environment.RegisterModule(`cookies`, environment.Cookies)
+	environment.RegisterModule(`page`, environment.Page)
 
 	// add our custom REPL commands
 	environment.RegisterCommandHandler(`help`, environment.handleReplHelp)

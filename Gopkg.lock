@@ -56,6 +56,27 @@
   version = "v1.16.0"
 
 [[projects]]
+  name = "github.com/ghetzel/diecast"
+  packages = ["."]
+  revision = "0eeab4621f469724e77d9ff36f97f685da8fdd12"
+  version = "1.8.5"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/ghetzel/friendscript"
+  packages = [
+    ".",
+    "commands/core",
+    "commands/file",
+    "commands/fmt",
+    "commands/utils",
+    "commands/vars",
+    "scripting",
+    "utils"
+  ]
+  revision = "1111fdbe64940c47ed1bd202d5e2ffc47ce07ee6"
+
+[[projects]]
   name = "github.com/ghetzel/go-stockutil"
   packages = [
     "colorutil",
@@ -327,6 +348,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d7f0a58c289c33fb087c263e378530234eb72aa523a9b3fb85c2d847a112f515"
+  inputs-digest = "bbe3ae661bbd566ce02502084da80dd892aa781f39fca1d2cf08235da3578cc5"
   solver-name = "gps-cdcl"
   solver-version = 1

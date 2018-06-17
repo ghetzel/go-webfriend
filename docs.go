@@ -109,86 +109,91 @@ func (self *Environment) Documentation() []ModuleDoc {
 			Commands: make([]CallDoc, 0),
 		}
 
-		sourcePath := fmt.Sprintf("commands/%s/*.go", name)
+		sourcePaths := []string{
+			fmt.Sprintf("commands/%s/*.go", name),
+		}
 
-		log.Debugf("Parsing %q (%T) from %v", name, module, sourcePath)
+		for _, sourcePath := range sourcePaths {
+			log.Debugf("Parsing %q (%T) from %v", name, module, sourcePath)
 
-		if parsed, err := parseCommandSourceCode(sourcePath); err == nil {
-			doc.Summary = parsed.Summary
-			doc.Description = parsed.Docs
-			moduleT := reflect.TypeOf(module)
+			if parsed, err := parseCommandSourceCode(sourcePath); err == nil {
+				doc.Summary = parsed.Summary
+				doc.Description = parsed.Docs
+				moduleT := reflect.TypeOf(module)
 
-			for i := 0; i < moduleT.NumMethod(); i++ {
-				fn := moduleT.Method(i)
-				key := stringutil.Underscore(fn.Name)
+				for i := 0; i < moduleT.NumMethod(); i++ {
+					fn := moduleT.Method(i)
+					key := stringutil.Underscore(fn.Name)
 
-				if key == `execute_command` {
-					continue
-				}
-
-				cmdDoc := CallDoc{
-					Name: key,
-				}
-
-				if fnDoc, ok := parsed.Functions[key]; ok && fnDoc.Docs != `` {
-					if fnDoc.Skip {
+					switch key {
+					case `execute_command`, `format_command_name`, `set_instance`:
 						continue
 					}
 
-					cmdDoc.Description = fnDoc.Docs
-
-					if r := fnDoc.Return; r != nil {
-						cmdDoc.Return = &DocItem{
-							Type: fmt.Sprintf("%v", r),
-						}
-
-						if subargs, ok := parsed.Structs[cmdDoc.Return.Type]; ok {
-							for _, arg := range subargs.Fields {
-								cmdDoc.Return.Parameters = append(cmdDoc.Return.Parameters, &DocItem{
-									Name:         arg.FriendscriptName,
-									Type:         arg.Type,
-									Description:  arg.Docs,
-									DefaultValue: stringutil.Autotype(arg.Default),
-								})
-							}
-						}
+					cmdDoc := CallDoc{
+						Name: key,
 					}
 
-					for i, arg := range fnDoc.Args {
-						if subargs, ok := parsed.Structs[arg.Type]; ok {
-							for _, arg := range subargs.Fields {
-								cmdDoc.Options = append(cmdDoc.Options, &DocItem{
-									Name:         arg.FriendscriptName,
-									Type:         arg.Type,
-									Description:  arg.Docs,
-									DefaultValue: stringutil.Autotype(arg.Default),
-								})
-							}
-						} else {
+					if fnDoc, ok := parsed.Functions[key]; ok && fnDoc.Docs != `` {
+						if fnDoc.Skip {
+							continue
+						}
 
-							if i == 0 {
-								cmdDoc.Argument = &DocItem{
-									Name: arg.Name,
-									Type: arg.Type,
+						cmdDoc.Description = fnDoc.Docs
+
+						if r := fnDoc.Return; r != nil {
+							cmdDoc.Return = &DocItem{
+								Type: fmt.Sprintf("%v", r),
+							}
+
+							if subargs, ok := parsed.Structs[cmdDoc.Return.Type]; ok {
+								for _, arg := range subargs.Fields {
+									cmdDoc.Return.Parameters = append(cmdDoc.Return.Parameters, &DocItem{
+										Name:         arg.FriendscriptName,
+										Type:         arg.Type,
+										Description:  arg.Docs,
+										DefaultValue: stringutil.Autotype(arg.Default),
+									})
+								}
+							}
+						}
+
+						for i, arg := range fnDoc.Args {
+							if subargs, ok := parsed.Structs[arg.Type]; ok {
+								for _, arg := range subargs.Fields {
+									cmdDoc.Options = append(cmdDoc.Options, &DocItem{
+										Name:         arg.FriendscriptName,
+										Type:         arg.Type,
+										Description:  arg.Docs,
+										DefaultValue: stringutil.Autotype(arg.Default),
+									})
 								}
 							} else {
-								cmdDoc.Options = append(cmdDoc.Options, &DocItem{
-									Name: arg.Name,
-									Type: arg.Type,
-								})
+
+								if i == 0 {
+									cmdDoc.Argument = &DocItem{
+										Name: arg.Name,
+										Type: arg.Type,
+									}
+								} else {
+									cmdDoc.Options = append(cmdDoc.Options, &DocItem{
+										Name: arg.Name,
+										Type: arg.Type,
+									})
+								}
 							}
 						}
 					}
+
+					doc.Commands = append(doc.Commands, cmdDoc)
 				}
-
-				doc.Commands = append(doc.Commands, cmdDoc)
+			} else {
+				log.Errorf("Error parsing source: %v", err)
 			}
-		} else {
-			log.Errorf("Error parsing source: %v", err)
-		}
 
-		docs = append(docs, doc)
-		log.Infof("Documented %q: %d commands", doc.Name, len(doc.Commands))
+			docs = append(docs, doc)
+			log.Infof("Documented %q: %d commands", doc.Name, len(doc.Commands))
+		}
 	}
 
 	return docs

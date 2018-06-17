@@ -10,11 +10,11 @@
   name = "github.com/ghetzel/cli"
   version = "1.16.0"
 
-[[constraint]]
+[[override]]
   name = "github.com/ghetzel/diecast"
   version = "1.8.5"
 
-[[constraint]]
+[[override]]
   name = "github.com/ghetzel/friendscript"
   branch = "master"
 
