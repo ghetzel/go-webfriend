@@ -88,8 +88,9 @@ func (self *Environment) Documentation() []ModuleDoc {
 	docs := make([]ModuleDoc, 0)
 	modnames := []string{`core`}
 	remaining := make([]string, 0)
+	modules := self.Modules()
 
-	for name, _ := range self.modules {
+	for name, _ := range modules {
 		if name == `core` {
 			continue
 		} else {
@@ -101,7 +102,7 @@ func (self *Environment) Documentation() []ModuleDoc {
 	modnames = append(modnames, remaining...)
 
 	for _, name := range modnames {
-		module := self.modules[name]
+		module := modules[name]
 
 		doc := ModuleDoc{
 			Name:     name,
@@ -272,6 +273,11 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 
 									// built list of struct fields, including associated documentation
 									for _, sfield := range structType.Fields.List {
+										if len(sfield.Names) == 0 {
+											log.Warningf("Could not determine field names for %v", key)
+											continue
+										}
+
 										structField := &parsedStructField{
 											Name:             sfield.Names[0].Name,
 											Type:             astTypeToString(sfield.Type),

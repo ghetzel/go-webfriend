@@ -2,23 +2,21 @@
 package page
 
 import (
-	"github.com/ghetzel/go-stockutil/stringutil"
+	"github.com/ghetzel/friendscript"
+	"github.com/ghetzel/friendscript/utils"
 	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/utils"
 )
 
 type Commands struct {
-	browser   *browser.Browser
-	scopeable utils.Scopeable
+	friendscript.Module
+	browser *browser.Browser
 }
 
 func New(browser *browser.Browser, scopeable utils.Scopeable) *Commands {
-	return &Commands{
-		browser:   browser,
-		scopeable: scopeable,
-	}
-}
+	cmd := &Commands{}
 
-func (self *Commands) ExecuteCommand(name string, arg interface{}, objargs map[string]interface{}) (interface{}, error) {
-	return utils.CallCommandFunction(self, stringutil.Camelize(name), arg, objargs)
+	cmd.browser = browser
+	cmd.Module = friendscript.CreateModule(cmd)
+
+	return cmd
 }

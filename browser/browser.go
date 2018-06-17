@@ -15,10 +15,10 @@ import (
 	"github.com/mitchellh/go-ps"
 
 	"github.com/ghetzel/argonaut"
+	"github.com/ghetzel/friendscript/utils"
 	"github.com/ghetzel/go-stockutil/httputil"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/pathutil"
-	"github.com/ghetzel/go-webfriend/utils"
 	"github.com/husobee/vestigo"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/phayes/freeport"

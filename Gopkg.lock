@@ -277,36 +277,16 @@
   revision = "cda20d4ac917ad418d86e151eff439648b06185b"
 
 [[projects]]
-  name = "github.com/pmezard/go-difflib"
-  packages = ["difflib"]
-  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
-  version = "v1.0.0"
-
-[[projects]]
   name = "github.com/russross/blackfriday"
   packages = ["."]
   revision = "55d61fa8aa702f59229e6cff85793c22e580eaf5"
   version = "v1.5.1"
 
 [[projects]]
-  name = "github.com/sergi/go-diff"
-  packages = ["diffmatchpatch"]
-  revision = "97b2266dfe4bd4ea1b81a463322f04f8b724801e"
-
-[[projects]]
   name = "github.com/spaolacci/murmur3"
   packages = ["."]
   revision = "9f5d223c60793748f04a9d5b4b4eacddfc1f755d"
   version = "v1.1"
-
-[[projects]]
-  name = "github.com/stretchr/testify"
-  packages = [
-    "assert",
-    "require"
-  ]
-  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
-  version = "v1.2.1"
 
 [[projects]]
   name = "github.com/urfave/negroni"
@@ -319,20 +299,6 @@
   name = "github.com/yosssi/gohtml"
   packages = ["."]
   revision = "97fbf36f4aa81f723d0530f5495a820ba267ae5f"
-
-[[projects]]
-  name = "github.com/yudai/gojsondiff"
-  packages = [
-    ".",
-    "formatter"
-  ]
-  revision = "7b1b7adf999dab73a6eb02669c3d82dbb27a3dd6"
-  version = "1.0.0"
-
-[[projects]]
-  name = "github.com/yudai/golcs"
-  packages = ["."]
-  revision = "d1c525dea8ce39ea9a783d33cf08932305373f2c"
 
 [[projects]]
   branch = "master"
@@ -367,6 +333,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1b041d8976ffe3ca0d86d12687d034c9a1c93c80add3f56f1ea59847f61cf6c4"
+  inputs-digest = "d7f0a58c289c33fb087c263e378530234eb72aa523a9b3fb85c2d847a112f515"
   solver-name = "gps-cdcl"
   solver-version = 1
