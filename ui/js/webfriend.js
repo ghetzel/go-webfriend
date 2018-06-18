@@ -62,7 +62,6 @@ var Webfriend = Stapes.subclass({
         this.targetElement = container;
 
         $(this.targetElement).on('resize', function(){
-            console.debug('resize')
             this.resizeScreen();
         }.bind(this));
 
@@ -240,6 +239,10 @@ var Webfriend = Stapes.subclass({
     },
 
     updateInspectNode: function(node) {
+        if (!node) {
+            return;
+        }
+
         var inspect = $('#inspect');
 
         var title = node.name;
@@ -254,7 +257,6 @@ var Webfriend = Stapes.subclass({
             }
         }
 
-        console.debug(node)
         inspect.find('.inspect-title').text(title);
 
         var attributes = $('.inspect-attributes table tbody');
@@ -310,6 +312,10 @@ var Webfriend = Stapes.subclass({
                 if ($.isPlainObject(rest)) {
                     scriptOrCommand += ' ' + this.friendlify(rest);
                 }
+            }
+
+            if (scriptOrCommand.indexOf('->') < 0) {
+                scriptOrCommand += ' -> $result';
             }
         }
 
