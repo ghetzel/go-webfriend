@@ -113,6 +113,10 @@ func (self *Browser) Launch() error {
 			}
 		}
 
+		if args := os.Getenv(`WEBFRIEND_BROWSER_ARGS`); args != `` {
+			cmd.Args = append(cmd.Args, strings.Split(args, ` `)...)
+		}
+
 		self.cmd = cmd
 
 		for k, v := range self.Environment {
