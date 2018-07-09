@@ -43,6 +43,11 @@ type Browser struct {
 	DefaultBackgroundColor      string                 `argonaut:"default-background-color,long"`
 	DisableSessionCrashedBubble bool                   `argonaut:"disable-session-crashed-bubble,long"`
 	DisableInfobars             bool                   `argonaut:"disable-infobars,long"`
+	SingleProcess               bool                   `argonaut:"single-process,long"`
+	DisableSharedMemory         bool                   `argonaut:"disable-dev-shm-usage,long"`
+	DisableSetuidSandbox        bool                   `argonaut:"disable-setuid-sandbox,long"`
+	NoZygote                    bool                   `argonaut:"no-zygote,long"`
+	NoSandbox                   bool                   `argonaut:"no-sandbox,long"`
 	URL                         string                 `argonaut:",positional"`
 	StartWait                   time.Duration          `argonaut:"-"`
 	Environment                 map[string]interface{} `argonaut:"-"`
