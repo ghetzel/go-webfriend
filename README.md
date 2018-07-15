@@ -5,6 +5,14 @@
     &ldquo;Your friendly friend in modern web automation and testing.&rdquo;
 </p>
 
+## ALPHA ALERT
+
+This software is under _heavy_ development and should not be considered production-ready.  Much of it works, but much is still yet to
+be implemented.  It is a ground-up rewrite of my [Python version](https://github.com/ghetzel/webfriend) of this project.
+Documentation and examples are missing and incomplete at this time, but I am working on it as I am able.
+
+I welcome polite feedback, comments, and suggestions.
+
 ## Overview
 
 Webfriend is a Golang library and command-line utility that integrates with the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) to control a Google Chrome or Chromium browser instance.  There is also a purpose-built scripting language (called [Friendscript](docs/intro.md)) that is designed to be an easy-to-learn environment for writing simple or complex browser automation scripts.
