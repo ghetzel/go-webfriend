@@ -16,6 +16,10 @@ const (
 	googleUrl string = "https://google.com"
 )
 
+// PROTIP: Export the environment variable LOGLEVEL=debug before executing your program to see
+//         every single little thing going on behind the scenes while Webfriend is executing.
+//         If it's too much, "info", "warning", and "error" are also valid values.
+
 func main() {
 	var searchTerm string
 
