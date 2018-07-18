@@ -27,6 +27,16 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/dsnet/compress"
+  packages = [
+    "brotli",
+    "internal",
+    "internal/errors"
+  ]
+  revision = "cc9eb1d7ad760af14e8f918698f745e80377af4f"
+
+[[projects]]
+  branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
   revision = "02af3965c54e8cacf948b97fef38925c4120652c"
@@ -74,7 +84,7 @@
     "scripting",
     "utils"
   ]
-  revision = "1111fdbe64940c47ed1bd202d5e2ffc47ce07ee6"
+  revision = "ac16ba0a295ec44031cc43ffcbb666ffa8adc661"
 
 [[projects]]
   name = "github.com/ghetzel/go-stockutil"
@@ -92,8 +102,8 @@
     "typeutil",
     "utils"
   ]
-  revision = "88f1fc0f7834b507bc951f7d6973da32320ee780"
-  version = "1.5.12"
+  revision = "605ab9211ae6790b55a5f5134cbdbb2e72321b67"
+  version = "1.5.34"
 
 [[projects]]
   name = "github.com/ghetzel/uuid"
@@ -268,6 +278,12 @@
   revision = "4fdf99ab29366514c69ccccddab5dc58b8d84062"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/mapstructure"
+  packages = ["."]
+  revision = "f15292f7a699fcc1a38a80977f80a046874ba8ac"
+
+[[projects]]
   name = "github.com/montanaflynn/stats"
   packages = ["."]
   revision = "eeaced052adbcfeea372c749c281099ed7fdaa38"
@@ -348,6 +364,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bbe3ae661bbd566ce02502084da80dd892aa781f39fca1d2cf08235da3578cc5"
+  inputs-digest = "4312629535c416f614c0573701042130e058475edb5ce3132654bc9ed203078e"
   solver-name = "gps-cdcl"
   solver-version = 1
