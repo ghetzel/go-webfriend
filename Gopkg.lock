@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  branch = "master"
   name = "github.com/PuerkitoBio/goquery"
   packages = ["."]
-  revision = "ea1bc64a63088ac2bbf1a2edcae38413794a7710"
+  revision = "dc2ec5c7ca4d9aae063b79b9f581dd3ea6afd2b2"
+  version = "v1.4.1"
 
 [[projects]]
   name = "github.com/andybalholm/cascadia"
@@ -16,8 +16,8 @@
 [[projects]]
   name = "github.com/c-bata/go-prompt"
   packages = ["."]
-  revision = "e99fbc797b795e0a7a94affc8d44f6a0350d85f0"
-  version = "v0.2.1"
+  revision = "c52492ff1b386e5c0ba5271b5eaad165fab09eca"
+  version = "v0.2.2"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -39,7 +39,7 @@
   branch = "master"
   name = "github.com/dustin/go-humanize"
   packages = ["."]
-  revision = "02af3965c54e8cacf948b97fef38925c4120652c"
+  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
 
 [[projects]]
   name = "github.com/fatih/color"
@@ -84,7 +84,7 @@
     "scripting",
     "utils"
   ]
-  revision = "ac16ba0a295ec44031cc43ffcbb666ffa8adc661"
+  revision = "f8794d57f888b27b530604292603a89f0b49105c"
 
 [[projects]]
   name = "github.com/ghetzel/go-stockutil"
@@ -142,19 +142,19 @@
   branch = "master"
   name = "github.com/grokify/html-strip-tags-go"
   packages = ["."]
-  revision = "2e24dd3c29e5fe86a6ac41c713f2e2840b3062e6"
+  revision = "3f8856873ce5730282807732a0413fcf7c98cc58"
 
 [[projects]]
   branch = "master"
   name = "github.com/hashicorp/errwrap"
   packages = ["."]
-  revision = "7554cd9344cec97297fa6649b055a8c98c2a1e55"
+  revision = "d6c0cd88035724dd42e0f335ae30161c20575ecc"
 
 [[projects]]
   branch = "master"
   name = "github.com/hashicorp/go-multierror"
   packages = ["."]
-  revision = "b7773ae218740a7be65057fc60b366a49b538a44"
+  revision = "3d5d8f294aa03d8e98859feac328afbdf1ae0703"
 
 [[projects]]
   name = "github.com/husobee/vestigo"
@@ -238,8 +238,8 @@
     "protocol/tracing",
     "rpcc"
   ]
-  revision = "52b8ab24b49848d8f54145760f7a5eb122130e70"
-  version = "v0.18.2"
+  revision = "5b6b2a4e9e17eb54346910dedf7fbed0530bed06"
+  version = "v0.18.5"
 
 [[projects]]
   name = "github.com/mattn/go-colorable"
@@ -255,6 +255,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/mattn/go-runewidth"
+  packages = ["."]
+  revision = "ce7b0b5c7b45a81508558cd1dba6bb1e4ddb51bb"
+
+[[projects]]
+  branch = "master"
   name = "github.com/mattn/go-tty"
   packages = ["."]
   revision = "931426f7535ac39720c8909d70ece5a41a2502a6"
@@ -266,10 +272,10 @@
   revision = "e1c978be3307be96ef03a0bd25d719ab50d277e4"
 
 [[projects]]
-  branch = "master"
   name = "github.com/microcosm-cc/bluemonday"
   packages = ["."]
-  revision = "995366fdf961d03629cd17361bddd32745718e2c"
+  revision = "dafebb5b6ff2861a0d69af64991e10866c19be85"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -338,13 +344,13 @@
     "html",
     "html/atom"
   ]
-  revision = "dfa909b99c79129e1100513e5cd36307665e5723"
+  revision = "8887df42c721e930089d31b28391090a10a497d7"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "04b83988a018ef3ebffe1485df79d6499b76a4b4"
+  revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
 
 [[projects]]
   name = "gopkg.in/neurosnap/sentences.v1"
