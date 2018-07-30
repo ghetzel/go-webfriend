@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/utils"
 	defaults "github.com/mcuadros/go-defaults"
 )
 
@@ -41,6 +42,7 @@ func (self *Commands) Click(selector browser.Selector, args *ClickArgs) ([]*brow
 	}
 
 	defaults.SetDefaults(args)
+	args.Delay = utils.FudgeDuration(args.Delay)
 
 	if elements, err := self.Select(selector, nil); err == nil {
 		if len(elements) == 1 || args.Multiple {

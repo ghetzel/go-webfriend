@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/ghetzel/go-stockutil/typeutil"
+	"github.com/ghetzel/go-webfriend/utils"
 	defaults "github.com/mcuadros/go-defaults"
 )
 
@@ -39,6 +40,11 @@ func (self *Commands) Type(input interface{}, args *TypeArgs) (string, error) {
 
 	text := typeutil.V(input).String()
 	defaults.SetDefaults(args)
+
+	args.KeyDownTime = utils.FudgeDuration(args.KeyDownTime)
+	args.KeyDownJitter = utils.FudgeDuration(args.KeyDownJitter)
+	args.Delay = utils.FudgeDuration(args.Delay)
+	args.DelayJitter = utils.FudgeDuration(args.DelayJitter)
 
 	for _, char := range text {
 		// send the keyDown event

@@ -3,6 +3,7 @@ package core
 import (
 	"time"
 
+	"github.com/ghetzel/go-webfriend/utils"
 	defaults "github.com/mcuadros/go-defaults"
 )
 
@@ -21,6 +22,7 @@ func (self *Commands) WaitFor(event string, args *WaitForArgs) error {
 	}
 
 	defaults.SetDefaults(args)
+	args.Timeout = utils.FudgeDuration(args.Timeout)
 
 	if waiter, err := self.browser.Tab().CreateEventWaiter(event); err == nil {
 		defer waiter.Remove()

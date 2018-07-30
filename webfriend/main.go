@@ -109,7 +109,7 @@ func main() {
 							input = os.Stdin
 						default:
 							if file, err := os.Open(c.Args().First()); err == nil {
-								log.Debug("Friendscript being read from file %s", file.Name())
+								log.Debugf("Friendscript being read from file %s", file.Name())
 								input = file
 							} else {
 								exiterr <- fmt.Errorf("file error: %v", err)

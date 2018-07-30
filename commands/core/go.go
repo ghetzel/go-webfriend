@@ -96,6 +96,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 	}
 
 	defaults.SetDefaults(args)
+	args.Timeout = utils.FudgeDuration(args.Timeout)
 
 	// if specified as random, generate a referrer with a UUID in the url
 	if args.Referrer == `random` {

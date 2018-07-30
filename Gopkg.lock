@@ -71,20 +71,6 @@
   revision = "0eeab4621f469724e77d9ff36f97f685da8fdd12"
   version = "1.8.5"
 
-[[projects]]
-  branch = "master"
-  name = "github.com/ghetzel/friendscript"
-  packages = [
-    ".",
-    "commands/core",
-    "commands/file",
-    "commands/fmt",
-    "commands/utils",
-    "commands/vars",
-    "scripting",
-    "utils"
-  ]
-  revision = "f8794d57f888b27b530604292603a89f0b49105c"
 
 [[projects]]
   name = "github.com/ghetzel/go-stockutil"
@@ -102,8 +88,8 @@
     "typeutil",
     "utils"
   ]
-  revision = "605ab9211ae6790b55a5f5134cbdbb2e72321b67"
-  version = "1.5.34"
+  revision = "0ccc4cd633243e4209ee47711113ae7a7d0ed6ab"
+  version = "1.5.36"
 
 [[projects]]
   name = "github.com/ghetzel/uuid"
@@ -370,6 +356,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4312629535c416f614c0573701042130e058475edb5ce3132654bc9ed203078e"
+  inputs-digest = "3097d12f714bf04e080b2e99e70981096e01322ec3cd0f6dec938017f45d8b39"
   solver-name = "gps-cdcl"
   solver-version = 1

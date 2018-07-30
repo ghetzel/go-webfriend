@@ -6,6 +6,7 @@ import (
 
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/utils"
 	defaults "github.com/mcuadros/go-defaults"
 )
 
@@ -32,6 +33,9 @@ func (self *Commands) Select(selector browser.Selector, args *SelectArgs) ([]*br
 	}
 
 	defaults.SetDefaults(args)
+	args.Timeout = utils.FudgeDuration(args.Timeout)
+	args.Interval = utils.FudgeDuration(args.Interval)
+
 	docroot := self.browser.Tab().DOM()
 	start := time.Now()
 	deadline := start.Add(args.Timeout)
