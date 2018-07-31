@@ -95,7 +95,7 @@ func (self *RPC) startReading() {
 
 				// if we just read a message another
 				if waitingForId > 0 && int64(message.ID) == waitingForId {
-					log.Debugf("[rpc] REPLY %d", message.ID)
+					log.Debugf("[rpc] REPLY %d: %v", message.ID, message)
 					self.reply <- message
 				} else {
 					self.recv <- message
@@ -175,7 +175,7 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 	}
 
 	if err := self.conn.WriteJSON(message); err == nil {
-		log.Debugf("[rpc] WROTE: %v", message)
+		log.Debugf("[rpc] REQUEST %d: %v", message.ID, message)
 
 		if waitForReply {
 			select {

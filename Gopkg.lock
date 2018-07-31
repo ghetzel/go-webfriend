@@ -71,6 +71,20 @@
   revision = "0eeab4621f469724e77d9ff36f97f685da8fdd12"
   version = "1.8.5"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/ghetzel/friendscript"
+  packages = [
+    ".",
+    "commands/core",
+    "commands/file",
+    "commands/fmt",
+    "commands/utils",
+    "commands/vars",
+    "scripting",
+    "utils"
+  ]
+  revision = "720637a299f57849ae593f0bde376df9359d1a60"
 
 [[projects]]
   name = "github.com/ghetzel/go-stockutil"
@@ -297,7 +311,7 @@
   branch = "master"
   name = "github.com/pkg/term"
   packages = ["termios"]
-  revision = "cda20d4ac917ad418d86e151eff439648b06185b"
+  revision = "bffc007b7fd5a70e20e28f5b7649bb84671ef436"
 
 [[projects]]
   name = "github.com/russross/blackfriday"
@@ -330,13 +344,13 @@
     "html",
     "html/atom"
   ]
-  revision = "8887df42c721e930089d31b28391090a10a497d7"
+  revision = "a0f8a16cb08c06df97cbdf9c47f4731ba548c33c"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
+  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
 
 [[projects]]
   name = "gopkg.in/neurosnap/sentences.v1"

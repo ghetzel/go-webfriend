@@ -179,6 +179,8 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 							for key, value := range res.Params.Map(`response.headers`) {
 								cmdresp.Headers[key.String()] = value.String()
 							}
+						} else {
+							return nil, fmt.Errorf("Failed to locate originating network request: %v", res)
 						}
 					} else if rerr != nil && !args.ContinueOnError {
 						return nil, fmt.Errorf("Request error: %v", rerr.Params.String(`errorText`, `Unknown Error`))
