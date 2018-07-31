@@ -9,6 +9,7 @@ import (
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/stringutil"
+	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/utils"
 	defaults "github.com/mcuadros/go-defaults"
 )
@@ -32,10 +33,17 @@ type GoArgs struct {
 	// The amount of time to wait for the page to load.
 	Timeout time.Duration `json:"timeout" default:"30s"`
 
+	// The amount of time to poll for the originating network request.
+	RequestPollTimeout time.Duration `json:"request_poll_timeout" default:"5s"`
+
 	// Whether the resources stack that is queried in page::resources and
 	// page::resource is cleared before navigating. Set this to false to
 	// preserve the ability to retrieve data that was loaded on previous pages.
 	ClearRequests bool `json:"clear_requests" default:"true"`
+
+	// Whether the originating network request is required in the return value.  If this is
+	// false, the response may be missing status, headers, and timing details.
+	RequireOriginatingRequest bool `json:"require_originating_request" default:"true"`
 
 	// Whether to continue execution if an error is encountered during page
 	// load (e.g.: HTTP 4xx/5xx, SSL, TCP connection errors).
@@ -97,6 +105,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 
 	defaults.SetDefaults(args)
 	args.Timeout = utils.FudgeDuration(args.Timeout)
+	args.RequestPollTimeout = utils.FudgeDuration(args.RequestPollTimeout)
 
 	// if specified as random, generate a referrer with a UUID in the url
 	if args.Referrer == `random` {
@@ -143,54 +152,73 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 
 				totalTime = time.Since(commandIssued)
 				rvM := maputil.M(rv.Result)
+				netPollStart := time.Now()
 
-				// locate the network request, response/error that resulted from the page navigation call
-				if req, res, rerr := self.browser.Tab().GetLoaderRequest(
-					rvM.String(`loaderId`, rvM.String(`frameId`)),
-				); req != nil {
-					cmdresp := &GoResponse{}
+				var response *browser.Event
 
-					if res != nil {
-						if v := res.Params.Int(`response.status`); v >= 0 {
-							if v >= 400 && !args.ContinueOnError {
-								return nil, fmt.Errorf("HTTP %v", v)
-							}
-
-							cmdresp.Status = int(v)
-							cmdresp.URL = res.Params.String(`response.url`)
-							cmdresp.MimeType = res.Params.String(`response.mimeType`)
-							cmdresp.Protocol = res.Params.String(`response.protocol`)
-							cmdresp.RemoteAddress = fmt.Sprintf(
-								"%v:%v",
-								res.Params.String(`response.remoteIPAddress`),
-								res.Params.Int(`response.remotePort`, 80),
-							)
-							cmdresp.TimingDetails = make(map[string]float64)
-							cmdresp.Headers = make(map[string]string)
-
-							// build timing
-							for key, value := range res.Params.Map(`response.timing`) {
-								cmdresp.TimingDetails[key.String()] = value.Float()
-							}
-
-							cmdresp.TimingDetails[`overallTimeMs`] = float64(totalTime.Nanoseconds()) / float64(1e6)
-
-							// build headers
-							for key, value := range res.Params.Map(`response.headers`) {
-								cmdresp.Headers[key.String()] = value.String()
-							}
-						} else {
-							return nil, fmt.Errorf("Failed to locate originating network request: %v", res)
+				// poll aggressively waiting to receive the network request that
+				// loaded the page
+				for time.Since(netPollStart) < args.RequestPollTimeout {
+					// locate the network request, response/error that resulted
+					// from the page navigation call
+					if req, res, rerr := self.browser.Tab().GetLoaderRequest(
+						rvM.String(`loaderId`, rvM.String(`frameId`)),
+					); req != nil {
+						// if we don't require the request, then don't waste time polling
+						// for it.  if we didn't just get a response, proceed anyway
+						if res != nil || !args.RequireOriginatingRequest {
+							response = res
+							break
 						}
 					} else if rerr != nil && !args.ContinueOnError {
 						return nil, fmt.Errorf("Request error: %v", rerr.Params.String(`errorText`, `Unknown Error`))
 					}
 
-					log.Debugf("Page loaded in %v: HTTP %d: %v", totalTime, cmdresp.Status, cmdresp.URL)
+					time.Sleep(33 * time.Millisecond)
+				}
 
-					return cmdresp, nil
+				if response != nil {
+					cmdresp := &GoResponse{}
+
+					if v := response.Params.Int(`response.status`); v >= 0 {
+						if v >= 400 && !args.ContinueOnError {
+							return nil, fmt.Errorf("HTTP %v", v)
+						}
+
+						cmdresp.Status = int(v)
+						cmdresp.URL = response.Params.String(`response.url`)
+						cmdresp.MimeType = response.Params.String(`response.mimeType`)
+						cmdresp.Protocol = response.Params.String(`response.protocol`)
+						cmdresp.RemoteAddress = fmt.Sprintf(
+							"%v:%v",
+							response.Params.String(`response.remoteIPAddress`),
+							response.Params.Int(`response.remotePort`, 80),
+						)
+						cmdresp.TimingDetails = make(map[string]float64)
+						cmdresp.Headers = make(map[string]string)
+
+						// build timing
+						for key, value := range response.Params.Map(`response.timing`) {
+							cmdresp.TimingDetails[key.String()] = value.Float()
+						}
+
+						cmdresp.TimingDetails[`overallTimeMs`] = float64(totalTime.Nanoseconds()) / float64(1e6)
+
+						// build headers
+						for key, value := range response.Params.Map(`response.headers`) {
+							cmdresp.Headers[key.String()] = value.String()
+						}
+
+						log.Debugf("Page loaded in %v: HTTP %d: %v", totalTime, cmdresp.Status, cmdresp.URL)
+
+						return cmdresp, nil
+					} else {
+						return nil, fmt.Errorf("Got invalid HTTP status")
+					}
+				} else if !args.RequireOriginatingRequest {
+					return &GoResponse{}, nil
 				} else {
-					return nil, fmt.Errorf("Unable to locate originating network request")
+					return nil, fmt.Errorf("Failed to locate originating network request: %v", response)
 				}
 			} else {
 				return nil, err
