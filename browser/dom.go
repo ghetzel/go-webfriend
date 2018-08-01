@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
@@ -9,6 +10,7 @@ import (
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
+	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 )
 
@@ -144,15 +146,11 @@ func (self *Document) Root() (*Element, error) {
 
 // Retrieve the current document's dimensions (scroll width and height).
 func (self *Document) PageSize() (float64, float64, error) {
-	if root, err := self.Root(); err == nil {
-		if result, err := root.Evaluate(`return [document.documentElement.scrollWidth, document.documentElement.scrollHeight]`); err == nil {
-			if sz := typeutil.V(result).Slice(); len(sz) == 2 {
-				return sz[0].Float(), sz[1].Float(), nil
-			} else {
-				return 0, 0, fmt.Errorf("Invalid response while retrieving page dimensions")
-			}
+	if result, err := self.Evaluate(`return [document.documentElement.scrollWidth, document.documentElement.scrollHeight]`); err == nil {
+		if sz := typeutil.V(result).Slice(); len(sz) == 2 {
+			return sz[0].Float(), sz[1].Float(), nil
 		} else {
-			return 0, 0, err
+			return 0, 0, fmt.Errorf("Invalid response while retrieving page dimensions")
 		}
 	} else {
 		return 0, 0, err
@@ -200,6 +198,45 @@ func (self *Document) RemoveElement(element *Element) error {
 		return err
 	} else {
 		return nil
+	}
+}
+
+func (self *Document) Evaluate(stmt string) (interface{}, error) {
+	callGroupId := stringutil.UUID().Base58()
+
+	if rv, err := self.tab.RPC(`Runtime`, `evaluate`, map[string]interface{}{
+		`expression`: fmt.Sprintf(
+			"%s;\nvar fn_%s = function(){ %s }.bind(webfriend); fn_%s()",
+			self.prescript(),
+			callGroupId,
+			stmt,
+			callGroupId,
+		),
+		`returnByValue`: false,
+		`awaitPromise`:  false,
+		`objectGroup`:   callGroupId,
+	}); err == nil {
+		defer self.tab.releaseObjectGroup(callGroupId)
+		out := maputil.M(rv.Result)
+
+		// return runtime exceptions as errors
+		if exc := out.Get(`exceptionDetails`); !exc.IsZero() {
+			excM := maputil.M(exc)
+
+			return nil, fmt.Errorf(
+				"Evaluation error: %v",
+				excM.String(`exception.description`, excM.String(`text`)),
+			)
+		} else if returnOid := out.String(`result.objectId`); returnOid != `` {
+			// recursively populate the output result and return it as a native value
+			return self.tab.getJavascriptResponse(maputil.M(out.Get(`result`)))
+		} else if returnValue := out.Get(`result.value`).Value; returnValue != nil {
+			return returnValue, nil
+		} else {
+			return nil, nil
+		}
+	} else {
+		return nil, err
 	}
 }
 
@@ -270,4 +307,20 @@ func (self *Document) PrintTree() {
 
 func (self *Document) String() string {
 	return fmt.Sprintf("%v", self.root)
+}
+
+func (self *Document) prescript() string {
+	if scopeable := self.tab.browser.scopeable; scopeable != nil {
+		if scope := scopeable.Scope(); scope != nil {
+			out := `var webfriend = `
+
+			if data, err := json.Marshal(scope.Data()); err == nil {
+				out += string(data)
+
+				return out
+			}
+		}
+	}
+
+	return ``
 }

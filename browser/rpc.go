@@ -14,7 +14,7 @@ import (
 )
 
 var MaxUnreadEvents = 1024
-var DefaultReplyTimeout = 10 * time.Second
+var DefaultReplyTimeout = 30 * time.Second
 
 type RPC struct {
 	URL                 string
@@ -108,6 +108,7 @@ func (self *RPC) startReading() {
 			return
 		} else {
 			log.Errorf("Failed to read from RPC: %v", err)
+			self.Close()
 			return
 		}
 	}

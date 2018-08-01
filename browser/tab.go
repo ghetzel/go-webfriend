@@ -265,6 +265,8 @@ func (self *Tab) startEventReceiver() {
 			return true
 		})
 	}
+
+	self.browser.Stop()
 }
 
 func (self *Tab) registerInternalEvents() {
@@ -306,8 +308,6 @@ func (self *Tab) registerInternalEvents() {
 		dom := self.DOM()
 
 		switch event.Name {
-		case `DOM.documentUpdated`:
-			dom.Reset()
 		case `DOM.setChildNodes`:
 			for _, node := range event.Params.Slice(`nodes`) {
 				dom.addElementFromResult(
@@ -323,6 +323,10 @@ func (self *Tab) registerInternalEvents() {
 			} else {
 				log.Warningf("Got attribute update event for unknown node %d", nid)
 			}
+
+		case `DOM.childNodeRemoved`:
+			nid := int(event.Params.Int(`nodeId`))
+			dom.elements.Delete(nid)
 		}
 	})
 

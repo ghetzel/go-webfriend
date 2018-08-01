@@ -84,7 +84,7 @@
     "scripting",
     "utils"
   ]
-  revision = "720637a299f57849ae593f0bde376df9359d1a60"
+  revision = "5973477f0f5819873c712988a3ca96ee8be26ed1"
 
 [[projects]]
   name = "github.com/ghetzel/go-stockutil"
@@ -344,7 +344,7 @@
     "html",
     "html/atom"
   ]
-  revision = "a0f8a16cb08c06df97cbdf9c47f4731ba548c33c"
+  revision = "22bb95c5e783d192c577a7b310b06637db9f1d94"
 
 [[projects]]
   branch = "master"

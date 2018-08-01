@@ -249,11 +249,15 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 
 		if oid := remoteObject.String(`object.objectId`); oid != `` {
 			if rv, err := self.document.tab.RPC(`Runtime`, `callFunctionOn`, map[string]interface{}{
-				`objectId`:            oid,
-				`functionDeclaration`: fmt.Sprintf("function(){ %s; %s }", self.prescript(), script),
-				`returnByValue`:       false,
-				`awaitPromise`:        true,
-				`objectGroup`:         callGroupId,
+				`objectId`: oid,
+				`functionDeclaration`: fmt.Sprintf(
+					"function(){ try{ %s; %s } catch(e) { return e; }",
+					self.document.prescript(),
+					script,
+				),
+				`returnByValue`: false,
+				`awaitPromise`:  false,
+				`objectGroup`:   callGroupId,
 			}); err == nil {
 				defer self.document.tab.releaseObjectGroup(callGroupId)
 				out := maputil.M(rv.Result)
@@ -345,20 +349,4 @@ func (self *Element) setAttributesFromInterleavedArray(attrpairs []typeutil.Vari
 	}
 
 	self.attributes = attributes
-}
-
-func (self *Element) prescript() string {
-	if scopeable := self.document.tab.browser.scopeable; scopeable != nil {
-		if scope := scopeable.Scope(); scope != nil {
-			out := `var webfriend = `
-
-			if data, err := json.Marshal(scope.Data()); err == nil {
-				out += string(data)
-
-				return out
-			}
-		}
-	}
-
-	return ``
 }
