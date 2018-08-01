@@ -84,7 +84,7 @@
     "scripting",
     "utils"
   ]
-  revision = "5973477f0f5819873c712988a3ca96ee8be26ed1"
+  revision = "9c38ae895d7337c4c157326a72dd1fa08288b8e4"
 
 [[projects]]
   name = "github.com/ghetzel/go-stockutil"
@@ -350,7 +350,7 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "bd9dbc187b6e1dacfdd2722a87e83093c2d7bd6e"
+  revision = "3dc4335d56c789b04b0ba99b7a37249d9b614314"
 
 [[projects]]
   name = "gopkg.in/neurosnap/sentences.v1"
