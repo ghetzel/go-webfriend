@@ -11,7 +11,7 @@ func (self *Commands) Source(selector browser.Selector) (string, error) {
 	var err error
 
 	if selector.IsNone() {
-		source, err = self.browser.Tab().DOM().Evaluate(`return this.outerHTML`)
+		source, err = self.browser.Tab().DOM().Evaluate(`return document.documentElement.outerHTML`)
 	} else {
 		source, err = self.browser.Tab().DOM().EvaluateOn(selector, `return this.outerHTML`)
 	}
@@ -29,7 +29,7 @@ func (self *Commands) Text(selector browser.Selector) (string, error) {
 	var err error
 
 	if selector.IsNone() {
-		source, err = self.browser.Tab().DOM().Evaluate(`return this.outerText`)
+		source, err = self.browser.Tab().DOM().Evaluate(`return document.documentElement.outerText`)
 	} else {
 		source, err = self.browser.Tab().DOM().EvaluateOn(selector, `return this.outerText`)
 	}

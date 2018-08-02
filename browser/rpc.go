@@ -24,6 +24,7 @@ type RPC struct {
 	recv                chan *RpcMessage
 	reply               chan *RpcMessage
 	sendlock            sync.Mutex
+	closelock           sync.Mutex
 	closing             bool
 }
 
@@ -81,9 +82,15 @@ func (self *RPC) SynthesizeEvent(message RpcMessage) {
 	self.recv <- &message
 }
 
+func (self *RPC) isRunning() bool {
+	self.closelock.Lock()
+	defer self.closelock.Unlock()
+	return !self.closing
+}
+
 func (self *RPC) startReading() {
 	for {
-		if self.closing {
+		if !self.isRunning() {
 			return
 		}
 
@@ -104,7 +111,7 @@ func (self *RPC) startReading() {
 				log.Errorf("Failed to decode RPC message: %v", err)
 				return
 			}
-		} else if self.closing {
+		} else if !self.isRunning() {
 			return
 		} else {
 			log.Errorf("Failed to read from RPC: %v", err)
@@ -160,7 +167,7 @@ func (self *RPC) CallAsync(method string, params map[string]interface{}) error {
 }
 
 func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, error) {
-	if self.closing {
+	if !self.isRunning() {
 		return nil, fmt.Errorf("Cannot send, connection is closing...")
 	}
 
@@ -196,10 +203,14 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 }
 
 func (self *RPC) Close() error {
-	if !self.closing {
+	if self.isRunning() {
+		self.closelock.Lock()
+
 		log.Debug("[rpc] Closing RPC connection")
 		self.closing = true
 		close(self.recv)
+
+		self.closelock.Unlock()
 	}
 
 	return self.conn.Close()
