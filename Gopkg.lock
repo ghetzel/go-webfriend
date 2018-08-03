@@ -314,6 +314,12 @@
   revision = "bffc007b7fd5a70e20e28f5b7649bb84671ef436"
 
 [[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   name = "github.com/russross/blackfriday"
   packages = ["."]
   revision = "55d61fa8aa702f59229e6cff85793c22e580eaf5"
@@ -324,6 +330,15 @@
   packages = ["."]
   revision = "9f5d223c60793748f04a9d5b4b4eacddfc1f755d"
   version = "v1.1"
+
+[[projects]]
+  name = "github.com/stretchr/testify"
+  packages = [
+    "assert",
+    "require"
+  ]
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [[projects]]
   name = "github.com/urfave/negroni"
@@ -370,6 +385,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3097d12f714bf04e080b2e99e70981096e01322ec3cd0f6dec938017f45d8b39"
+  inputs-digest = "c669cbc0b85c2ac176c08e2ca4509f7aec68b45f2b408c989fcbe9f44d8149e1"
   solver-name = "gps-cdcl"
   solver-version = 1

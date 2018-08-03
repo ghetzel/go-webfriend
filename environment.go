@@ -17,11 +17,11 @@ import (
 var MaxReaderWait = time.Duration(5) * time.Second
 
 type Environment struct {
+	*friendscript.Environment
 	Assert  *assert.Commands
 	Cookies *cookies.Commands
 	Core    *core.Commands
 	Page    *page.Commands
-	*friendscript.Environment
 	browser *browser.Browser
 	script  *scripting.Friendscript
 	stack   []*scripting.Scope

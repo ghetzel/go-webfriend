@@ -19,7 +19,11 @@ func (self *Commands) Pdf(destination interface{}, args *PdfArgs) error {
 
 	switch destination.(type) {
 	case string:
-		if d, err := os.Create(destination.(string)); err == nil {
+		filename := destination.(string)
+
+		if w, ok := self.browser.GetWriterForPath(filename); ok {
+			dest = w
+		} else if d, err := os.Create(filename); err == nil {
 			dest = d
 		} else {
 			return err

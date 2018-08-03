@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -28,6 +29,8 @@ var rpcGlobalTimeout = (60 * time.Second)
 var DefaultStartWait = time.Duration(500) * time.Millisecond
 var ProcessExitMaxWait = 10 * time.Second
 var ProcessExitCheckInterval = 125 * time.Millisecond
+
+type PathHandlerFunc = func(string) (io.Writer, bool)
 
 type Browser struct {
 	Command                     argonaut.CommandName   `argonaut:",joiner=[=]"`
@@ -62,6 +65,7 @@ type Browser struct {
 	tabs                        map[string]*Tab
 	tabLock                     sync.Mutex
 	scopeable                   utils.Scopeable
+	pathHandlers                []PathHandlerFunc
 }
 
 func NewBrowser() *Browser {
@@ -73,12 +77,27 @@ func NewBrowser() *Browser {
 		StartWait:           DefaultStartWait,
 		exitchan:            make(chan error),
 		tabs:                make(map[string]*Tab),
+		pathHandlers:        make([]PathHandlerFunc, 0),
 	}
 }
 
 func Start() (*Browser, error) {
 	browser := NewBrowser()
 	return browser, browser.Launch()
+}
+
+func (self *Browser) RegisterPathHandler(handler PathHandlerFunc) {
+	self.pathHandlers = append(self.pathHandlers, handler)
+}
+
+func (self *Browser) GetWriterForPath(path string) (io.Writer, bool) {
+	for _, handler := range self.pathHandlers {
+		if w, ok := handler(path); ok {
+			return w, true
+		}
+	}
+
+	return nil, false
 }
 
 func (self *Browser) SetScope(scopeable utils.Scopeable) {
