@@ -30,7 +30,7 @@ var DefaultStartWait = time.Duration(500) * time.Millisecond
 var ProcessExitMaxWait = 10 * time.Second
 var ProcessExitCheckInterval = 125 * time.Millisecond
 
-type PathHandlerFunc = func(string) (io.Writer, bool)
+type PathHandlerFunc = func(string) (string, io.Writer, bool)
 
 type Browser struct {
 	Command                     argonaut.CommandName   `argonaut:",joiner=[=]"`
@@ -90,14 +90,14 @@ func (self *Browser) RegisterPathHandler(handler PathHandlerFunc) {
 	self.pathHandlers = append(self.pathHandlers, handler)
 }
 
-func (self *Browser) GetWriterForPath(path string) (io.Writer, bool) {
+func (self *Browser) GetWriterForPath(path string) (string, io.Writer, bool) {
 	for _, handler := range self.pathHandlers {
-		if w, ok := handler(path); ok {
-			return w, true
+		if p, w, ok := handler(path); ok {
+			return p, w, true
 		}
 	}
 
-	return nil, false
+	return ``, nil, false
 }
 
 func (self *Browser) SetScope(scopeable utils.Scopeable) {

@@ -79,8 +79,9 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 
 	if destination != nil {
 		if filename, ok := destination.(string); ok {
-			if w, ok := self.browser.GetWriterForPath(filename); ok {
+			if newPath, w, ok := self.browser.GetWriterForPath(filename); ok {
 				writer = w
+				response.Path = newPath
 			} else if filename == `temporary` {
 				if temp, err := ioutil.TempFile(``, ``); err == nil {
 					writer = temp
