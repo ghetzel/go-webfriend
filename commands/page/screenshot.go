@@ -30,6 +30,10 @@ type ScreenshotArgs struct {
 
 	// The quality of the image used during encoding.  Only applies to "jpeg" format.
 	Quality int `json:"quality"`
+
+	// Whether the given destination should be automatically closed for writing after the
+	// screenshot is written.
+	Autoclose bool `json:"autoclose" default:"true"`
 }
 
 type ScreenshotResponse struct {
@@ -79,14 +83,12 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 				writer = w
 			} else if filename == `temporary` {
 				if temp, err := ioutil.TempFile(``, ``); err == nil {
-					defer temp.Close()
 					writer = temp
 					response.Path = temp.Name()
 				} else {
 					return nil, err
 				}
 			} else if file, err := os.Create(filename); err == nil {
-				defer file.Close()
 				writer = file
 				response.Path = filename
 			} else {
@@ -101,6 +103,12 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 
 	if writer == nil {
 		return response, fmt.Errorf("A destination for the screenshot must be specified")
+	}
+
+	if args.Autoclose {
+		if closer, ok := writer.(io.Closer); ok {
+			defer closer.Close()
+		}
 	}
 
 	// if one or both of the dimensions are not explicitly given, fill them in from the current
