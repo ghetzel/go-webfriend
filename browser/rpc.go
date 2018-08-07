@@ -102,7 +102,7 @@ func (self *RPC) startReading() {
 
 				// if we just read a message another
 				if waitingForId > 0 && int64(message.ID) == waitingForId {
-					log.Debugf("[rpc] REPLY %d: %v", message.ID, message)
+					log.Debugf("[rpc] REPLY %d", message.ID)
 					self.reply <- message
 				} else {
 					self.recv <- message
