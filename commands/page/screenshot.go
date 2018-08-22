@@ -34,6 +34,9 @@ type ScreenshotArgs struct {
 	// Whether the given destination should be automatically closed for writing after the
 	// screenshot is written.
 	Autoclose bool `json:"autoclose" default:"true"`
+
+	// Automatically resize the screen to the width and height.
+	Autoresize bool `json:"autoresize" default:"true"`
 }
 
 type ScreenshotResponse struct {
@@ -152,13 +155,13 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 			`y`:      args.Y,
 			`scale`:  1.0,
 		}
-	} else if args.Width > 0 && args.Height > 0 {
+	} else if args.Autoresize && args.Width > 0 && args.Height > 0 {
 		// resize viewport to given width and height
 		if _, err := self.browser.Tab().RPC(`Emulation`, `setDeviceMetricsOverride`, map[string]interface{}{
 			`width`:             args.Width,
 			`height`:            args.Height,
 			`deviceScaleFactor`: 1.0,
-			`mobile`:            true,
+			`mobile`:            false,
 		}); err != nil {
 			return response, fmt.Errorf("Failed to resize screen: %v", err)
 		}

@@ -65,6 +65,7 @@ func main() {
 		log.Infof("Starting %s %s", c.App.Name, c.App.Version)
 		chrome = browser.NewBrowser()
 		chrome.Headless = !c.Bool(`debug`)
+		chrome.HideScrollbars = true
 
 		if err := chrome.Launch(); err == nil {
 			exiterr := make(chan error)
