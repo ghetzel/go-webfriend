@@ -51,6 +51,7 @@ type Browser struct {
 	DisableSetuidSandbox        bool                   `argonaut:"disable-setuid-sandbox,long"`
 	NoZygote                    bool                   `argonaut:"no-zygote,long"`
 	NoSandbox                   bool                   `argonaut:"no-sandbox,long"`
+	UserAgent                   string                 `argonaut:"user-agent,long"`
 	URL                         string                 `argonaut:",positional"`
 	StartWait                   time.Duration          `argonaut:"-"`
 	Environment                 map[string]interface{} `argonaut:"-"`
