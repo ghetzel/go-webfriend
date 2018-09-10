@@ -15,7 +15,10 @@ var rpcConnectRetryInterval = (125 * time.Millisecond)
 var rpcConnectMaxRetries = 40
 
 func (self *Browser) connectRPC(address string) error {
-	self.devtools = devtool.New(fmt.Sprintf("http://%v", address))
+	rpcAddr := fmt.Sprintf("http://%v", address)
+	log.Debugf("DevTools RPC Address: %v", rpcAddr)
+
+	self.devtools = devtool.New(rpcAddr)
 	connected := false
 
 	for i := 0; i < rpcConnectMaxRetries; i++ {

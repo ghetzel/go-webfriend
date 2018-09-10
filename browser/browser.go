@@ -11,6 +11,7 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/mitchellh/go-ps"
@@ -72,6 +73,7 @@ type Browser struct {
 func NewBrowser() *Browser {
 	return &Browser{
 		Command:             argonaut.CommandName(LocateChromeExecutable()),
+		URL:                 `about:blank`,
 		Headless:            true,
 		RemoteDebuggingPort: 0,
 		Preferences:         GetDefaultPreferences(),
@@ -163,6 +165,20 @@ func (self *Browser) Launch() error {
 
 		select {
 		case err := <-self.exitchan:
+			if err == nil {
+				if eerr, ok := err.(*exec.ExitError); ok {
+					if status, ok := eerr.Sys().(syscall.WaitStatus); ok {
+						err = fmt.Errorf("Process exited prematurely with status %d", status.ExitStatus())
+					} else if eerr.Success() {
+						err = fmt.Errorf("Process exited prematurely without error")
+					}
+				}
+
+				if err == nil {
+					err = fmt.Errorf("Process exited prematurely with non-zero status")
+				}
+			}
+
 			return err
 		case <-time.After(self.StartWait):
 			log.Debugf("[browser] Process stayed running for %v", self.StartWait)
