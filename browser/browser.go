@@ -219,6 +219,10 @@ func (self *Browser) Wait() error {
 }
 
 func (self *Browser) Stop() error {
+	if self.cmd == nil {
+		return nil
+	}
+
 	self.tabLock.Lock()
 	defer self.tabLock.Unlock()
 	defer self.cleanupUserDataDirectory()
