@@ -197,7 +197,7 @@ func (self *Browser) Launch() error {
 
 func (self *Browser) ctx() context.Context {
 	c := context.Background()
-	c, _ = context.WithTimeout(c, rpcGlobalTimeout)
+	// c, _ = context.WithTimeout(c, rpcGlobalTimeout)
 	return c
 }
 
