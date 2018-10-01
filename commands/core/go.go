@@ -135,7 +135,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 			}
 
 			if rv, err := self.browser.Tab().Navigate(u.String()); err == nil {
-				if args.WaitForLoad {
+				if args.WaitForLoad && args.Timeout > 0 {
 					// wait for the first event matching the given pattern
 					if event, err := waiter.Wait(args.Timeout); err != nil {
 						if utils.IsTimeoutErr(err) {
