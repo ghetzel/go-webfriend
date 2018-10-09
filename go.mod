@@ -17,13 +17,17 @@ require (
 	github.com/ghetzel/uuid v0.0.0-20171129191014-dec09d789f3d
 	github.com/ghodss/yaml v1.0.0
 	github.com/gobwas/glob v0.2.3
+	github.com/gogo/protobuf v1.1.1 // indirect
 	github.com/gorilla/websocket v1.2.0
 	github.com/grokify/html-strip-tags-go v0.0.0-20180530080503-3f8856873ce5
 	github.com/hashicorp/errwrap v1.0.0
 	github.com/hashicorp/go-multierror v1.0.0
 	github.com/husobee/vestigo v1.1.0
+	github.com/influxdata/influxdb v1.6.3
+	github.com/influxdata/influxql v0.0.0-20180925231337-1cbfca8e56b6 // indirect
 	github.com/jbenet/go-base58 v0.0.0-20150317085156-6237cf65f3a6
 	github.com/jdkato/prose v1.1.0
+	github.com/jsternberg/zap-logfmt v1.2.0 // indirect
 	github.com/julienschmidt/httprouter v0.0.0-20150421170007-8c199fb6259f
 	github.com/kelvins/sunrisesunset v0.0.0-20170601204625-14f1915ad4b4
 	github.com/mafredri/cdp v0.18.5
@@ -41,10 +45,13 @@ require (
 	github.com/pkg/term v0.0.0-20180730021639-bffc007b7fd5
 	github.com/pmezard/go-difflib v1.0.0
 	github.com/russross/blackfriday v1.5.1
+	github.com/shirou/gopsutil v2.17.12+incompatible
 	github.com/spaolacci/murmur3 v0.0.0-20170819071325-9f5d223c6079
 	github.com/stretchr/testify v1.2.2
 	github.com/urfave/negroni v1.0.0
+	github.com/xlab/treeprint v0.0.0-20180616005107-d6fb6747feb6 // indirect
 	github.com/yosssi/gohtml v0.0.0-20180130040904-97fbf36f4aa8
+	golang.org/x/crypto v0.0.0-20181001203147-e3636079e1a4 // indirect
 	golang.org/x/net v0.0.0-20180801183431-22bb95c5e783
 	golang.org/x/sys v0.0.0-20180801221139-3dc4335d56c7
 	golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e // indirect

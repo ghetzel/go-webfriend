@@ -101,7 +101,7 @@ bindings:
                                 <span class="fs-type fs-type-{{ lower $opt.types }}">{{ lower $opt.types }}</span>
                             </td>
                             <td>{{ or (asStr $opt.default) `-` }}</td>
-                            <td>{{ $opt.description }}</td>
+                            <td>{{ markdown $opt.description }}</td>
                         </tr>
                         {{ end }}
                         </tbody>
@@ -126,7 +126,7 @@ bindings:
                             <td>
                                 <span class="fs-type fs-type-{{ lower $opt.types }}">{{ lower $opt.types }}</span>
                             </td>
-                            <td>{{ $opt.description }}</td>
+                            <td>{{ markdown $opt.description }}</td>
                         </tr>
                         {{ end }}
                         </tbody>

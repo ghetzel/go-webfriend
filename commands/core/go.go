@@ -154,71 +154,69 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 				rvM := maputil.M(rv.Result)
 				netPollStart := time.Now()
 
-				var response *browser.Event
+				var netreq *browser.NetworkRequest
 
 				// poll aggressively waiting to receive the network request that
 				// loaded the page
 				for time.Since(netPollStart) < args.RequestPollTimeout {
 					// locate the network request, response/error that resulted
 					// from the page navigation call
-					if req, res, rerr := self.browser.Tab().GetLoaderRequest(
+					if req := self.browser.Tab().GetLoaderRequest(
 						rvM.String(`loaderId`, rvM.String(`frameId`)),
-					); req != nil {
-						// if we don't require the request, then don't waste time polling
-						// for it.  if we didn't just get a response, proceed anyway
-						if res != nil || !args.RequireOriginatingRequest {
-							response = res
-							break
-						}
-					} else if rerr != nil && !args.ContinueOnError {
-						return nil, fmt.Errorf("Request error: %v", rerr.Params.String(`errorText`, `Unknown Error`))
+					); req != nil && req.IsCompleted() {
+						netreq = req
+						break
 					}
 
 					time.Sleep(33 * time.Millisecond)
 				}
 
-				if response != nil {
-					cmdresp := &GoResponse{}
+				if netreq != nil {
+					if err := netreq.Error(); err == nil {
+						cmdresp := &GoResponse{}
 
-					if v := response.Params.Int(`response.status`); v >= 0 {
-						if v >= 400 && !args.ContinueOnError {
-							return nil, fmt.Errorf("HTTP %v", v)
+						if v := netreq.R().Int(`response.status`); v >= 0 {
+							if v >= 400 && !args.ContinueOnError {
+								return nil, fmt.Errorf("HTTP %v", v)
+							}
+
+							cmdresp.Status = int(v)
+							cmdresp.URL = netreq.R().String(`response.url`)
+							cmdresp.MimeType = netreq.R().String(`response.mimeType`)
+							cmdresp.Protocol = netreq.R().String(`response.protocol`)
+							cmdresp.RemoteAddress = fmt.Sprintf(
+								"%v:%v",
+								netreq.R().String(`response.remoteIPAddress`),
+								netreq.R().Int(`response.remotePort`, 80),
+							)
+							cmdresp.TimingDetails = make(map[string]float64)
+							cmdresp.Headers = make(map[string]string)
+
+							// build timing
+							for key, value := range netreq.R().Map(`response.timing`) {
+								cmdresp.TimingDetails[key.String()] = value.Float()
+							}
+
+							cmdresp.TimingDetails[`overallTimeMs`] = float64(totalTime.Nanoseconds()) / float64(1e6)
+
+							// build headers
+							for key, value := range netreq.R().Map(`response.headers`) {
+								cmdresp.Headers[key.String()] = value.String()
+							}
+
+							log.Debugf("Page loaded in %v: HTTP %d: %v", totalTime, cmdresp.Status, cmdresp.URL)
+
+							return cmdresp, nil
+						} else {
+							return nil, fmt.Errorf("Got invalid HTTP status")
 						}
-
-						cmdresp.Status = int(v)
-						cmdresp.URL = response.Params.String(`response.url`)
-						cmdresp.MimeType = response.Params.String(`response.mimeType`)
-						cmdresp.Protocol = response.Params.String(`response.protocol`)
-						cmdresp.RemoteAddress = fmt.Sprintf(
-							"%v:%v",
-							response.Params.String(`response.remoteIPAddress`),
-							response.Params.Int(`response.remotePort`, 80),
-						)
-						cmdresp.TimingDetails = make(map[string]float64)
-						cmdresp.Headers = make(map[string]string)
-
-						// build timing
-						for key, value := range response.Params.Map(`response.timing`) {
-							cmdresp.TimingDetails[key.String()] = value.Float()
-						}
-
-						cmdresp.TimingDetails[`overallTimeMs`] = float64(totalTime.Nanoseconds()) / float64(1e6)
-
-						// build headers
-						for key, value := range response.Params.Map(`response.headers`) {
-							cmdresp.Headers[key.String()] = value.String()
-						}
-
-						log.Debugf("Page loaded in %v: HTTP %d: %v", totalTime, cmdresp.Status, cmdresp.URL)
-
-						return cmdresp, nil
 					} else {
-						return nil, fmt.Errorf("Got invalid HTTP status")
+						return &GoResponse{}, fmt.Errorf("Request failed: %v", err)
 					}
 				} else if !args.RequireOriginatingRequest {
 					return &GoResponse{}, nil
 				} else {
-					return nil, fmt.Errorf("Failed to locate originating network request: %v", response)
+					return nil, fmt.Errorf("Failed to locate originating network request")
 				}
 			} else {
 				return nil, err

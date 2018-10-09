@@ -2,6 +2,7 @@ package browser
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -14,11 +15,43 @@ import (
 	"github.com/mafredri/cdp/devtool"
 )
 
-var netTrackingEvents = `Network.{requestWillBeSent,responseReceived,loadingFailed}`
+var netTrackingEvents = `Network.{requestWillBeSent,responseReceived,loadingFailed,loadingFinished}`
 var domTrackingEvents = `DOM.*`
 var consoleEvents = `Console.messageAdded`
 
 type TabID string
+
+type NetworkRequest struct {
+	ID         string
+	Request    *Event
+	Response   *Event
+	Failure    *Event
+	Completion *Event
+}
+
+func (self *NetworkRequest) IsCompleted() bool {
+	if self.Completion != nil || self.Failure != nil {
+		return true
+	}
+
+	return false
+}
+
+func (self *NetworkRequest) Error() error {
+	if self.Failure != nil {
+		return errors.New(self.Failure.P().String(`errorText`))
+	}
+
+	return nil
+}
+
+func (self *NetworkRequest) R() *maputil.Map {
+	if self.Response != nil {
+		return self.Response.P()
+	} else {
+		return maputil.M(nil)
+	}
+}
 
 type PageInfo struct {
 	URL      string `json:"url"`
@@ -33,7 +66,7 @@ type Tab struct {
 	rpc                  *RPC
 	events               chan *Event
 	waiters              sync.Map
-	networkRequests      []*Event
+	networkRequests      sync.Map
 	netreqLock           sync.Mutex
 	accumulators         sync.Map
 	currentDocument      *Document
@@ -47,10 +80,9 @@ type Tab struct {
 
 func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
 	tab := &Tab{
-		browser:         browser,
-		target:          target,
-		events:          make(chan *Event),
-		networkRequests: make([]*Event, 0),
+		browser: browser,
+		target:  target,
+		events:  make(chan *Event),
 		mostRecentInfo: &PageInfo{
 			URL:   target.URL,
 			State: `initial`,
@@ -300,7 +332,36 @@ func (self *Tab) registerInternalEvents() {
 	self.RegisterEventHandler(netTrackingEvents, func(event *Event) {
 		self.netreqLock.Lock()
 		defer self.netreqLock.Unlock()
-		self.networkRequests = append(self.networkRequests, event)
+
+		requestId := event.P().String(`requestId`)
+
+		request := &NetworkRequest{
+			ID: requestId,
+		}
+
+		if requestI, ok := self.networkRequests.Load(requestId); ok {
+			request = requestI.(*NetworkRequest)
+		}
+
+		switch event.Name {
+		case `Network.requestWillBeSent`:
+			request.Request = event
+			log.Debugf("[tab] NetworkRequest[%v] started", requestId)
+
+		case `Network.responseReceived`:
+			request.Response = event
+			log.Debugf("[tab] NetworkRequest[%v] response received (HTTP %d)", requestId, event.P().Int(`response.status`))
+
+		case `Network.loadingFailed`:
+			request.Failure = event
+			log.Debugf("[tab] NetworkRequest[%v] load failed: %s", requestId, event.P().String(`errorText`))
+
+		case `Network.loadingFinished`:
+			request.Completion = event
+			log.Debugf("[tab] NetworkRequest[%v] load completed (%d bytes)", requestId, event.P().Int(`encodedDataLength`))
+		}
+
+		self.networkRequests.Store(requestId, request)
 	})
 
 	self.RegisterEventHandler(domTrackingEvents, func(event *Event) {
@@ -377,57 +438,18 @@ func (self *Tab) registerInternalEvents() {
 }
 
 func (self *Tab) ResetNetworkRequests() {
-	self.netreqLock.Lock()
-	defer self.netreqLock.Unlock()
-	self.networkRequests = nil
+	self.networkRequests = sync.Map{}
 }
 
-func (self *Tab) GetLoaderRequest(id string) (request *Event, response *Event, reqerr *Event) {
-	self.netreqLock.Lock()
-	defer self.netreqLock.Unlock()
-
-	for _, event := range self.networkRequests {
-		reqId := event.Params.String(`loaderId`, event.Params.String(`frameId`))
-
-		if reqId == id {
-			switch event.Name {
-			case `Network.requestWillBeSent`:
-				if request == nil {
-					request = event
-				}
-			case `Network.responseReceived`:
-				if response == nil {
-					response = event
-					break
-				}
-			case `Network.loadingFailed`:
-				if reqerr == nil {
-					reqerr = event
-					break
-				}
-			}
+func (self *Tab) GetLoaderRequest(id string) (netreq *NetworkRequest) {
+	self.networkRequests.Range(func(key interface{}, value interface{}) bool {
+		if key.(string) == id {
+			netreq = value.(*NetworkRequest)
+			return false
 		}
-	}
 
-	// go through requests AGAIN, setting details that weren't found in the initital pass
-	for _, event := range self.networkRequests {
-		switch event.Name {
-		case `Network.requestWillBeSent`:
-			if request == nil {
-				request = event
-			}
-		case `Network.responseReceived`:
-			if response == nil {
-				response = event
-				return
-			}
-		case `Network.loadingFailed`:
-			if reqerr == nil {
-				reqerr = event
-				return
-			}
-		}
-	}
+		return true
+	})
 
 	return
 }
