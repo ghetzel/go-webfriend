@@ -10,7 +10,7 @@ require (
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.16.0
 	github.com/ghetzel/diecast v0.0.0-20180404162638-0eeab4621f46
-	github.com/ghetzel/friendscript v0.5.0
+	github.com/ghetzel/friendscript v0.5.1
 	github.com/ghetzel/go-defaults v1.2.0
 	github.com/ghetzel/go-stockutil v1.5.49
 	github.com/ghodss/yaml v1.0.0 // indirect
@@ -28,7 +28,6 @@ require (
 	github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936
 	github.com/montanaflynn/stats v0.0.0-20151014174947-eeaced052adb // indirect
 	github.com/neurosnap/sentences v1.0.6 // indirect
-	github.com/onsi/gomega v1.4.2 // indirect
 	github.com/phayes/freeport v0.0.0-20171002181615-b8543db493a5
 	github.com/pkg/term v0.0.0-20180730021639-bffc007b7fd5 // indirect
 	github.com/russross/blackfriday v1.5.1 // indirect
@@ -37,5 +36,5 @@ require (
 	github.com/stretchrcom/testify v1.2.2 // indirect
 	github.com/urfave/negroni v1.0.0
 	github.com/yosssi/gohtml v0.0.0-20180130040904-97fbf36f4aa8 // indirect
-	github.com/yudai/pp v2.0.1+incompatible // indirect
+	golang.org/x/tools v0.0.0-20181009195744-afb03721b588 // indirect
 )

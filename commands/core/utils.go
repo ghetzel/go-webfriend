@@ -115,3 +115,8 @@ func (self *Commands) Inspect(args *InspectArgs) (*browser.Element, error) {
 		return nil, err
 	}
 }
+
+// Immediately close the browser without error or delay.
+func (self *Commands) Exit() error {
+	return self.browser.Stop()
+}

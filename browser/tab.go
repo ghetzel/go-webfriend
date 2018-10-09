@@ -67,7 +67,6 @@ type Tab struct {
 	events               chan *Event
 	waiters              sync.Map
 	networkRequests      sync.Map
-	netreqLock           sync.Mutex
 	accumulators         sync.Map
 	currentDocument      *Document
 	mostRecentFrameId    int64
@@ -330,9 +329,6 @@ func (self *Tab) registerInternalEvents() {
 	})
 
 	self.RegisterEventHandler(netTrackingEvents, func(event *Event) {
-		self.netreqLock.Lock()
-		defer self.netreqLock.Unlock()
-
 		requestId := event.P().String(`requestId`)
 
 		request := &NetworkRequest{
