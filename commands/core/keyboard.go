@@ -1,8 +1,8 @@
 package core
 
 import (
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 type KeyArgs struct {

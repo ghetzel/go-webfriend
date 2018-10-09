@@ -3,9 +3,9 @@ package core
 import (
 	"fmt"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 // [SKIP]

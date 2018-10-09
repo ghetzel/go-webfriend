@@ -1,7 +1,7 @@
 package browser
 
 import (
-	defaults "github.com/mcuadros/go-defaults"
+	defaults "github.com/ghetzel/go-defaults"
 )
 
 type Button string

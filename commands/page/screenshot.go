@@ -8,8 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 type ScreenshotArgs struct {

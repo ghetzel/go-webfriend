@@ -6,12 +6,12 @@ import (
 	"strings"
 	"time"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/utils"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 var RandomReferrerPrefix = `https://github.com/ghetzel/go-webfriend`
@@ -104,6 +104,7 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 	}
 
 	defaults.SetDefaults(args)
+
 	args.Timeout = utils.FudgeDuration(args.Timeout)
 	args.RequestPollTimeout = utils.FudgeDuration(args.RequestPollTimeout)
 
@@ -148,6 +149,8 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 					} else {
 						log.Debugf("core::go proceeding: got event %v", event.Name)
 					}
+				} else {
+					log.Debugf("core::go not waiting for navigation: WaitForLoad=%v Timeout=%v", args.WaitForLoad, args.Timeout)
 				}
 
 				totalTime = time.Since(commandIssued)

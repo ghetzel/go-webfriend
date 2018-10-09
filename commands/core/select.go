@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/utils"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 type SelectArgs struct {

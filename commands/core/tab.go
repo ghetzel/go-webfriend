@@ -3,11 +3,11 @@ package core
 import (
 	"fmt"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 type NewTabArgs struct {

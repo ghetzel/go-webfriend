@@ -3,8 +3,8 @@ package core
 import (
 	"fmt"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/colorutil"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 type ConfigureArgs struct {

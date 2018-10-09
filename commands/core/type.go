@@ -4,9 +4,9 @@ import (
 	"math/rand"
 	"time"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/utils"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 type TypeArgs struct {

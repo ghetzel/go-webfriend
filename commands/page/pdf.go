@@ -6,8 +6,8 @@ import (
 	"io"
 	"os"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/maputil"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 type PdfArgs struct {

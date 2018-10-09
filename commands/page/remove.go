@@ -3,8 +3,8 @@ package page
 import (
 	"fmt"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 type RemoveArgs struct {

@@ -3,8 +3,8 @@ package core
 import (
 	"time"
 
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/utils"
-	defaults "github.com/mcuadros/go-defaults"
 )
 
 var WaitForLoadEventName string = `Page.loadEventFired`
