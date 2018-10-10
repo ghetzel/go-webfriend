@@ -10,7 +10,7 @@ require (
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.16.0
 	github.com/ghetzel/diecast v0.0.0-20180404162638-0eeab4621f46
-	github.com/ghetzel/friendscript v0.5.1
+	github.com/ghetzel/friendscript v0.5.2
 	github.com/ghetzel/go-defaults v1.2.0
 	github.com/ghetzel/go-stockutil v1.5.49
 	github.com/ghodss/yaml v1.0.0 // indirect

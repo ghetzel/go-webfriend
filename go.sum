@@ -29,6 +29,8 @@ github.com/ghetzel/friendscript v0.5.0 h1:3Ujg01YEO0TEp0Esls12rS3suoO/LA13Ucn5lp
 github.com/ghetzel/friendscript v0.5.0/go.mod h1:GZJ2FZRpgvURp4hUb/AdevNCnHKCWRpKLxtAl817F4g=
 github.com/ghetzel/friendscript v0.5.1 h1:CAIFQ/l/lDD/koupmqbaHSuLVtxSpvJkNFNPoi/OLtA=
 github.com/ghetzel/friendscript v0.5.1/go.mod h1:F2dZJWxEHLg+AFilyUDWNWlet+Pf7h1rlFweJCbA3HY=
+github.com/ghetzel/friendscript v0.5.2 h1:N6qcdKq1Ast7QIraWWc79yOS08IiCZcye9wxMHP1g4E=
+github.com/ghetzel/friendscript v0.5.2/go.mod h1:F2dZJWxEHLg+AFilyUDWNWlet+Pf7h1rlFweJCbA3HY=
 github.com/ghetzel/go-defaults v1.2.0 h1:U1T64bxhBc6nVZ68QXch1hoHq43h6isqgbvG7kxY9Uc=
 github.com/ghetzel/go-defaults v1.2.0/go.mod h1:xWhTgOoc4UNWT7sl3oyNFqtKzEbUKI9C3rqbwtwdxFw=
 github.com/ghetzel/go-stockutil v1.5.49 h1:SQEo4cLlzLidi9j+u+AvcYdN6jy5yqpJAB8L+YGn4VY=

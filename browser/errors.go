@@ -1,9 +1,16 @@
 package browser
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 )
+
+var ExitRequested = errors.New(`exit requested`)
+
+func IsExitRequestedErr(err error) bool {
+	return (err == ExitRequested)
+}
 
 func IsElementNotFoundErr(err error) bool {
 	if err != nil {
