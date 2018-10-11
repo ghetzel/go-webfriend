@@ -36,7 +36,7 @@ func (self *Commands) Select(selector browser.Selector, args *SelectArgs) ([]*br
 	args.Timeout = utils.FudgeDuration(args.Timeout)
 	args.Interval = utils.FudgeDuration(args.Interval)
 
-	docroot := self.browser.Tab().DOM()
+	dom := self.browser.Tab().DOM()
 	start := time.Now()
 	deadline := start.Add(args.Timeout)
 	i := 0
@@ -48,7 +48,7 @@ func (self *Commands) Select(selector browser.Selector, args *SelectArgs) ([]*br
 			log.Debugf("Polling for elements matching: %v", selector)
 		}
 
-		if elements, err := docroot.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
+		if elements, err := dom.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
 			if len(elements) >= args.MinMatches {
 				return elements, err
 			} else {

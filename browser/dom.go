@@ -97,12 +97,32 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 	}
 }
 
+// Retrieve all elements matching the given name
+func (self *Document) ElementsByName(name string) []*Element {
+	elements := make([]*Element, 0)
+
+	self.elements.Range(func(_ interface{}, v interface{}) bool {
+		if el, ok := v.(*Element); ok {
+			if el.Name() == name {
+				elements = append(elements, el)
+			}
+		}
+
+		return true
+	})
+
+	return elements
+}
+
 // Retrieve a known element by its Node ID
 func (self *Document) Element(id int) (*Element, bool) {
 	start := time.Now()
-	deadline := start.Add(ElementPollTimeout)
 
-	for t := start; t.Before(deadline); t = time.Now() {
+	for {
+		if time.Since(start) > ElementPollTimeout {
+			break
+		}
+
 		if v, ok := self.elements.Load(id); ok {
 			if el, ok := v.(*Element); ok {
 				return el, true
@@ -113,12 +133,32 @@ func (self *Document) Element(id int) (*Element, bool) {
 	return nil, false
 }
 
+// Retrieve a known element by its Node ID
+func (self *Document) ElementByBackendId(id int) (*Element, bool) {
+	var element *Element
+
+	self.elements.Range(func(key interface{}, el interface{}) bool {
+		if elem := el.(*Element); elem.backendId == id {
+			element = elem
+			return false
+		}
+
+		return true
+	})
+
+	if element == nil {
+		return nil, false
+	} else {
+		return element, true
+	}
+}
+
 // Return the root element of the current document.
 func (self *Document) Root() (*Element, error) {
 	if self.root == nil {
 		if rv, err := self.tab.RPC(`DOM`, `getDocument`, map[string]interface{}{
 			`pierce`: true,
-			`depth`:  1,
+			`depth`:  -1,
 		}); err == nil {
 			docElem := maputil.M(rv.Result)
 
@@ -167,15 +207,12 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 		}
 	}
 
-	if rv, err := self.tab.RPC(`DOM`, `querySelectorAll`, map[string]interface{}{
-		`nodeId`:   queryRoot.ID(),
-		`selector`: selector,
-	}); err == nil {
+	if rv, err := self.Evaluate(fmt.Sprintf(`return document.querySelectorAll(%q)`, selector)); err == nil {
 		results := make([]*Element, 0)
-		ids := maputil.M(rv.Result).Slice(`nodeIds`)
 
-		for _, nid := range ids {
-			if element, ok := self.Element(int(nid.Int())); ok {
+		for _, el := range sliceutil.Sliceify(rv) {
+
+			if element, ok := el.(*Element); ok {
 				results = append(results, element)
 			}
 		}

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/PerformLine/go-performline-stdlib/log"
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
 )
@@ -40,6 +41,9 @@ func (self *Commands) Field(selector browser.Selector, args *FieldArgs) (string,
 	defaults.SetDefaults(args)
 
 	if elements, err := self.Select(selector, nil); err == nil && len(elements) == 1 {
+		log.Notice("NOTICE ME SENPAI")
+		log.Debugf("els %+v", elements)
+
 		field := elements[0]
 
 		if err := field.SetAttribute(`value`, ``); err != nil {

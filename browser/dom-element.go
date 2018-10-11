@@ -69,6 +69,10 @@ type Element struct {
 	loadedChildren bool
 }
 
+func (self *Element) Name() string {
+	return strings.ToLower(self.name)
+}
+
 // Return the parent element of this element, or nil if there isn't one.
 func (self *Element) Parent() *Element {
 	if parent, ok := self.document.Element(self.parent); ok {

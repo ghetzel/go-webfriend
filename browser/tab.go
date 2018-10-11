@@ -365,6 +365,9 @@ func (self *Tab) registerInternalEvents() {
 		dom := self.DOM()
 
 		switch event.Name {
+		case `DOM.childNodeInserted`:
+			dom.addElementFromResult(maputil.M(event.Params.Get(`node`)))
+
 		case `DOM.setChildNodes`:
 			for _, node := range event.Params.Slice(`nodes`) {
 				dom.addElementFromResult(
@@ -539,6 +542,21 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 				}
 
 				return out, nil
+
+			case `node`:
+				if node, err := self.RPC(`DOM`, `describeNode`, map[string]interface{}{
+					`objectId`: result.String(`objectId`),
+				}); err == nil {
+					backendNodeId := int(node.R().Int(`node.backendNodeId`))
+
+					if element, ok := self.DOM().ElementByBackendId(backendNodeId); ok {
+						return element, nil
+					} else {
+						return nil, fmt.Errorf("Unable to locate node with backend ID %d", backendNodeId)
+					}
+				} else {
+					return nil, err
+				}
 
 			default:
 				log.Dumpf("Unhandled Value: %s", result.Value())
