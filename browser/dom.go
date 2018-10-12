@@ -199,19 +199,26 @@ func (self *Document) PageSize() (float64, float64, error) {
 
 // Select one or more elements from the current DOM.
 func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, error) {
+	type evalFn func(string) (interface{}, error)
+	var eval evalFn
+	var tgt string
+
 	if queryRoot == nil {
-		if el, err := self.Root(); err == nil {
-			queryRoot = el
+		if _, err := self.Root(); err == nil {
+			eval = self.Evaluate
+			tgt = `window.document`
 		} else {
 			return nil, err
 		}
+	} else {
+		eval = queryRoot.Evaluate
+		tgt = `this`
 	}
 
-	if rv, err := self.Evaluate(fmt.Sprintf(`return document.querySelectorAll(%q)`, selector)); err == nil {
+	if rv, err := eval(fmt.Sprintf(`return %s.querySelectorAll(%q)`, tgt, selector)); err == nil {
 		results := make([]*Element, 0)
 
 		for _, el := range sliceutil.Sliceify(rv) {
-
 			if element, ok := el.(*Element); ok {
 				results = append(results, element)
 			}

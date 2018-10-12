@@ -44,6 +44,10 @@ func main() {
 			Usage: `If running the Webfriend Debugging Server, this specifies the [address]:port to listen on.`,
 			Value: `:19222`,
 		},
+		cli.BoolFlag{
+			Name:  `print-vars, P`,
+			Usage: `Print the final state of all variables upon script completion.`,
+		},
 	}
 
 	var chrome *browser.Browser
@@ -123,7 +127,10 @@ func main() {
 					}
 
 					if scope, err := script.EvaluateReader(input); err == nil {
-						fmt.Println(scope)
+						if c.Bool(`print-vars`) {
+							fmt.Println(scope)
+						}
+
 						exiterr <- nil
 					} else {
 						exiterr <- fmt.Errorf("runtime error: %v", err)

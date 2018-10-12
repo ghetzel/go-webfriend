@@ -19,6 +19,8 @@ var netTrackingEvents = `Network.{requestWillBeSent,responseReceived,loadingFail
 var domTrackingEvents = `DOM.*`
 var consoleEvents = `Console.messageAdded`
 
+var skipItem = errors.New(`skip`)
+
 type TabID string
 
 type NetworkRequest struct {
@@ -513,7 +515,9 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 				for _, elem := range maputil.M(rv.Result).Slice(`result`) {
 					if elemM := maputil.M(elem); elemM.Bool(`enumerable`) {
 						if elemV, err := self.getJavascriptResponse(maputil.M(elemM.Get(`value`))); err == nil {
-							out = append(out, elemV)
+							if elemV != skipItem {
+								out = append(out, elemV)
+							}
 						} else {
 							return nil, err
 						}
@@ -533,7 +537,9 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 					if elemM.Bool(`enumerable`) {
 						if key := elemM.String(`name`); key != `` {
 							if elemV, err := self.getJavascriptResponse(valueM); err == nil {
-								out[key] = elemV
+								if elemV != skipItem {
+									out[key] = elemV
+								}
 							} else {
 								return nil, fmt.Errorf("key %s: %v", key, err)
 							}
@@ -552,7 +558,9 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 					if element, ok := self.DOM().ElementByBackendId(backendNodeId); ok {
 						return element, nil
 					} else {
-						return nil, fmt.Errorf("Unable to locate node with backend ID %d", backendNodeId)
+						// return nil, fmt.Errorf("Unable to locate node with backend ID %d", backendNodeId)
+						log.Warningf("Unable to locate node with backend ID %d", backendNodeId)
+						return skipItem, nil
 					}
 				} else {
 					return nil, err

@@ -61,7 +61,6 @@ func main() {
 		// find all search result links, spend up to 5 seconds looking for them.
 		if resultLinks, err := environment.Core.Select(`h3.r a`, &core.SelectArgs{
 			CanBeEmpty: true,
-			Timeout:    5 * time.Second,
 		}); err == nil {
 			if len(resultLinks) > 0 {
 				// loop through all search result links and print their name and URL

@@ -33,39 +33,42 @@ type FieldArgs struct {
 // }
 // ```
 //
-func (self *Commands) Field(selector browser.Selector, args *FieldArgs) (string, error) {
+func (self *Commands) Field(selector browser.Selector, args *FieldArgs) ([]*browser.Element, error) {
 	if args == nil {
 		args = &FieldArgs{}
 	}
 
 	defaults.SetDefaults(args)
+	dom := self.browser.Tab().DOM()
 
-	if elements, err := self.Select(selector, nil); err == nil && len(elements) == 1 {
-		log.Notice("NOTICE ME SENPAI")
+	if elements, err := dom.Query(selector, nil); err == nil {
 		log.Debugf("els %+v", elements)
 
-		field := elements[0]
+		for _, field := range elements {
+			log.Notice("NOTICE ME SENPAI")
 
-		if err := field.SetAttribute(`value`, ``); err != nil {
-			return ``, err
+			if err := field.SetAttribute(`value`, ``); err != nil {
+				return nil, err
+			}
+
+			if err := field.Focus(); err != nil {
+				return nil, err
+			}
+
+			if _, err := self.Type(args.Value, nil); err != nil {
+				return nil, err
+			}
+
+			if args.Enter {
+				self.Key(`Enter`, &KeyArgs{
+					KeyCode: 13,
+				})
+			}
+
 		}
 
-		if err := field.Focus(); err != nil {
-			return ``, err
-		}
-
-		_, err := self.Type(args.Value, nil)
-
-		if args.Enter {
-			self.Key(`Enter`, &KeyArgs{
-				KeyCode: 13,
-			})
-		}
-
-		return field.Text(), err
-	} else if l := len(elements); l > 1 {
-		return ``, browser.TooManyMatchesErr(selector, 1, l)
+		return elements, err
 	} else {
-		return ``, err
+		return nil, err
 	}
 }
