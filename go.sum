@@ -217,8 +217,6 @@ github.com/russross/blackfriday v1.5.1 h1:B8ZN6pD4PVofmlDCDUdELeYrbsVIDM/bpjW3v3
 github.com/russross/blackfriday v1.5.1/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
 github.com/sergi/go-diff v0.0.0-20140808132932-97b2266dfe4b h1:iXZ3pgSI2g9Qo7LVrJVU7UQQuqQxrtEyRO/p/eMkU48=
 github.com/sergi/go-diff v0.0.0-20140808132932-97b2266dfe4b/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
-github.com/shutterstock/go-stockutil v0.0.0-20171108152810-39a961cfa608 h1:ArQHW5uX3ECpB1SA6djBhUaRAuEg/veRqbXNnWJ4330=
-github.com/shutterstock/go-stockutil v0.0.0-20171108152810-39a961cfa608/go.mod h1:klPVXq46Dn/clbJoDo5anjL8ICsC3yzN6X+kW4slB9Q=
 github.com/sirupsen/logrus v1.0.6/go.mod h1:pMByvHTf9Beacp5x1UXfOR9xyW/9antXMhjMPG0dEzc=
 github.com/spaolacci/murmur3 v0.0.0-20170819071325-9f5d223c6079 h1:lDiM+yMjW7Ork8mhl0YN0qO1Z02qGoe1vwzGc1gP/8U=
 github.com/spaolacci/murmur3 v0.0.0-20170819071325-9f5d223c6079/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=

@@ -16,7 +16,6 @@ require (
 	github.com/mafredri/cdp v0.19.2
 	github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
-	github.com/shutterstock/go-stockutil v0.0.0-20171108152810-39a961cfa608
 	github.com/stretchr/testify v1.2.2
 	github.com/urfave/negroni v1.0.0
 	golang.org/x/tools v0.0.0-20181013145246-13216ffa54f0 // indirect
