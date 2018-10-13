@@ -55,23 +55,20 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 		} else {
 			// build the element
 			element = &Element{
-				backendId:  backendNodeId,
-				nodeId:     int(node.Int(`nodeId`)),
-				document:   self,
-				name:       sliceutil.OrString(node.String(`localName`), node.String(`nodeName`)),
-				attributes: make(map[string]interface{}),
-				value:      node.String(`nodeValue`),
+				document:      self,
+				backendNodeId: backendNodeId,
+				nodeId:        int(node.Int(`nodeId`)),
+				objectId:      node.String(`objectId`),
 			}
 		}
 
-		element.setAttributesFromInterleavedArray(node.Slice(`attributes`))
 		collapsed := false
 
 		if len(children) == 1 {
 			child := maputil.M(children[0])
 
 			if child.Int(`nodeType`) == 3 {
-				element.value = strings.TrimSpace(child.String(`nodeValue`))
+				element.textOverride = strings.TrimSpace(child.String(`nodeValue`))
 				collapsed = true
 			}
 		}

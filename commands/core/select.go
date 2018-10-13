@@ -25,7 +25,7 @@ func (self *Commands) Select(selector browser.Selector, args *SelectArgs) ([]*br
 
 	if elements, err := dom.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
 		if len(elements) > 0 {
-			return elements, err
+			return elements, nil
 		} else if args.CanBeEmpty {
 			return nil, nil
 		} else {

@@ -1,6 +1,8 @@
 package core
 
 import (
+	"fmt"
+
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
 )
@@ -43,16 +45,16 @@ func (self *Commands) Field(selector browser.Selector, args *FieldArgs) ([]*brow
 		for _, field := range elements {
 			if args.Autoclear {
 				if err := field.SetAttribute(`value`, ``); err != nil {
-					return nil, err
+					return nil, fmt.Errorf("autoclear: %v", err)
 				}
 			}
 
 			if err := field.Focus(); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("focus: %v", err)
 			}
 
 			if _, err := self.Type(args.Value, nil); err != nil {
-				return nil, err
+				return nil, fmt.Errorf("type: %v", err)
 			}
 
 			if args.Enter {
@@ -62,7 +64,7 @@ func (self *Commands) Field(selector browser.Selector, args *FieldArgs) ([]*brow
 			}
 		}
 
-		return elements, err
+		return elements, nil
 	} else {
 		return nil, err
 	}

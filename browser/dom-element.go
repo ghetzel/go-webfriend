@@ -58,54 +58,64 @@ func (self Selector) GetAnnotation() (string, string, error) {
 }
 
 type Element struct {
-	backendId      int
-	nodeId         int
-	document       *Document
-	parent         int
-	name           string
-	attributes     map[string]interface{}
-	value          string
-	children       []*Element
-	loadedChildren bool
-}
-
-func (self *Element) Name() string {
-	return strings.ToLower(self.name)
-}
-
-// Return the parent element of this element, or nil if there isn't one.
-func (self *Element) Parent() *Element {
-	if parent, ok := self.document.Element(self.parent); ok {
-		return parent
-	}
-
-	return nil
+	nodeId        int
+	backendNodeId int
+	objectId      string
+	document      *Document
+	lastDetails   *maputil.Map
+	textOverride  string
 }
 
 // Return a map representation of the element. This is how values are exposed in
 // the Friendscript runtime environment.
-func (self *Element) ToMap() map[string]interface{} {
-	output := map[string]interface{}{
-		`id`:         self.backendId,
-		`name`:       self.name,
-		`attributes`: self.attributes,
-	}
+func (self *Element) refresh() {
+	output := map[string]interface{}{}
 
-	if l := len(self.Children()); l > 0 {
-		output[`child_count`] = l
-	}
+	if node, err := self.document.tab.RPC(`DOM`, `describeNode`, map[string]interface{}{
+		`nodeId`:        self.nodeId,
+		`backendNodeId`: self.backendNodeId,
+		`objectId`:      self.objectId,
+	}); err == nil {
+		details := maputil.M(node.R().Get(`node`))
 
-	if self.value != `` {
-		output[`text`] = self.value
+		if nodeId := int(details.Int(`nodeId`)); nodeId > 0 {
+			self.nodeId = nodeId
+		}
+
+		if backendNodeId := int(details.Int(`backendNodeId`)); backendNodeId > 0 {
+			self.backendNodeId = backendNodeId
+		}
+
+		output[`name`] = details.String(`localName`)
+		output[`attributes`] = self.getAttributesFromInterleavedArray(details.Slice(`attributes`))
+
+		if n := details.Int(`childNodeCount`); n > 0 {
+			output[`child_count`] = n
+		}
+
+		if v := details.String(`nodeValue`); v != `` {
+			output[`text`] = v
+		}
 	}
 
 	if position, err := self.Position(); err == nil {
 		output[`position`] = position
-	} else {
-		log.Warningf("Error retrieving element position: %v", err)
 	}
 
-	return output
+	output[`id`] = self.backendNodeId
+
+	self.lastDetails = maputil.M(output)
+}
+
+func (self *Element) refreshIfMissing() {
+	if self.lastDetails == nil {
+		self.refresh()
+	}
+}
+
+func (self *Element) ToMap() map[string]interface{} {
+	self.refresh()
+	return self.lastDetails.Value().(map[string]interface{})
 }
 
 func (self *Element) MarshalJSON() ([]byte, error) {
@@ -114,30 +124,53 @@ func (self *Element) MarshalJSON() ([]byte, error) {
 
 // Satisifies the fmt.Stringer interface.
 func (self *Element) String() string {
-	return fmt.Sprintf("[NODE %v] %v", self.backendId, self.name)
+	return fmt.Sprintf("[NODE %v] %v", self.backendNodeId, self.TreeString(0))
+}
+
+// Retrieve the name of the element.
+func (self *Element) Name() string {
+	self.refreshIfMissing()
+
+	return self.lastDetails.String(`name`)
 }
 
 // Retrieve the text value of the element.
 func (self *Element) Text() string {
-	return self.value
+	self.refreshIfMissing()
+
+	if txt := self.textOverride; txt != `` {
+		return txt
+	} else {
+		return self.lastDetails.String(`text`)
+	}
 }
 
 // Retrieve the current attributes on the element.
 func (self *Element) Attributes() map[string]interface{} {
-	return maputil.DeepCopy(self.attributes)
+	self.refreshIfMissing()
+
+	return maputil.DeepCopy(self.lastDetails.Get(`attributes`).Value)
 }
 
 func (self *Element) BackendID() int {
-	return self.backendId
+	return self.backendNodeId
 }
 
 func (self *Element) NodeID() int {
+	if self.nodeId == 0 {
+		self.refresh()
+
+		if self.nodeId == 0 {
+			log.Panicf("%v: nodeId was explicitly requested before it is available", self)
+		}
+	}
+
 	return self.nodeId
 }
 
 // Retrieve the current position and dimensions of the element.
 func (self *Element) Position() (Dimensions, error) {
-	if result, err := self.Evaluate(`return Object.assign({}, this.getBoundingClientRect().toJSON())`); err == nil {
+	if result, err := self.evaluate(`return Object.assign({}, this.getBoundingClientRect().toJSON())`, true); err == nil {
 		dimensions := maputil.M(result)
 
 		return Dimensions{
@@ -153,78 +186,32 @@ func (self *Element) Position() (Dimensions, error) {
 	}
 }
 
-// Loads all child elements under this element.
-func (self *Element) Children() []*Element {
-	if !self.loadedChildren {
-		// setup an accumulator that will capture all setChildNodes events received between
-		// now and the end of the RequestChildNodes call
-		accumulator, _ := self.document.tab.CreateAccumulator(`DOM.setChildNodes`)
-		defer accumulator.Destroy()
-
-		if _, err := self.document.tab.RPC(`DOM`, `requestChildNodes`, map[string]interface{}{
-			`nodeId`: self.nodeId,
-			`pierce`: true,
-			`depth`:  1,
-		}); err == nil {
-			// stop receiving events now
-			accumulator.Stop()
-
-			for _, event := range accumulator.Events {
-				for _, node := range maputil.M(event.Params).Slice(`nodes`) {
-					self.children = append(self.children, self.document.addElementFromResult(
-						maputil.M(node),
-					))
-				}
-			}
-		}
-
-		self.loadedChildren = true
-	}
-
-	return self.children
-}
-
-// Retrieve the current attributes on this node and update our local copy.
-func (self *Element) RefreshAttributes() error {
-	if rv, err := self.document.tab.RPC(`DOM`, `getAttributes`, map[string]interface{}{
-		`nodeId`: self.NodeID(),
-	}); err == nil {
-		self.setAttributesFromInterleavedArray(maputil.M(rv.Result).Slice(`attributes`))
-		return nil
-	} else {
-		return err
-	}
-}
-
 // Set the given named attribute to the stringified output of value.
 func (self *Element) SetAttribute(attrName string, value interface{}) error {
-	_, err := self.document.tab.RPC(`DOM`, `setAttributeValue`, map[string]interface{}{
-		`nodeId`: self.NodeID(),
-		`name`:   attrName,
-		`value`:  typeutil.V(value).String(),
-	})
+	_, err := self.evaluate(fmt.Sprintf(
+		"return this.setAttribute(%q, %q)",
+		attrName,
+		typeutil.V(value).String(),
+	), true)
 
 	return err
 }
 
 // Focus the current element.
 func (self *Element) Focus() error {
-	_, err := self.document.tab.RPC(`DOM`, `focus`, map[string]interface{}{
-		`nodeId`: self.NodeID(),
-	})
-
+	_, err := self.evaluate(`return this.focus()`, true)
 	return err
 }
 
 // Click on the current element.
 func (self *Element) Click() error {
-	_, err := self.Evaluate(`return this.click()`)
+	_, err := self.evaluate(`return this.click()`, true)
 	return err
 }
 
 // Remove the element.
 func (self *Element) Remove() error {
-	_, err := self.Evaluate(`this.remove()`)
+	_, err := self.evaluate(`this.remove()`, true)
 	return err
 }
 
@@ -249,6 +236,10 @@ func (self *Element) Highlight(r int, g int, b int, a float64) error {
 
 // Evaluate the given JavaScript as an anonymous function on the current element.
 func (self *Element) Evaluate(script string) (interface{}, error) {
+	return self.evaluate(script, false)
+}
+
+func (self *Element) evaluate(script string, skipPrescript bool) (interface{}, error) {
 	if rv, err := self.document.tab.RPC(`DOM`, `resolveNode`, map[string]interface{}{
 		`backendNodeId`: self.BackendID(),
 	}); err == nil {
@@ -256,16 +247,24 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 		callGroupId := stringutil.UUID().String()
 
 		if oid := remoteObject.String(`object.objectId`); oid != `` {
+			prescript := `true`
+
+			if !skipPrescript {
+				prescript = self.document.prescript()
+			}
+
+			decl := fmt.Sprintf(
+				"function(){ try{ %s; %s; } catch(e) { return e; } }",
+				prescript,
+				script,
+			)
+
 			if rv, err := self.document.tab.RPC(`Runtime`, `callFunctionOn`, map[string]interface{}{
-				`objectId`: oid,
-				`functionDeclaration`: fmt.Sprintf(
-					"function(){ try{ %s; %s } catch(e) { return e; }",
-					self.document.prescript(),
-					script,
-				),
-				`returnByValue`: false,
-				`awaitPromise`:  false,
-				`objectGroup`:   callGroupId,
+				`objectId`:            oid,
+				`functionDeclaration`: decl,
+				`returnByValue`:       false,
+				`awaitPromise`:        false,
+				`objectGroup`:         callGroupId,
 			}); err == nil {
 				defer self.document.tab.releaseObjectGroup(callGroupId)
 				out := maputil.M(rv.Result)
@@ -275,8 +274,11 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 					excM := maputil.M(exc)
 
 					return nil, fmt.Errorf(
-						"Evaluation error: %v",
-						excM.String(`exception.description`, excM.String(`text`)),
+						"Evaluation error:\nline %d, col %d\n%v\n%v",
+						excM.Int(`lineNumber`),
+						excM.Int(`columnNumber`),
+						excM.String(`text`),
+						excM.String(`exception.description`),
 					)
 				} else if returnOid := out.String(`result.objectId`); returnOid != `` {
 					// recursively populate the output result and return it as a native value
@@ -301,15 +303,17 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 func (self *Element) TreeString(depth int) string {
 	output := ``
 
-	switch self.name {
+	switch name := self.Name(); name {
+	case `#comment`:
+		output += color.GreenString(`<!-- -->`)
 	case `#text`:
-		output += strings.Repeat(`  `, depth) + strings.TrimSpace(self.value) + "\n"
+		output += strings.Repeat(`  `, depth) + strings.TrimSpace(self.Text()) + "\n"
 
 	default:
 		attrs := []string{}
 		astr := ``
 
-		maputil.Walk(self.attributes, func(value interface{}, path []string, isLeaf bool) error {
+		maputil.Walk(self.Attributes(), func(value interface{}, path []string, isLeaf bool) error {
 			if isLeaf {
 				attrs = append(attrs, fmt.Sprintf(
 					"%v=\"%v\"",
@@ -327,27 +331,27 @@ func (self *Element) TreeString(depth int) string {
 
 		line := strings.Repeat(`  `, depth)
 		line += color.MagentaString(`<`)
-		line += color.RedString(self.name)
+		line += color.RedString(name)
 		line += astr
 		line += color.MagentaString(`>`)
 
-		line += self.value
+		line += self.Text()
 
 		line += color.MagentaString(`</`)
-		line += color.RedString(self.name)
+		line += color.RedString(name)
 		line += color.MagentaString(`>`)
 
 		output += line + "\n"
 	}
 
-	for _, child := range self.Children() {
-		output += child.TreeString(depth + 1)
-	}
+	// for _, child := range self.Children() {
+	// 	output += child.TreeString(depth + 1)
+	// }
 
 	return output
 }
 
-func (self *Element) setAttributesFromInterleavedArray(attrpairs []typeutil.Variant) {
+func (self *Element) getAttributesFromInterleavedArray(attrpairs []typeutil.Variant) map[string]interface{} {
 	attributes := make(map[string]interface{})
 
 	for i := 0; i < len(attrpairs); i += 2 {
@@ -356,5 +360,5 @@ func (self *Element) setAttributesFromInterleavedArray(attrpairs []typeutil.Vari
 		}
 	}
 
-	self.attributes = attributes
+	return attributes
 }

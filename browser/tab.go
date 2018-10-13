@@ -381,15 +381,6 @@ func (self *Tab) registerInternalEvents() {
 				)
 			}
 
-		case `DOM.attributeModified`, `DOM.attributeRemoved`:
-			nid := int(event.Params.Int(`nodeId`))
-
-			if element, ok := dom.Element(nid); ok {
-				element.RefreshAttributes()
-			} else {
-				log.Warningf("Got attribute update event for unknown node %d", nid)
-			}
-
 		case `DOM.childNodeRemoved`:
 			nid := int(event.Params.Int(`nodeId`))
 			dom.elements.Delete(nid)
@@ -557,6 +548,8 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 				if node, err := self.RPC(`DOM`, `describeNode`, map[string]interface{}{
 					`objectId`: result.String(`objectId`),
 				}); err == nil {
+					log.Dump(node)
+
 					return self.DOM().addElementFromResult(maputil.M(node.R().Get(`node`))), nil
 				} else {
 					return nil, err
