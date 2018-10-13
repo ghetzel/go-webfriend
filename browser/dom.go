@@ -45,22 +45,22 @@ func (self *Document) Reset() {
 // Create an element from a maputil.Map of element properties and add it to the
 // document's element index.
 func (self *Document) addElementFromResult(node *maputil.Map) *Element {
-	if nodeId := int(node.Int(`nodeId`)); nodeId > 0 {
+	if backendNodeId := int(node.Int(`backendNodeId`)); backendNodeId > 0 {
 		var element *Element
 		var children = node.Slice(`children`)
 
 		// load the various properties from the given node map into a new elements
-		if el, ok := self.elements.Load(nodeId); ok {
+		if el, ok := self.elements.Load(backendNodeId); ok {
 			element = el.(*Element)
 		} else {
 			// build the element
 			element = &Element{
+				backendId:  backendNodeId,
+				nodeId:     int(node.Int(`nodeId`)),
 				document:   self,
 				name:       sliceutil.OrString(node.String(`localName`), node.String(`nodeName`)),
 				attributes: make(map[string]interface{}),
 				value:      node.String(`nodeValue`),
-				backendId:  int(node.Int(`backendNodeId`)),
-				id:         nodeId,
 			}
 		}
 
@@ -76,8 +76,8 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 			}
 		}
 
-		log.Debugf("Store element %d: %v", element.ID(), element)
-		self.elements.Store(nodeId, element)
+		log.Debugf("Store element backend=%d node=%d: %v", element.BackendID(), element.NodeID(), element)
+		self.elements.Store(backendNodeId, element)
 
 		if !collapsed {
 			for _, child := range children {
@@ -134,11 +134,11 @@ func (self *Document) Element(id int) (*Element, bool) {
 }
 
 // Retrieve a known element by its Node ID
-func (self *Document) ElementByBackendId(id int) (*Element, bool) {
+func (self *Document) ElementByNodeID(id int) (*Element, bool) {
 	var element *Element
 
 	self.elements.Range(func(key interface{}, el interface{}) bool {
-		if elem := el.(*Element); elem.backendId == id {
+		if elem := el.(*Element); elem.NodeID() == id {
 			element = elem
 			return false
 		}
@@ -233,10 +233,10 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 // Remove the given element from the document.
 func (self *Document) RemoveElement(element *Element) error {
 	if element != nil {
-		defer self.elements.Delete(element.ID())
+		defer self.elements.Delete(element.BackendID())
 
 		_, err := self.tab.RPC(`DOM`, `removeNode`, map[string]interface{}{
-			`nodeId`: element.ID(),
+			`nodeId`: element.NodeID(),
 		})
 
 		return err
@@ -325,7 +325,7 @@ func (self *Document) HighlightAll(selector Selector) error {
 				},
 				`selectorList`: selector,
 			},
-			`nodeId`: root.ID(),
+			`backendNodeId`: root.BackendID(),
 		})
 	} else {
 		return err

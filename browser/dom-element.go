@@ -58,13 +58,13 @@ func (self Selector) GetAnnotation() (string, string, error) {
 }
 
 type Element struct {
+	backendId      int
+	nodeId         int
 	document       *Document
 	parent         int
 	name           string
 	attributes     map[string]interface{}
 	value          string
-	backendId      int
-	id             int
 	children       []*Element
 	loadedChildren bool
 }
@@ -86,7 +86,7 @@ func (self *Element) Parent() *Element {
 // the Friendscript runtime environment.
 func (self *Element) ToMap() map[string]interface{} {
 	output := map[string]interface{}{
-		`id`:         self.id,
+		`id`:         self.backendId,
 		`name`:       self.name,
 		`attributes`: self.attributes,
 	}
@@ -114,7 +114,7 @@ func (self *Element) MarshalJSON() ([]byte, error) {
 
 // Satisifies the fmt.Stringer interface.
 func (self *Element) String() string {
-	return fmt.Sprintf("[NODE %v] %v", self.id, self.name)
+	return fmt.Sprintf("[NODE %v] %v", self.backendId, self.name)
 }
 
 // Retrieve the text value of the element.
@@ -127,8 +127,12 @@ func (self *Element) Attributes() map[string]interface{} {
 	return maputil.DeepCopy(self.attributes)
 }
 
-func (self *Element) ID() int {
-	return self.id
+func (self *Element) BackendID() int {
+	return self.backendId
+}
+
+func (self *Element) NodeID() int {
+	return self.nodeId
 }
 
 // Retrieve the current position and dimensions of the element.
@@ -158,7 +162,7 @@ func (self *Element) Children() []*Element {
 		defer accumulator.Destroy()
 
 		if _, err := self.document.tab.RPC(`DOM`, `requestChildNodes`, map[string]interface{}{
-			`nodeId`: self.id,
+			`nodeId`: self.nodeId,
 			`pierce`: true,
 			`depth`:  1,
 		}); err == nil {
@@ -183,7 +187,7 @@ func (self *Element) Children() []*Element {
 // Retrieve the current attributes on this node and update our local copy.
 func (self *Element) RefreshAttributes() error {
 	if rv, err := self.document.tab.RPC(`DOM`, `getAttributes`, map[string]interface{}{
-		`nodeId`: self.ID(),
+		`nodeId`: self.NodeID(),
 	}); err == nil {
 		self.setAttributesFromInterleavedArray(maputil.M(rv.Result).Slice(`attributes`))
 		return nil
@@ -195,7 +199,7 @@ func (self *Element) RefreshAttributes() error {
 // Set the given named attribute to the stringified output of value.
 func (self *Element) SetAttribute(attrName string, value interface{}) error {
 	_, err := self.document.tab.RPC(`DOM`, `setAttributeValue`, map[string]interface{}{
-		`nodeId`: self.ID(),
+		`nodeId`: self.NodeID(),
 		`name`:   attrName,
 		`value`:  typeutil.V(value).String(),
 	})
@@ -206,7 +210,7 @@ func (self *Element) SetAttribute(attrName string, value interface{}) error {
 // Focus the current element.
 func (self *Element) Focus() error {
 	_, err := self.document.tab.RPC(`DOM`, `focus`, map[string]interface{}{
-		`nodeId`: self.ID(),
+		`nodeId`: self.NodeID(),
 	})
 
 	return err
@@ -239,14 +243,14 @@ func (self *Element) Highlight(r int, g int, b int, a float64) error {
 				`a`: a,
 			},
 		},
-		`nodeId`: self.id,
+		`nodeId`: self.NodeID(),
 	})
 }
 
 // Evaluate the given JavaScript as an anonymous function on the current element.
 func (self *Element) Evaluate(script string) (interface{}, error) {
 	if rv, err := self.document.tab.RPC(`DOM`, `resolveNode`, map[string]interface{}{
-		`nodeId`: self.ID(),
+		`backendNodeId`: self.BackendID(),
 	}); err == nil {
 		remoteObject := maputil.M(rv.Result)
 		callGroupId := stringutil.UUID().String()
@@ -286,7 +290,7 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 				return nil, err
 			}
 		} else {
-			return nil, fmt.Errorf("Unable to determine RemoteObjectID for node %d", self.ID())
+			return nil, fmt.Errorf("Unable to determine RemoteObjectID for node=%d backend=%d", self.NodeID(), self.BackendID())
 		}
 	} else {
 		return nil, err

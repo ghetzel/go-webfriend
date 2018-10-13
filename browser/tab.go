@@ -260,6 +260,10 @@ func (self *Tab) setupEvents() error {
 		return err
 	}
 
+	if err := self.rpc.CallAsync(`DOMSnapshot.enable`, nil); err != nil {
+		return err
+	}
+
 	if err := self.rpc.CallAsync(`Network.enable`, nil); err != nil {
 		return err
 	}
@@ -553,15 +557,7 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 				if node, err := self.RPC(`DOM`, `describeNode`, map[string]interface{}{
 					`objectId`: result.String(`objectId`),
 				}); err == nil {
-					backendNodeId := int(node.R().Int(`node.backendNodeId`))
-
-					if element, ok := self.DOM().ElementByBackendId(backendNodeId); ok {
-						return element, nil
-					} else {
-						// return nil, fmt.Errorf("Unable to locate node with backend ID %d", backendNodeId)
-						log.Warningf("Unable to locate node with backend ID %d", backendNodeId)
-						return skipItem, nil
-					}
+					return self.DOM().addElementFromResult(maputil.M(node.R().Get(`node`))), nil
 				} else {
 					return nil, err
 				}

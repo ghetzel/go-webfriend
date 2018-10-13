@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/PerformLine/go-performline-stdlib/log"
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
 )
@@ -39,16 +38,13 @@ func (self *Commands) Field(selector browser.Selector, args *FieldArgs) ([]*brow
 	}
 
 	defaults.SetDefaults(args)
-	dom := self.browser.Tab().DOM()
 
-	if elements, err := dom.Query(selector, nil); err == nil {
-		log.Debugf("els %+v", elements)
-
+	if elements, err := self.Select(selector, nil); err == nil {
 		for _, field := range elements {
-			log.Notice("NOTICE ME SENPAI")
-
-			if err := field.SetAttribute(`value`, ``); err != nil {
-				return nil, err
+			if args.Autoclear {
+				if err := field.SetAttribute(`value`, ``); err != nil {
+					return nil, err
+				}
 			}
 
 			if err := field.Focus(); err != nil {
@@ -64,7 +60,6 @@ func (self *Commands) Field(selector browser.Selector, args *FieldArgs) ([]*brow
 					KeyCode: 13,
 				})
 			}
-
 		}
 
 		return elements, err

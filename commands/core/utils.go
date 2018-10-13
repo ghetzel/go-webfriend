@@ -100,7 +100,7 @@ func (self *Commands) Inspect(args *InspectArgs) (*browser.Element, error) {
 		`x`: int(args.X),
 		`y`: int(args.Y),
 	}); err == nil {
-		if element, ok := self.browser.Tab().DOM().Element(int(rv.R().Int(`nodeId`))); ok {
+		if element, ok := self.browser.Tab().DOM().Element(int(rv.R().Int(`backendNodeId`))); ok {
 			if args.Highlight {
 				if err := element.Highlight(args.R, args.G, args.B, args.A); err != nil {
 					return nil, err
