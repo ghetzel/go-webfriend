@@ -43,11 +43,17 @@ type ModuleDoc struct {
 }
 
 func (self *ModuleDoc) AddCommand(name string, doc *CallDoc) {
+	doc.Description = processComment(doc.Description)
+
 	if self.commandSet == nil {
 		self.commandSet = make(map[string]*CallDoc)
 	}
 
-	self.commandSet[name] = doc
+	if _, ok := self.commandSet[name]; !ok {
+		self.commandSet[name] = doc
+	} else if doc.Description == `` {
+		return
+	}
 
 	self.Commands = nil
 
@@ -59,7 +65,7 @@ func (self *ModuleDoc) AddCommand(name string, doc *CallDoc) {
 		return (self.Commands[i].Name < self.Commands[j].Name)
 	})
 
-	log.Infof("  added command %q", name)
+	log.Infof("  added command %q // %s...", name, stringutil.ElideWords(doc.Description, 4))
 }
 
 type parsedStructField struct {
@@ -113,7 +119,7 @@ func (self *Environment) Documentation() []*ModuleDoc {
 	remaining := make([]string, 0)
 	modules := self.Modules()
 
-	for name, _ := range modules {
+	for name := range modules {
 		if name == `core` {
 			continue
 		} else {
@@ -152,6 +158,8 @@ func (self *Environment) Documentation() []*ModuleDoc {
 				mod.Summary = parsed.Summary
 				mod.Description = parsed.Docs
 				moduleT := reflect.TypeOf(module)
+
+				log.Debugf("Methods: %d", moduleT.NumMethod())
 
 				for i := 0; i < moduleT.NumMethod(); i++ {
 					fn := moduleT.Method(i)
@@ -256,26 +264,24 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 				nil,
 				parser.ParseComments,
 			); err == nil {
-				if parsed.Docs == `` {
-					lines := strings.Split(astCommentGroupToString(source.Doc), "\n")
-					goToDocs := false
+				lines := strings.Split(astCommentGroupToString(source.Doc), "\n")
+				goToDocs := false
 
-					for _, line := range lines {
-						if strings.TrimSpace(line) == `` {
-							goToDocs = true
-							continue
-						}
-
-						if goToDocs {
-							parsed.Docs += line + "\n"
-						} else {
-							parsed.Summary += line + "\n"
-						}
+				for _, line := range lines {
+					if strings.TrimSpace(line) == `` {
+						goToDocs = true
+						continue
 					}
 
-					parsed.Summary = strings.TrimSpace(parsed.Summary)
-					parsed.Docs = strings.TrimSpace(parsed.Docs)
+					if goToDocs {
+						parsed.Docs += line + "\n"
+					} else {
+						parsed.Summary += line + "\n"
+					}
 				}
+
+				parsed.Summary = strings.TrimSpace(parsed.Summary)
+				parsed.Docs = strings.TrimSpace(parsed.Docs)
 
 				for _, decl := range source.Decls {
 					switch decl.(type) {
@@ -312,7 +318,6 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 						}
 
 						parsed.Functions[key] = pFunc
-						log.Infof("  fn: %s", key)
 
 					case *ast.GenDecl:
 						if gdecl := decl.(*ast.GenDecl); len(gdecl.Specs) > 0 {
@@ -407,17 +412,21 @@ func astCommentGroupToString(cg *ast.CommentGroup) string {
 			}
 		}
 
-		lines := strings.Split(out, "\n")
-
-		for i, _ := range lines {
-			lines[i] = strings.TrimPrefix(lines[i], `//`)
-			lines[i] = strings.TrimPrefix(lines[i], ` `)
-		}
-
-		return strings.TrimSpace(strings.Join(lines, "\n"))
+		return processComment(out)
 	}
 
 	return ``
+}
+
+func processComment(out string) string {
+	lines := strings.Split(out, "\n")
+
+	for i := range lines {
+		lines[i] = strings.TrimPrefix(lines[i], `//`)
+		lines[i] = strings.TrimPrefix(lines[i], ` `)
+	}
+
+	return strings.TrimSpace(strings.Join(lines, "\n"))
 }
 
 func astTypeToString(ty ast.Expr) string {
