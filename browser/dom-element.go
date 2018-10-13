@@ -161,6 +161,7 @@ func (self *Element) NodeID() int {
 		self.refresh()
 
 		if self.nodeId == 0 {
+			log.DebugStack()
 			log.Panicf("%v: nodeId was explicitly requested before it is available", self)
 		}
 	}

@@ -73,7 +73,7 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 			}
 		}
 
-		log.Debugf("Store element backend=%d node=%d: %v", element.BackendID(), element.NodeID(), element)
+		log.Debugf("Store element backend=%d: %v", element.BackendID(), element)
 		self.elements.Store(backendNodeId, element)
 
 		if !collapsed {

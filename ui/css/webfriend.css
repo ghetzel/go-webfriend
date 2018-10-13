@@ -1,5 +1,10 @@
 body {
     position: relative;
+    background-color: rgb(18, 20, 22);
+}
+
+.basic-main {
+    background-color: white;
 }
 
 #main {
@@ -412,8 +417,8 @@ body {
 
 .fs-sidebar .nav-link:hover,
 .fs-sidebar .nav-link.active {
-    background: #111111;
-    color: #96D789;
+    background: #343A40;
+    color: white;
 }
 
 .fs-sidebar ul {

@@ -32,11 +32,34 @@ type CallDoc struct {
 	Return      *DocItem   `json:"return,omitempty"`
 }
 
+type CallDocSet []*CallDoc
+
 type ModuleDoc struct {
-	Name        string    `json:"name"`
-	Summary     string    `json:"summary,omitempty"`
-	Description string    `json:"description,omitempty"`
-	Commands    []CallDoc `json:"commands"`
+	Name        string     `json:"name"`
+	Summary     string     `json:"summary,omitempty"`
+	Description string     `json:"description,omitempty"`
+	Commands    CallDocSet `json:"commands"`
+	commandSet  map[string]*CallDoc
+}
+
+func (self *ModuleDoc) AddCommand(name string, doc *CallDoc) {
+	if self.commandSet == nil {
+		self.commandSet = make(map[string]*CallDoc)
+	}
+
+	self.commandSet[name] = doc
+
+	self.Commands = nil
+
+	for _, cmd := range self.commandSet {
+		self.Commands = append(self.Commands, cmd)
+	}
+
+	sort.Slice(self.Commands, func(i int, j int) bool {
+		return (self.Commands[i].Name < self.Commands[j].Name)
+	})
+
+	log.Infof("  added command %q", name)
 }
 
 type parsedStructField struct {
@@ -84,8 +107,8 @@ type parsedSource struct {
 	Structs   map[string]parsedStruct
 }
 
-func (self *Environment) Documentation() []ModuleDoc {
-	docs := make([]ModuleDoc, 0)
+func (self *Environment) Documentation() []*ModuleDoc {
+	mods := make(map[string]*ModuleDoc)
 	modnames := []string{`core`}
 	remaining := make([]string, 0)
 	modules := self.Modules()
@@ -104,12 +127,21 @@ func (self *Environment) Documentation() []ModuleDoc {
 	for _, name := range modnames {
 		module := modules[name]
 
-		doc := ModuleDoc{
-			Name:     name,
-			Commands: make([]CallDoc, 0),
+		var mod *ModuleDoc
+
+		if m, ok := mods[name]; ok {
+			mod = m
+		} else {
+			mod = &ModuleDoc{
+				Name:     name,
+				Commands: make(CallDocSet, 0),
+			}
+
+			mods[name] = mod
 		}
 
 		sourcePaths := []string{
+			fmt.Sprintf("../friendscript/commands/%s/*.go", name),
 			fmt.Sprintf("commands/%s/*.go", name),
 		}
 
@@ -117,8 +149,8 @@ func (self *Environment) Documentation() []ModuleDoc {
 			log.Debugf("Parsing %q (%T) from %v", name, module, sourcePath)
 
 			if parsed, err := parseCommandSourceCode(sourcePath); err == nil {
-				doc.Summary = parsed.Summary
-				doc.Description = parsed.Docs
+				mod.Summary = parsed.Summary
+				mod.Description = parsed.Docs
 				moduleT := reflect.TypeOf(module)
 
 				for i := 0; i < moduleT.NumMethod(); i++ {
@@ -126,7 +158,7 @@ func (self *Environment) Documentation() []ModuleDoc {
 					key := stringutil.Underscore(fn.Name)
 
 					switch key {
-					case `execute_command`, `format_command_name`, `set_instance`:
+					case `execute_command`, `format_command_name`, `set_instance`, `new`:
 						continue
 					}
 
@@ -185,18 +217,27 @@ func (self *Environment) Documentation() []ModuleDoc {
 						}
 					}
 
-					doc.Commands = append(doc.Commands, cmdDoc)
+					mod.AddCommand(cmdDoc.Name, &cmdDoc)
 				}
 			} else {
 				log.Errorf("Error parsing source: %v", err)
 			}
 
-			docs = append(docs, doc)
-			log.Infof("Documented %q: %d commands", doc.Name, len(doc.Commands))
+			log.Infof("Documented %q: %d commands", mod.Name, len(mod.Commands))
 		}
 	}
 
-	return docs
+	sortedMods := make([]*ModuleDoc, 0)
+
+	for _, mod := range mods {
+		sortedMods = append(sortedMods, mod)
+	}
+
+	sort.Slice(sortedMods, func(i int, j int) bool {
+		return (sortedMods[i].Name < sortedMods[j].Name)
+	})
+
+	return sortedMods
 }
 
 func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
@@ -207,6 +248,8 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 
 	if sources, err := filepath.Glob(fileglob); err == nil {
 		for _, sourcefile := range sources {
+			log.Infof("Processing file %s", sourcefile)
+
 			if source, err := parser.ParseFile(
 				token.NewFileSet(),
 				sourcefile,
@@ -236,7 +279,8 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 
 				for _, decl := range source.Decls {
 					switch decl.(type) {
-					case *ast.FuncDecl:
+					case *ast.FuncDecl: // describe a function declaration from its source code
+
 						fnDecl := decl.(*ast.FuncDecl)
 						key := stringutil.Underscore(fnDecl.Name.Name)
 
@@ -247,10 +291,12 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 							Args:             make(parsedArgSet, len(fnDecl.Type.Params.List)),
 						}
 
+						// functions preceded by a "// [SKIP]" command will be omitted
 						if strings.Contains(pFunc.Docs, `[SKIP]`) {
 							pFunc.Skip = true
 						}
 
+						// extract function parameter names
 						for i, inParam := range fnDecl.Type.Params.List {
 							pFunc.Args[i] = &parsedArg{
 								Name: inParam.Names[0].Name,
@@ -258,6 +304,7 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 							}
 						}
 
+						// extract function return types
 						if fnDecl.Type.Results != nil && len(fnDecl.Type.Results.List) > 1 {
 							pFunc.Return = &parsedArg{
 								Type: astTypeToString(fnDecl.Type.Results.List[0].Type),
@@ -265,6 +312,7 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 						}
 
 						parsed.Functions[key] = pFunc
+						log.Infof("  fn: %s", key)
 
 					case *ast.GenDecl:
 						if gdecl := decl.(*ast.GenDecl); len(gdecl.Specs) > 0 {
@@ -279,7 +327,6 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 									// built list of struct fields, including associated documentation
 									for _, sfield := range structType.Fields.List {
 										if len(sfield.Names) == 0 {
-											log.Warningf("Could not determine field names for %v", key)
 											continue
 										}
 
