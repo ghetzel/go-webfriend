@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	defaults "github.com/ghetzel/go-defaults"
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/pathutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
@@ -41,19 +42,19 @@ type HighlightArgs struct {
 
 // Highlight the node matching the given selector, or clear all highlights if
 // the selector is "none"
-func (self *Commands) Highlight(selector browser.Selector, args *HighlightArgs) error {
+func (self *Commands) Highlight(selector interface{}, args *HighlightArgs) error {
 	if args == nil {
 		args = &HighlightArgs{}
 	}
 
 	defaults.SetDefaults(args)
 
-	if selector.IsNone() {
-		return self.browser.Tab().AsyncRPC(`DOM`, `hideHighlight`, nil)
-	} else {
-		docroot := self.browser.Tab().DOM()
+	if elements, isNone, err := self.browser.ElementsFromSelector(selector); err == nil {
+		log.Dump(elements)
 
-		if elements, err := docroot.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
+		if isNone {
+			return self.browser.Tab().AsyncRPC(`DOM`, `hideHighlight`, nil)
+		} else {
 			for _, element := range elements {
 				if err := element.Highlight(args.R, args.G, args.B, args.A); err != nil {
 					return err
@@ -61,9 +62,9 @@ func (self *Commands) Highlight(selector browser.Selector, args *HighlightArgs) 
 			}
 
 			return nil
-		} else {
-			return err
 		}
+	} else {
+		return err
 	}
 }
 
