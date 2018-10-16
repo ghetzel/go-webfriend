@@ -28,6 +28,9 @@ type ConfigureArgs struct {
 
 	// Set the default background color of the underlying window in the following formats: `#RRGGBB`, `#RRGGBBAA`, `rgb()`, `rgba()`, `hsv()`, `hsva()`, `hsl()`, `hsla()`.
 	BackgroundColor string `json:"background_color"`
+
+	// Set whether scrollbars should be hidden all the time.
+	HideScrollbars bool `json:"hide_scrollbars"`
 }
 
 // Configures various features of the Remote Debugging protocol and provides
@@ -74,6 +77,10 @@ func (self *Commands) Configure(args *ConfigureArgs) error {
 
 	self.browser.Tab().AsyncRPC(`Emulation`, `setTouchEmulationEnabled`, map[string]interface{}{
 		`value`: args.EmulateTouch,
+	})
+
+	self.browser.Tab().AsyncRPC(`Emulation`, `setScrollbarsHidden`, map[string]interface{}{
+		`hidden`: args.HideScrollbars,
 	})
 
 	if bgcolor := args.BackgroundColor; bgcolor != `` {
