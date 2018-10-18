@@ -18,7 +18,7 @@ func main() {
 	app.Name = `webfriend`
 	app.Usage = webfriend.Slogan
 	app.Version = webfriend.Version
-	app.EnableBashCompletion = false
+	app.EnableBashCompletion = true
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
