@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
@@ -164,14 +163,7 @@ func (self *Commands) Tabs() ([]browser.Tab, error) {
 
 // Navigate back through the current tab's history.
 func (self *Commands) Back() error {
-	if r, err := self.browser.Tab().RPC(`Page`, `getNavigationHistory`, nil); err == nil {
-		results := maputil.M(r)
-		current := results.Int(`currentIndex`)
-		entries := results.Slice(`entries`)
-
-		log.Debugf("current: %d", current)
-		log.Dumpf("entries: %s", entries)
-
+	if _, err := self.browser.Tab().RPC(`Page`, `getNavigationHistory`, nil); err == nil {
 		return nil
 	} else {
 		return err

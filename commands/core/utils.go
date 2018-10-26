@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/pathutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
@@ -50,8 +49,6 @@ func (self *Commands) Highlight(selector interface{}, args *HighlightArgs) error
 	defaults.SetDefaults(args)
 
 	if elements, isNone, err := self.browser.ElementsFromSelector(selector); err == nil {
-		log.Dump(elements)
-
 		if isNone {
 			return self.browser.Tab().AsyncRPC(`DOM`, `hideHighlight`, nil)
 		} else {

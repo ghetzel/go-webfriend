@@ -55,6 +55,14 @@ func NewEnvironment(browser *browser.Browser) *Environment {
 	return environment
 }
 
+func (self *Environment) MustModule(name string) friendscript.Module {
+	if module, ok := self.Module(name); ok {
+		return module
+	} else {
+		panic(fmt.Sprintf("Invalid module %q", name))
+	}
+}
+
 func (self *Environment) Browser() *browser.Browser {
 	return self.browser
 }

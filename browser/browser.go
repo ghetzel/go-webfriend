@@ -34,6 +34,7 @@ var ProcessExitMaxWait = 10 * time.Second
 var ProcessExitCheckInterval = 125 * time.Millisecond
 
 type PathHandlerFunc = func(string) (string, io.Writer, bool)
+type PathReaderFunc = func(string) (io.ReadCloser, bool)
 
 type Browser struct {
 	Command                     argonaut.CommandName   `argonaut:",joiner=[=]"`
@@ -69,7 +70,8 @@ type Browser struct {
 	tabs                        map[string]*Tab
 	tabLock                     sync.Mutex
 	scopeable                   utils.Scopeable
-	pathHandlers                []PathHandlerFunc
+	pathWriters                 []PathHandlerFunc
+	pathReaders                 []PathReaderFunc
 }
 
 func NewBrowser() *Browser {
@@ -82,7 +84,8 @@ func NewBrowser() *Browser {
 		StartWait:           DefaultStartWait,
 		exitchan:            make(chan error),
 		tabs:                make(map[string]*Tab),
-		pathHandlers:        make([]PathHandlerFunc, 0),
+		pathWriters:         make([]PathHandlerFunc, 0),
+		pathReaders:         make([]PathReaderFunc, 0),
 	}
 }
 
@@ -92,17 +95,31 @@ func Start() (*Browser, error) {
 }
 
 func (self *Browser) RegisterPathHandler(handler PathHandlerFunc) {
-	self.pathHandlers = append(self.pathHandlers, handler)
+	self.pathWriters = append(self.pathWriters, handler)
+}
+
+func (self *Browser) RegisterPathReader(handler PathReaderFunc) {
+	self.pathReaders = append(self.pathReaders, handler)
 }
 
 func (self *Browser) GetWriterForPath(path string) (string, io.Writer, bool) {
-	for _, handler := range self.pathHandlers {
+	for _, handler := range self.pathWriters {
 		if p, w, ok := handler(path); ok {
 			return p, w, true
 		}
 	}
 
 	return ``, nil, false
+}
+
+func (self *Browser) GetReaderForPath(path string) (io.ReadCloser, error) {
+	for _, handler := range self.pathReaders {
+		if r, ok := handler(path); ok {
+			return r, nil
+		}
+	}
+
+	return os.Open(path)
 }
 
 func (self *Browser) SetScope(scopeable utils.Scopeable) {

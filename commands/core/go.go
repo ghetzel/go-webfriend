@@ -3,12 +3,12 @@ package core
 import (
 	"fmt"
 	"net/url"
-	"strings"
 	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/utils"
@@ -25,7 +25,7 @@ type GoArgs struct {
 	// generate a URL with a randomly generated path component to ensure that
 	// it is always different from the current page. Specifying None will omit
 	// the field from the request.
-	Referrer string `json:"referrer" default:"random"`
+	Referrer string `json:"referrer"`
 
 	// Whether to block until the page has finished loading.
 	WaitForLoad bool `json:"wait_for_load" default:"true"`
@@ -49,12 +49,24 @@ type GoArgs struct {
 	// load (e.g.: HTTP 4xx/5xx, SSL, TCP connection errors).
 	ContinueOnError bool `json:"continue_on_error"`
 
+	// These HTTP status codes are not considered errors.
+	ContinueStatuses []int `json:"continue_statuses"`
+
 	// Whether to continue execution if load_event_name is not seen before
 	// timeout elapses.
 	ContinueOnTimeout bool `json:"continue_on_timeout" default:"false"`
 
 	// The RPC event to wait for before proceeding to the next command.
 	LoadEventName string `json:"load_event_name" default:"Page.loadEventFired"`
+
+	// Provide a username if one is requested via HTTP Basic authentication.
+	Username string `json:"username"`
+
+	// Provide a password if one is requested via HTTP Basic authentication.
+	Password string `json:"password"`
+
+	// Only provide credentials if the HTTP Basic Authentication Realm matches this one.
+	Realm string `json:"realm"`
 }
 
 type GoResponse struct {
@@ -109,12 +121,11 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 	args.RequestPollTimeout = utils.FudgeDuration(args.RequestPollTimeout)
 
 	// if specified as random, generate a referrer with a UUID in the url
-	if args.Referrer == `random` {
-		args.Referrer = fmt.Sprintf(
-			"%s/%v",
-			strings.TrimSuffix(RandomReferrerPrefix, `/`),
-			stringutil.UUID(),
-		)
+	switch args.Referrer {
+	case `random`:
+		args.Referrer = stringutil.UUID().String()
+	case ``:
+		args.Referrer = RandomReferrerPrefix
 	}
 
 	// clear our network requests accumulated so far
@@ -133,6 +144,38 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 			// if a scheme wasn't given, prepend HTTPS
 			if u.Scheme == `` {
 				u.Scheme = `https`
+			}
+
+			// if basic auth credentials are specified, setup the request intercept to provide them
+			username := args.Username
+			password := args.Password
+
+			if username != `` || password != `` {
+				if err := self.browser.Tab().AddNetworkIntercept(``, true, func(tab *browser.Tab, pattern *browser.NetworkRequestPattern, event *browser.Event) *browser.NetworkInterceptResponse {
+					response := &browser.NetworkInterceptResponse{}
+
+					if event.P().Bool(`isNavigationRequest`) {
+						if origin := event.P().String(`authChallenge.origin`); origin != `` {
+							if args.Realm == `` || args.Realm == event.P().String(`authChallenge.realm`) {
+								u := args.Username
+								p := args.Password
+
+								if u == `` && p == `` {
+									response.AuthResponse = `Cancel`
+								} else {
+									response.AuthResponse = `ProvideCredentials`
+									response.Username = username
+									response.Password = password
+								}
+							}
+						}
+					}
+
+					return response
+				}); err != nil {
+					log.Warning(err)
+					return nil, fmt.Errorf("Failed to setup authentication intercept")
+				}
 			}
 
 			if rv, err := self.browser.Tab().Navigate(u.String()); err == nil {
@@ -180,7 +223,10 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 
 						if v := netreq.R().Int(`response.status`); v >= 0 {
 							if v >= 400 && !args.ContinueOnError {
-								return nil, fmt.Errorf("HTTP %v", v)
+								// ContinueStatuses (if set) gives us one last chance to accept this response before erroring out
+								if len(args.ContinueStatuses) == 0 || !sliceutil.Contains(args.ContinueStatuses, v) {
+									return nil, fmt.Errorf("HTTP %v", v)
+								}
 							}
 
 							cmdresp.Status = int(v)

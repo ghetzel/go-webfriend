@@ -126,8 +126,6 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 			if args.Height == 0 {
 				args.Height = int(pageHeight)
 			}
-		} else {
-			return response, fmt.Errorf("Unable to determine page size, and either width or height were not explicitly given.")
 		}
 	}
 

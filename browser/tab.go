@@ -1,9 +1,13 @@
 package browser
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"sync"
 	"time"
 
@@ -22,6 +26,112 @@ var consoleEvents = `Console.messageAdded`
 var skipItem = errors.New(`skip`)
 
 type TabID string
+
+type NetworkRequestPattern struct {
+	URL               string
+	ResourceType      string
+	InterceptionStage string
+	Pattern           glob.Glob
+}
+
+func (self *NetworkRequestPattern) ToMap() map[string]interface{} {
+	rv := make(map[string]interface{})
+
+	if self.URL != `` {
+		rv[`urlPattern`] = self.URL
+	}
+
+	if self.ResourceType != `` {
+		rv[`resourceType`] = self.ResourceType
+	}
+
+	if self.InterceptionStage != `` {
+		rv[`interceptionStage`] = self.InterceptionStage
+	}
+
+	return rv
+}
+
+type NetworkInterceptResponse struct {
+	URL          string
+	Method       string
+	Body         io.Reader
+	PostData     map[string]interface{}
+	Header       http.Header
+	Error        error
+	AuthResponse string
+	Username     string
+	Password     string
+	Autoremove   bool
+}
+
+func (self *NetworkInterceptResponse) ToMap(id string) map[string]interface{} {
+	rv := map[string]interface{}{
+		`interceptionId`: id,
+	}
+
+	if self.Error == nil {
+		if self.Body == nil {
+			if v := self.URL; v != `` {
+				rv[`url`] = v
+			}
+
+			if v := self.Method; v != `` {
+				rv[`method`] = v
+			}
+
+			if len(self.PostData) > 0 {
+				rv[`postData`] = maputil.Join(self.PostData, `=`, `&`)
+			}
+
+			if len(self.Header) > 0 {
+				rv[`headers`] = self.Header
+			}
+		} else if data, err := ioutil.ReadAll(self.Body); err == nil {
+			raw := &http.Response{
+				StatusCode:    200,
+				Proto:         `HTTP/1.1`,
+				ProtoMajor:    1,
+				ProtoMinor:    1,
+				Header:        self.Header,
+				Body:          ioutil.NopCloser(bytes.NewBuffer(data)),
+				ContentLength: int64(len(data)),
+			}
+
+			dest := bytes.NewBuffer(nil)
+
+			if err := raw.Write(dest); err == nil {
+				rv[`rawResponse`] = base64.StdEncoding.EncodeToString(dest.Bytes())
+			} else {
+				log.Warningf("Failed to generate intercept response: %v", err)
+				rv[`errorReason`] = `Failed`
+			}
+		} else {
+			log.Warningf("Failed to read intercept body: %v", err)
+			rv[`errorReason`] = `Failed`
+		}
+
+		switch self.AuthResponse {
+		case `Cancel`:
+			rv[`authChallengeResponse`] = map[string]interface{}{
+				`response`: `Cancel`,
+			}
+
+		case `ProvideCredentials`:
+			rv[`authChallengeResponse`] = map[string]interface{}{
+				`response`: `ProvideCredentials`,
+				`username`: self.Username,
+				`password`: self.Password,
+			}
+		}
+	} else {
+		rv[`errorReason`] = self.Error.Error()
+	}
+
+	return rv
+}
+
+type NetworkInterceptFunc func(*Tab, *NetworkRequestPattern, *Event) *NetworkInterceptResponse
 
 type NetworkRequest struct {
 	ID         string
@@ -77,6 +187,7 @@ type Tab struct {
 	screencasting        bool
 	castlock             sync.Mutex
 	mostRecentInfo       *PageInfo
+	netIntercepts        sync.Map
 }
 
 func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
@@ -278,7 +389,10 @@ func (self *Tab) setupEvents() error {
 func (self *Tab) startEventReceiver() {
 	for message := range self.rpc.Messages() {
 		event := eventFromRpcResponse(message)
-		log.Debugf("[event] %v", event)
+
+		if name := event.Name; name != `` {
+			log.Debugf("[event] %v", name)
+		}
 
 		// dispatch events to waiters
 		self.waiters.Range(func(_ interface{}, waiterI interface{}) bool {
@@ -413,6 +527,45 @@ func (self *Tab) registerInternalEvents() {
 		}
 	})
 
+	self.RegisterEventHandler(`Network.requestIntercepted`, func(event *Event) {
+		url := event.P().String(`request.url`)
+		id := event.P().String(`interceptionId`)
+		interceptResponse := &NetworkInterceptResponse{}
+
+		self.netIntercepts.Range(func(key interface{}, value interface{}) bool {
+			if requestPattern, ok := key.(*NetworkRequestPattern); ok {
+				if fn, ok := value.(NetworkInterceptFunc); ok && fn != nil {
+					if requestPattern.Pattern == nil {
+						if pattern, err := glob.Compile(requestPattern.URL); err == nil {
+							requestPattern.Pattern = pattern
+						} else {
+							return true
+						}
+					}
+
+					if requestPattern.Pattern.Match(url) {
+						log.Debugf("Intercepted %v: %v", id, url)
+
+						if response := fn(self, requestPattern, event); response != nil {
+							if response.Autoremove {
+								self.netIntercepts.Delete(key)
+							}
+
+							interceptResponse = response
+						}
+					}
+				}
+			}
+
+			return true
+		})
+
+		// if we receive this event, we HAVE to respond to it
+		if err := self.AsyncRPC(`Network`, `continueInterceptedRequest`, interceptResponse.ToMap(id)); err != nil {
+			log.Errorf("Failed to complete interception: %v", err)
+		}
+	})
+
 	self.RegisterEventHandler(`Page.screencastFrame`, func(event *Event) {
 		defer self.RPC(`Page`, `screencastFrameAck`, map[string]interface{}{
 			`sessionId`: event.Params.Int(`sessionId`),
@@ -430,6 +583,51 @@ func (self *Tab) registerInternalEvents() {
 				log.Warningf("[rpc] Failed to decode screencast frame: %v", err)
 			}
 		}
+	})
+}
+
+func (self *Tab) AddNetworkIntercept(urlPattern string, waitForHeaders bool, fn NetworkInterceptFunc) error {
+	requestPattern := &NetworkRequestPattern{}
+
+	if urlPattern == `` {
+		requestPattern.URL = `*`
+	} else {
+		requestPattern.URL = urlPattern
+	}
+
+	if waitForHeaders {
+		requestPattern.InterceptionStage = `HeadersReceived`
+	} else {
+		requestPattern.InterceptionStage = `Request`
+	}
+
+	patterns := []map[string]interface{}{
+		requestPattern.ToMap(),
+	}
+
+	self.netIntercepts.Range(func(key interface{}, _ interface{}) bool {
+		if rp, ok := key.(*NetworkRequestPattern); ok {
+			patterns = append(patterns, rp.ToMap())
+		}
+
+		return true
+	})
+
+	if err := self.AsyncRPC(`Network`, `setRequestInterception`, map[string]interface{}{
+		`patterns`: patterns,
+	}); err == nil {
+		self.netIntercepts.Store(requestPattern, fn)
+		return nil
+	} else {
+		return err
+	}
+}
+
+func (self *Tab) ClearNetworkIntercepts() error {
+	self.netIntercepts = sync.Map{}
+
+	return self.AsyncRPC(`Network`, `setRequestInterception`, map[string]interface{}{
+		`patterns`: []interface{}{},
 	})
 }
 
@@ -548,8 +746,6 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 				if node, err := self.RPC(`DOM`, `describeNode`, map[string]interface{}{
 					`objectId`: result.String(`objectId`),
 				}); err == nil {
-					log.Dump(node)
-
 					return self.DOM().addElementFromResult(maputil.M(node.R().Get(`node`))), nil
 				} else {
 					return nil, err

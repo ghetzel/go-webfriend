@@ -1,6 +1,8 @@
 github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78/go.mod h1:LmzpDX56iTiv29bbRTIsUNlaFfuhWRQBWjQdVyAevI8=
 github.com/Microsoft/go-winio v0.4.11/go.mod h1:VhR8bwka0BXejwEJY73c50VrPtXAaKcyvVC4A4RozmA=
 github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5/go.mod h1:lmUJ/7eu/Q8D7ML55dXQrVaamCz2vxCfdQBasLZfHKk=
+github.com/PerformLine/go-performline-stdlib v0.6.24 h1:Qcn866Dt7LBF90DdrVt9sJcbqkAoLoNE9AxO50odmzY=
+github.com/PerformLine/go-performline-stdlib v0.6.24/go.mod h1:CoZs0KZPIabLnwq1jnmRTmSK6ng5fJud3EzsFv3sVw8=
 github.com/PuerkitoBio/goquery v1.4.1 h1:smcIRGdYm/w7JSbcdeLHEMzxmsBQvl8lhf0dSw2nzMI=
 github.com/PuerkitoBio/goquery v1.4.1/go.mod h1:T9ezsOHcCrDCgA8aF1Cqr3sSYbO/xgdy8/R/XiIMAhA=
 github.com/RichardKnop/logging v0.0.0-20180729160517-75cec7213f7c/go.mod h1:GN1ovZ77t2jiz0kTaWhgtQe271GODCgheqxlxGt7wIo=
@@ -24,6 +26,8 @@ github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dR
 github.com/boltdb/bolt v0.0.0-20171120010307-9da317453632/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
 github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
 github.com/bradfitz/gomemcache v0.0.0-20180710155616-bc664df96737/go.mod h1:PmM6Mmwb0LSuEubjR8N7PtNe1KxZLtOUHtbeikc5h60=
+github.com/browserpass/browserpass v0.0.0-20180903233706-99efdc5e878c h1:zys4BS+WfAU+eL796q3+8uUvLK/g+7qa7yRJqh2UNB8=
+github.com/browserpass/browserpass v0.0.0-20180903233706-99efdc5e878c/go.mod h1:8E6mzeDUHw/24NCrrHoHpt6JGJMgBRs01nIqlIk6nlI=
 github.com/c-bata/go-prompt v0.2.1 h1:HTPxmnfY4y5x3Myo7Gq4ce989jfnvZIBgdBp6y8bjYM=
 github.com/c-bata/go-prompt v0.2.1/go.mod h1:VzqtzE2ksDBcdln8G7mk2RX9QyGjH+OVqOCSiVIqS34=
 github.com/c-bata/go-prompt v0.2.2 h1:uyKRz6Z6DUyj49QVijyM339UJV9yhbr70gESwbNU3e0=
@@ -37,6 +41,8 @@ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/deckarep/golang-set v0.0.0-20171013212420-1d4478f51bed/go.mod h1:93vsz/8Wt4joVM7c2AVqh+YRMiUSc14yDtF28KmMOgQ=
 github.com/deluan/gosonic v0.0.0-20170404035338-f7c182b1f879 h1:S0/iwq4EguvWeCNIFtNzqSNgF/X0K/E2lGq7sGsR2kw=
 github.com/deluan/gosonic v0.0.0-20170404035338-f7c182b1f879/go.mod h1:xONJpmtXY17JTelG096S+gOdr0MBBbrG5EP990hWdFs=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
+github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/docker/go-connections v0.3.0/go.mod h1:Gbd7IOopHjR8Iph03tsViu4nIes5XhDvyHbTtUxmeec=
 github.com/docker/go-units v0.3.3/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/dsnet/compress v0.0.0-20171208185109-cc9eb1d7ad76 h1:eX+pdPPlD279OWgdx7f6KqIRSONuK7egk+jDx7OM3Ac=
@@ -73,10 +79,13 @@ github.com/ghetzel/go-stockutil v1.5.49 h1:SQEo4cLlzLidi9j+u+AvcYdN6jy5yqpJAB8L+
 github.com/ghetzel/go-stockutil v1.5.49/go.mod h1:Y2IAZKZNEGeZZD46Cwd94CoA1Oh+Bx0N4c2z5FpMT5s=
 github.com/ghetzel/go-stockutil v1.5.50 h1:VApjvnJW7oAx34r2V+MrInFuzguGRmgvYkr6cShCfu4=
 github.com/ghetzel/go-stockutil v1.5.50/go.mod h1:Y2IAZKZNEGeZZD46Cwd94CoA1Oh+Bx0N4c2z5FpMT5s=
+github.com/ghetzel/go-stockutil v1.5.52 h1:aHmiUEhOa7704ia+/TcqeDmKhlyGoZEzs8GAbqK9IAM=
+github.com/ghetzel/go-stockutil v1.5.52/go.mod h1:Y2IAZKZNEGeZZD46Cwd94CoA1Oh+Bx0N4c2z5FpMT5s=
 github.com/ghetzel/go-webfriend v0.9.23/go.mod h1:4tjKFGdCtac9eXJ8Hz48DSCoiwjhzynwFFiyhsLfMnI=
 github.com/ghetzel/go-webfriend v0.9.27/go.mod h1:l3nIHrNcBc3bVfCmiIV9h43FV9dSSlfgZK0GmfY7DIE=
 github.com/ghetzel/pivot v2.5.0+incompatible/go.mod h1:WQSAPymR2LZs7w2sCTR6yinegKzeOMIhlPoXYN364as=
 github.com/ghetzel/pivot/v3 v3.0.14/go.mod h1:44DZvOwnjS3a+uXRFG63cj7dDuCje4x5rOgQt7Ezy3w=
+github.com/ghetzel/pivot/v3 v3.0.20/go.mod h1:2SNV9OnFomsmMDuXW8S+M7DIS0YSAE8E4q08NGILE5s=
 github.com/ghetzel/uuid v0.0.0-20171129191014-dec09d789f3d h1:YVJe7KwVYazt90hCc/q2dYJVS3062AY6QdT6iHd+Kh8=
 github.com/ghetzel/uuid v0.0.0-20171129191014-dec09d789f3d/go.mod h1:7CCemW/spiphukVWb/v2WWYeZkydh30TwSRBh48irZQ=
 github.com/ghodss/yaml v1.0.0 h1:wQHKEahhL6wmXdzwWG11gIVCkOv05bNOh+Rxn0yngAk=
@@ -161,6 +170,8 @@ github.com/mattn/go-shellwords v1.0.3/go.mod h1:3xCvwCdWdlDJUrvuMn7Wuy9eWs4pE8vq
 github.com/mattn/go-sqlite3 v1.9.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOqkbpncsNc=
 github.com/mattn/go-tty v0.0.0-20180219170247-931426f7535a h1:8TGB3DFRNl06DB1Q6zBX+I7FDoCUZY2fmMS9WGUIIpw=
 github.com/mattn/go-tty v0.0.0-20180219170247-931426f7535a/go.mod h1:XPvLUNfbS4fJH25nqRHfWLMa1ONC8Amw+mIA639KxkE=
+github.com/mattn/go-zglob v0.0.0-20180803001819-2ea3427bfa53 h1:tGfIHhDghvEnneeRhODvGYOt305TPwingKt6p90F4MU=
+github.com/mattn/go-zglob v0.0.0-20180803001819-2ea3427bfa53/go.mod h1:9fxibJccNxU2cnpIKLRRFA7zX7qhkJIQWBb449FYHOo=
 github.com/mcuadros/go-defaults v0.0.0-20161116231230-e1c978be3307 h1:yZPHtcvw3W2CHchOutz8dXaYmFcPjBql1BOCavZpt7M=
 github.com/mcuadros/go-defaults v0.0.0-20161116231230-e1c978be3307/go.mod h1:vl9cJiNIIHISQeboDhZBUCiCOa3GkeioLe3Y95NXF6Y=
 github.com/mcuadros/go-defaults v1.1.0 h1:K0LgSNfsSUrbEHR7HgfZpOHVWYsPnYh/dKTA7pGeZ/I=
@@ -215,8 +226,12 @@ github.com/pointlander/peg v1.0.0/go.mod h1:WJTMcgeWYr6fZz4CwHnY1oWZCXew8GWCF93F
 github.com/prologic/go-gopher v0.0.0-20180416032048-d8a2f839d2ad/go.mod h1:58Q4PlMrJyT5EGsnKI+TpvvahdHDXOQiQL+YbAKSKhM=
 github.com/russross/blackfriday v1.5.1 h1:B8ZN6pD4PVofmlDCDUdELeYrbsVIDM/bpjW3v3zgcRc=
 github.com/russross/blackfriday v1.5.1/go.mod h1:JO/DiYxRf+HjHt06OyowR9PTA263kcR/rfWxYHBV53g=
+github.com/sahilm/fuzzy v0.1.0 h1:FzWGaw2Opqyu+794ZQ9SYifWv2EIXpwP4q8dY1kDAwI=
+github.com/sahilm/fuzzy v0.1.0/go.mod h1:VFvziUEIMCrT6A6tw2RFIXPXXmzXbOsSHF0DOI8ZK9Y=
 github.com/sergi/go-diff v0.0.0-20140808132932-97b2266dfe4b h1:iXZ3pgSI2g9Qo7LVrJVU7UQQuqQxrtEyRO/p/eMkU48=
 github.com/sergi/go-diff v0.0.0-20140808132932-97b2266dfe4b/go.mod h1:0CfEIISq7TuYL3j771MWULgwwjU+GofnZX9QAmXWZgo=
+github.com/shutterstock/go-stockutil v0.0.0-20171108152810-39a961cfa608 h1:ArQHW5uX3ECpB1SA6djBhUaRAuEg/veRqbXNnWJ4330=
+github.com/shutterstock/go-stockutil v0.0.0-20171108152810-39a961cfa608/go.mod h1:klPVXq46Dn/clbJoDo5anjL8ICsC3yzN6X+kW4slB9Q=
 github.com/sirupsen/logrus v1.0.6/go.mod h1:pMByvHTf9Beacp5x1UXfOR9xyW/9antXMhjMPG0dEzc=
 github.com/spaolacci/murmur3 v0.0.0-20170819071325-9f5d223c6079 h1:lDiM+yMjW7Ork8mhl0YN0qO1Z02qGoe1vwzGc1gP/8U=
 github.com/spaolacci/murmur3 v0.0.0-20170819071325-9f5d223c6079/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=

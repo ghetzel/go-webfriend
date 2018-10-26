@@ -133,6 +133,9 @@ func (self *RPC) Call(method string, params map[string]interface{}, timeout time
 		Params: params,
 	}
 
+	self.sendlock.Lock()
+	defer self.sendlock.Unlock()
+
 	if reply, err := self.Send(message, timeout); err == nil {
 		if len(reply.Error) > 0 {
 			errmap := maputil.M(reply.Error)
@@ -173,9 +176,6 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 		return nil, fmt.Errorf("Cannot send, connection is closing...")
 	}
 
-	self.sendlock.Lock()
-	defer self.sendlock.Unlock()
-
 	mid := atomic.AddInt64(&self.messageId, 1)
 	message.ID = mid
 	waitForReply := (timeout > 0)
@@ -210,8 +210,6 @@ func (self *RPC) Close() error {
 
 		log.Debug("[rpc] Closing RPC connection")
 		self.closing = true
-		close(self.recv)
-
 		self.closelock.Unlock()
 	}
 
