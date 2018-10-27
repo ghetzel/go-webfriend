@@ -85,6 +85,10 @@ func (self *Commands) Intercept(match string, args *InterceptArgs) error {
 		args.Body = bytes.NewBufferString(contents)
 	} else if reader, ok := args.Body.(io.Reader); ok {
 		args.Body = reader
+	} else if contents, ok := args.Body.([]byte); ok {
+		args.Body = bytes.NewBuffer(contents)
+	} else if contents, ok := args.Body.([]uint8); ok {
+		args.Body = bytes.NewBuffer([]byte(contents))
 	} else {
 		return fmt.Errorf("Must specify a filename or reader")
 	}
