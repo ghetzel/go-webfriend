@@ -25,4 +25,3 @@ test: fmt deps
 
 build: fmt
 	go build -i -o bin/webfriend webfriend/main.go
-	go build -i -o bin/webfriend-autodoc webfriend/autodoc/*.go

@@ -45,14 +45,14 @@ type ModuleDoc struct {
 func (self *ModuleDoc) AddCommand(name string, doc *CallDoc) {
 	doc.Description = processComment(doc.Description)
 
-	if self.commandSet == nil {
+	if len(self.commandSet) == 0 {
 		self.commandSet = make(map[string]*CallDoc)
 	}
 
-	if _, ok := self.commandSet[name]; !ok {
-		self.commandSet[name] = doc
-	} else if doc.Description == `` {
+	if doc.Description == `` {
 		return
+	} else {
+		self.commandSet[name] = doc
 	}
 
 	self.Commands = nil
