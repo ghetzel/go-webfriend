@@ -71,11 +71,21 @@ type Element struct {
 func (self *Element) refresh() {
 	output := map[string]interface{}{}
 
-	if node, err := self.document.tab.RPC(`DOM`, `describeNode`, map[string]interface{}{
-		`nodeId`:        self.nodeId,
-		`backendNodeId`: self.backendNodeId,
-		`objectId`:      self.objectId,
-	}); err == nil {
+	params := map[string]interface{}{}
+
+	if self.nodeId > 0 {
+		params[`nodeId`] = self.nodeId
+	}
+
+	if self.backendNodeId > 0 {
+		params[`backendNodeId`] = self.backendNodeId
+	}
+
+	if self.objectId != `` {
+		params[`objectId`] = self.objectId
+	}
+
+	if node, err := self.document.tab.RPC(`DOM`, `describeNode`, params); err == nil {
 		details := maputil.M(node.R().Get(`node`))
 
 		if nodeId := int(details.Int(`nodeId`)); nodeId > 0 {
@@ -96,6 +106,8 @@ func (self *Element) refresh() {
 		if v := details.String(`nodeValue`); v != `` {
 			output[`text`] = v
 		}
+	} else {
+		log.Warningf("No such node nodeId=%v backendNodeId=%v objectId=%v: %v", self.nodeId, self.backendNodeId, self.objectId, err)
 	}
 
 	if position, err := self.Position(); err == nil {

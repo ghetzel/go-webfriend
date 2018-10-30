@@ -2,14 +2,22 @@ package core
 
 import (
 	"fmt"
+	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/utils"
 )
 
 type SelectArgs struct {
-	// Whether no matches returns an error or not.
-	CanBeEmpty bool `json:"can_be_empty" default:"false"`
+	// The timeout before we stop waiting for the element to appear.
+	Timeout time.Duration `json:"timeout" default:"5s"`
+
+	// The minimum number of matches necessary to be considered a successful match.
+	MinMatches int `json:"min_matches" default:"1"`
+
+	// The polling interval between element re-checks.
+	Interval time.Duration `json:"interval" default:"125ms"`
 }
 
 // Polls the DOM for an element that matches the given selector. Either the
@@ -21,17 +29,26 @@ func (self *Commands) Select(selector browser.Selector, args *SelectArgs) ([]*br
 	}
 
 	defaults.SetDefaults(args)
-	dom := self.browser.Tab().DOM()
+	args.Timeout = utils.FudgeDuration(args.Timeout)
+	args.Interval = utils.FudgeDuration(args.Interval)
 
-	if elements, err := dom.Query(selector, nil); err == nil || browser.IsElementNotFoundErr(err) {
-		if len(elements) > 0 {
-			return elements, nil
-		} else if args.CanBeEmpty {
-			return nil, nil
-		} else {
-			return nil, fmt.Errorf("No elements matched the given selector")
+	dom := self.browser.Tab().DOM()
+	started := time.Now()
+
+	for time.Since(started) <= args.Timeout {
+		if elements, err := dom.Query(selector, nil); err == nil {
+			if len(elements) >= args.MinMatches {
+				return elements, nil
+			}
 		}
+
+		time.Sleep(args.Interval)
+	}
+
+	// If we timed out but are allowed to have zero hits, then it's not an error.
+	if args.MinMatches == 0 {
+		return make([]*browser.Element, 0), nil
 	} else {
-		return nil, err
+		return nil, fmt.Errorf("Timed out waiting for '%v'", selector)
 	}
 }

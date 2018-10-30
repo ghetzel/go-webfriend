@@ -12,29 +12,31 @@ var Editor = Stapes.subclass({
                 action:   function(){
                     this.executeCurrentBuffer();
                 }.bind(this),
-            }, {
-                name:     'Inspect Mode',
-                shortcut: 'F10',
-                class:    function() {
-                    if (this.inspectMode) {
-                        return 'inspect-mode active';
-                    } else {
-                        return 'inspect-mode';
-                    }
-                }.bind(this),
-                icon:     'eyedropper',
-                toggle:   true,
-                action:   function() {
-                    var wasInspecting = this.inspectMode;
-                    this.inspectMode = !this.inspectMode;
+            },
+            // {
+            //     name:     'Inspect Mode',
+            //     shortcut: 'F10',
+            //     class:    function() {
+            //         if (this.inspectMode) {
+            //             return 'inspect-mode active';
+            //         } else {
+            //             return 'inspect-mode';
+            //         }
+            //     }.bind(this),
+            //     icon:     'eyedropper',
+            //     toggle:   true,
+            //     action:   function() {
+            //         var wasInspecting = this.inspectMode;
+            //         this.inspectMode = !this.inspectMode;
 
-                    if (wasInspecting) {
-                        webfriend.deactivateInspector();
-                    } else {
-                        webfriend.activateInspector();
-                    }
-                }.bind(this),
-            }, {
+            //         if (wasInspecting) {
+            //             webfriend.deactivateInspector();
+            //         } else {
+            //             webfriend.activateInspector();
+            //         }
+            //     }.bind(this),
+            // },
+            {
                 name:     'Show/Hide Stats',
                 shortcut: 'F8',
                 class:    'toggle-stats',
@@ -509,6 +511,7 @@ var Editor = Stapes.subclass({
 
     executeCurrentBuffer: function() {
         if (this.activeIndex) {
+            this.clearLog();
             console.debug('Execute buffer', this.activeIndex);
 
             var editor = this.getEditorByIndex(this.activeIndex);
@@ -516,11 +519,21 @@ var Editor = Stapes.subclass({
             if (editor) {
                 this.executingIndex = this.activeIndex;
                 webfriend.command(editor.file.text(), null, null, true).done(function(reply){
-                    console.log(reply);
+                    // console.log(reply);
                 }.bind(this)).fail(function(reply){
-                    this.log('error', 'Friendscript failed: ' + reply.error);
+                    if (reply.error) {
+                        this.log('error', 'Friendscript failed: ' + reply.error);
+                    }
                 }.bind(this))
             }
+        }
+    },
+
+    highlight: function(offset, length) {
+        var editor = this.getEditorByIndex(this.activeIndex);
+
+        if (editor) {
+            editor.file.highlight(offset, length);
         }
     },
 });
@@ -532,6 +545,7 @@ var EditorFile = Stapes.subclass({
         this.editor = editor;
         this.generation = 0;
         this.widgets = {};
+        this.marks = [];
         this.element = d3.select(this.editor.files)
             .append('div')
             .attr('class', 'editor-file')
@@ -551,6 +565,7 @@ var EditorFile = Stapes.subclass({
             lineNumbers:       true,
             autofocus:         true,
             styleActiveLine:   true,
+            styleSelectedText: true,
             extraKeys: {
                 'Ctrl-Space': 'autocomplete',
             },
@@ -584,6 +599,25 @@ var EditorFile = Stapes.subclass({
         }
 
         return inCommand;
+    },
+
+    highlight: function(offset, length) {
+        this.marks.forEach(function(mark){
+            mark.clear();
+        }.bind(this));
+
+        if (length) {
+            var pos = this.cm.posFromIndex(offset);
+            var end = this.cm.posFromIndex(offset+length);
+
+            this.marks.push(
+                this.cm.markText(pos, end, {
+                    className: "current-command",
+                })
+            );
+        } else {
+            this.marks = [];
+        }
     },
 
     updateInfoAtCursor: function(cm) {

@@ -23,6 +23,8 @@ var Webfriend = Stapes.subclass({
         this.maxEventCount = 0;
         this.frameCount = 0;
         this.maxFrameCount = 0;
+        this.timeOfLastConnectAttempt = null;
+        this.negateOffset = 0;
 
         this.editor = null;
         this.stats = [
@@ -86,6 +88,8 @@ var Webfriend = Stapes.subclass({
 
                 $(this.options.statsContainer).append(panel.dom);
             }.bind(this));
+
+            $('#stats').toggle();
         }
     },
 
@@ -129,7 +133,17 @@ var Webfriend = Stapes.subclass({
 
         $(this.targetElement).on('contextmenu', function(e) {
             e.preventDefault();
-        });
+
+            var parentOffset = $(this.targetElement).offset();
+            var relX = e.pageX - parentOffset.left;
+            var relY = e.pageY - parentOffset.top;
+
+            this.command('javascript', [
+                'return document.elementFromPoint(' + relX.toString() + ',' + relY.toString() +');'
+            ], null, false, 'inspect').done(function(reply){
+                console.log(reply)
+            }.bind(this));
+        }.bind(this));
 
         $(document).on('keydown keyup keypress', function(e) {
             if (this.editor && this.editor.handleEvent(e)) {
@@ -298,7 +312,9 @@ var Webfriend = Stapes.subclass({
         }
     },
 
-    command: function(scriptOrCommand, first, rest, tagCommand) {
+    command: function(scriptOrCommand, first, rest, tagCommand, resultVar) {
+        resultVar = (resultVar || 'result');
+
         if (!this.commandStream || this.commandStream.readyState != 1) {
             throw 'Command Stream is not available to accept commands';
         }
@@ -306,6 +322,13 @@ var Webfriend = Stapes.subclass({
         if (first || rest) {
             if ($.isPlainObject(first)) {
                 scriptOrCommand += ' ' + this.friendlify(first);
+            } else if ($.isArray(first)) {
+                scriptOrCommand += ' begin\n';
+                first.forEach(function(line) {
+                    scriptOrCommand += '  ' + line.toString() + '\n';
+                });
+                scriptOrCommand += '\nend';
+
             } else {
                 scriptOrCommand += ' ' + this.friendlify(first);
 
@@ -315,16 +338,17 @@ var Webfriend = Stapes.subclass({
             }
 
             if (scriptOrCommand.indexOf('->') < 0) {
-                scriptOrCommand += ' -> $result';
+                scriptOrCommand += ' -> $' + resultVar;
             }
         }
 
-        // console.debug('SEND', scriptOrCommand);
+
         this.deferredReply = $.Deferred(function(){
             // console.debug('SENT')
         }.bind(this));
 
         if (tagCommand) {
+            console.debug('SEND', scriptOrCommand);
             scriptOrCommand = "put '" + uuidv4() + "' -> $invocation;" + scriptOrCommand;
         }
 
@@ -333,15 +357,43 @@ var Webfriend = Stapes.subclass({
     },
 
     connect: function() {
-        return $.when(
+        var now = Date.now();
+
+        if (this.timeOfLastConnectAttempt && (now-this.timeOfLastConnectAttempt) < 750) {
+            return;
+        }
+
+        this.timeOfLastConnectAttempt = Date.now();
+
+        var p = $.when(
             this.connectImageStream(),
             this.connectCommandStream()
         );
+
+        p.done(function(){
+            webfriend.hideOverlay();
+        });
+
+        return p;
     },
 
-    disconnect: function() {
-        this.stopImageStream();
-        this.stopCommandStream();
+    disconnect: function(reconnect) {
+        if (reconnect) {
+            setTimeout(this.connect.bind(this), reconnect);
+        }
+
+        return $.when(
+            this.stopImageStream(),
+            this.stopCommandStream()
+        );
+    },
+
+    hideOverlay: function() {
+        $('#overlay').attr('hidden', 'hidden');
+    },
+
+    showOverlay: function() {
+        $('#overlay').removeAttr('hidden');
     },
 
     wsroot: function() {
@@ -368,14 +420,19 @@ var Webfriend = Stapes.subclass({
 
         this.imageStream.onerror = function(event) {
             p.reject();
-            this.stopImageStream();
-            this.connectImageStream();
+            this.disconnect();
+        }.bind(this);
+
+        this.imageStream.onclose = function() {
+            this.showOverlay();
+            this.disconnect(1000);
         }.bind(this);
 
         this.imageStream.onopen = function(event) {
             console.debug('Connected to image stream');
             p.resolve();
         }.bind(this);
+
 
         this.imageStream.onmessage = function(event) {
             // put the end stats call first; it will no-op on the first frame, but in tandem
@@ -458,8 +515,12 @@ var Webfriend = Stapes.subclass({
 
         this.commandStream.onerror = function(event) {
             p.reject();
-            this.stopCommandStream();
-            this.connectCommandStream();
+            this.disconnect();
+        }.bind(this);
+
+        this.commandStream.onclose = function() {
+            this.showOverlay();
+            this.disconnect(1000);
         }.bind(this);
 
         this.commandStream.onopen = function(event) {
@@ -475,6 +536,8 @@ var Webfriend = Stapes.subclass({
                 if (reply.event) {
                     this.processRemoteEvent(reply.event, reply.params);
                 } else if (this.deferredReply) {
+                    console.log('REPLY', reply)
+
                     if (reply.success) {
                         this.deferredReply.resolve(reply);
                     } else {
@@ -503,23 +566,17 @@ var Webfriend = Stapes.subclass({
             break;
 
         case 'Webfriend.scriptContextEvent':
-            if (!params.scope || !params.scope.invocation) {
-                return;
-            }
-
-            if (this.editor) {
+            if (this.editor && params.id) {
                 var severity = 'info';
                 var message = '';
-
-                console.log(params)
 
                 if (params.action === 'finished') {
                     if (params.error) {
                         severity = 'error';
-                        message = params.label + ' failed: ' + params.error;
+                        message = params.command + ' failed: ' + params.error;
                     } else {
                         severity = 'notice';
-                        message = params.label + ' succeeded';
+                        message = params.command + ' succeeded';
                     }
                 }
 

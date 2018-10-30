@@ -2,6 +2,7 @@ package webfriend
 
 import (
 	"fmt"
+	"github.com/ghetzel/go-stockutil/typeutil"
 	"time"
 
 	"github.com/fatih/color"
@@ -51,6 +52,40 @@ func NewEnvironment(browser *browser.Browser) *Environment {
 
 	// add our custom REPL commands
 	environment.RegisterCommandHandler(`help`, environment.handleReplHelp)
+
+	// add command context handlers
+	environment.RegisterContextHandler(func(ctx *scripting.Context, isCompleted bool) {
+		if browser := environment.Browser(); browser != nil {
+			params := map[string]interface{}{
+				`command`: ctx.Label,
+				`offset`:  ctx.AbsoluteStartOffset,
+				`advance`: ctx.Length,
+			}
+
+			if id := environment.Scope().Get(`invocation`); !typeutil.IsZero(id) {
+				params[`id`] = id
+			}
+
+			if isCompleted {
+				params[`action`] = `finished`
+				params[`took`] = (ctx.Took.Round(time.Microsecond) / time.Millisecond)
+			} else {
+				params[`action`] = `running`
+			}
+
+			if err := ctx.Error; err != nil {
+				params[`error`] = err.Error()
+			}
+
+			browser.Tab().Emit(`Webfriend.scriptContextEvent`, params)
+
+			if isCompleted && ctx.Error == nil {
+				if delay := browser.Tab().AfterCommandDelay; delay > 0 {
+					time.Sleep(delay)
+				}
+			}
+		}
+	})
 
 	return environment
 }

@@ -89,7 +89,7 @@ func (self *Document) addElementFromResult(node *maputil.Map) *Element {
 
 		return element
 	} else {
-		log.Panicf("Received invalid node")
+		log.Warningf("Received invalid node")
 		return nil
 	}
 }

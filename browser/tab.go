@@ -173,6 +173,7 @@ type PageInfo struct {
 }
 
 type Tab struct {
+	AfterCommandDelay    time.Duration
 	browser              *Browser
 	target               *devtool.Target
 	rpc                  *RPC

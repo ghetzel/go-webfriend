@@ -133,9 +133,6 @@ func (self *RPC) Call(method string, params map[string]interface{}, timeout time
 		Params: params,
 	}
 
-	self.sendlock.Lock()
-	defer self.sendlock.Unlock()
-
 	if reply, err := self.Send(message, timeout); err == nil {
 		if len(reply.Error) > 0 {
 			errmap := maputil.M(reply.Error)
@@ -184,7 +181,11 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 		atomic.StoreInt64(&self.waitingForMessageId, mid)
 	}
 
-	if err := self.conn.WriteJSON(message); err == nil {
+	self.sendlock.Lock()
+	err := self.conn.WriteJSON(message)
+	self.sendlock.Unlock()
+
+	if err == nil {
 		log.Debugf("[rpc] REQUEST %d: %v", message.ID, message)
 
 		if waitForReply {

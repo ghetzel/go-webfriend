@@ -3,6 +3,7 @@ module github.com/ghetzel/go-webfriend
 require (
 	github.com/PerformLine/go-performline-stdlib v0.6.24
 	github.com/browserpass/browserpass v0.0.0-20180903233706-99efdc5e878c
+	github.com/davecgh/go-spew v1.1.1
 	github.com/deluan/gosonic v0.0.0-20170404035338-f7c182b1f879
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.7.0
