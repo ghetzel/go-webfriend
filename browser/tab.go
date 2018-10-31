@@ -698,17 +698,29 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 			`ownProperties`:          true,
 			`accessorPropertiesOnly`: false,
 		}); err == nil {
-			remoteType := result.String(`subtype`, result.String(`type`))
+			rType := result.String(`type`)
+			rSubtype := result.String(`subtype`, rType)
 
 			// handles compound types
-			switch remoteType {
+			switch rSubtype {
 			case `array`:
 				out := make([]interface{}, 0)
 
 				// go through the results and populate the output array
 				for _, elem := range maputil.M(rv.Result).Slice(`result`) {
 					if elemM := maputil.M(elem); elemM.Bool(`enumerable`) {
-						if elemV, err := self.getJavascriptResponse(maputil.M(elemM.Get(`value`))); err == nil {
+						var elemV interface{}
+						var err error
+
+						if concreteValue := elemM.Get(`value`); !concreteValue.IsNil() {
+							elemV, err = self.getJavascriptResponse(maputil.M(concreteValue))
+						} else if objectId := elemM.String(`objectId`); objectId != `` {
+							elemV, err = self.getJavascriptResponse(elemM)
+						} else {
+							err = fmt.Errorf("Do not know how to process response")
+						}
+
+						if err == nil {
 							if elemV != skipItem {
 								out = append(out, elemV)
 							}
@@ -754,7 +766,7 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 
 			default:
 				log.Dumpf("Unhandled Value: %s", result.Value())
-				return nil, fmt.Errorf("Unhandled Javascript type %q", remoteType)
+				return nil, fmt.Errorf("Unhandled Javascript type %q", rSubtype)
 			}
 		} else {
 			return nil, err

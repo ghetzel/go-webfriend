@@ -212,7 +212,7 @@ func (self *Document) Query(selector Selector, queryRoot *Element) ([]*Element, 
 		tgt = `this`
 	}
 
-	if rv, err := eval(fmt.Sprintf(`return %s.querySelectorAll(%q)`, tgt, selector)); err == nil {
+	if rv, err := eval(fmt.Sprintf(`return Array.from(%s.querySelectorAll(%q));`, tgt, selector)); err == nil {
 		results := make([]*Element, 0)
 
 		for _, el := range sliceutil.Sliceify(rv) {

@@ -186,7 +186,7 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 	self.sendlock.Unlock()
 
 	if err == nil {
-		log.Debugf("[rpc] REQUEST %d: %v", message.ID, message)
+		// log.Debugf("[rpc] REQUEST %d: %v", message.ID, message)
 
 		if waitForReply {
 			select {
