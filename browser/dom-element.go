@@ -105,6 +105,8 @@ func (self *Element) refresh() {
 
 		if v := details.String(`nodeValue`); v != `` {
 			output[`text`] = v
+		} else if text, err := self.evaluate(`return this.innerText`, true); err == nil {
+			output[`text`] = text
 		}
 	} else {
 		log.Warningf("No such node nodeId=%v backendNodeId=%v objectId=%v: %v", self.nodeId, self.backendNodeId, self.objectId, err)
