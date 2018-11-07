@@ -66,7 +66,7 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
-		log.Infof("Starting %s %s", c.App.Name, c.App.Version)
+		log.Debugf("Starting %s %s", c.App.Name, c.App.Version)
 		chrome = browser.NewBrowser()
 		chrome.Headless = !c.Bool(`debug`)
 		chrome.HideScrollbars = true
