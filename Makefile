@@ -25,3 +25,4 @@ test: fmt deps
 
 build: fmt
 	go build -i -o bin/webfriend webfriend/main.go
+	which webfriend && cp -v bin/webfriend `which webfriend` || true
