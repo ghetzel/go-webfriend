@@ -7,6 +7,7 @@ import (
 	"os"
 
 	defaults "github.com/ghetzel/go-defaults"
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 )
 
@@ -48,18 +49,21 @@ func (self *Commands) Pdf(destination interface{}, args *PdfArgs) error {
 		return fmt.Errorf("A destination for the PDF must be specified")
 	}
 
-	if args.Autoclose {
-		if closer, ok := dest.(io.Closer); ok {
-			defer closer.Close()
-		}
-	}
-
 	if rv, err := self.browser.Tab().RPC(`Page`, `printToPDF`, map[string]interface{}{
 		`scale`: 1,
 	}); err == nil {
 		if dataS := maputil.M(rv.Result).String(`data`); len(dataS) > 0 {
 			if data, err := base64.StdEncoding.DecodeString(dataS); err == nil {
 				_, err := dest.Write(data)
+
+				if closer, ok := dest.(io.Closer); ok {
+					if err := closer.Close(); err == nil {
+						log.Debugf("Destination file closed.")
+					} else {
+						return err
+					}
+				}
+
 				return err
 			} else {
 				return fmt.Errorf("decode error: %v", err)

@@ -9,6 +9,7 @@ import (
 	"os"
 
 	defaults "github.com/ghetzel/go-defaults"
+	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-webfriend/browser"
 )
 
@@ -109,12 +110,6 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 		return response, fmt.Errorf("A destination for the screenshot must be specified")
 	}
 
-	if args.Autoclose {
-		if closer, ok := writer.(io.Closer); ok {
-			defer closer.Close()
-		}
-	}
-
 	// if one or both of the dimensions are not explicitly given, fill them in from the current
 	// page dimensions (scroll width/height)
 	if args.Width == 0 || args.Height == 0 {
@@ -183,6 +178,16 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 
 			if n, err := io.Copy(writer, decoder); err == nil {
 				response.Size = n
+
+				if args.Autoclose {
+					if closer, ok := writer.(io.Closer); ok {
+						if err := closer.Close(); err == nil {
+							log.Debugf("Destination file closed.")
+						} else {
+							return response, err
+						}
+					}
+				}
 
 				return response, nil
 			} else {
