@@ -6,7 +6,7 @@ require (
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.17.0
 	github.com/ghetzel/diecast v1.9.15
-	github.com/ghetzel/friendscript v0.5.7
+	github.com/ghetzel/friendscript v0.5.8
 	github.com/ghetzel/go-defaults v1.2.0
 	github.com/ghetzel/go-stockutil v1.6.22
 	github.com/gobwas/glob v0.2.3
