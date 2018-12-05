@@ -29,9 +29,9 @@ func (self *Commands) Text(selector browser.Selector) (string, error) {
 	var err error
 
 	if selector.IsNone() {
-		source, err = self.browser.Tab().DOM().Evaluate(`return document.documentElement.outerText`)
+		source, err = self.browser.Tab().DOM().Evaluate(`return document.documentElement.innerText`)
 	} else {
-		source, err = self.browser.Tab().DOM().EvaluateOn(selector, `return this.outerText`)
+		source, err = self.browser.Tab().DOM().EvaluateOn(selector, `return this.innerText`)
 	}
 
 	if err == nil {
