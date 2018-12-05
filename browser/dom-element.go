@@ -255,9 +255,17 @@ func (self *Element) Evaluate(script string) (interface{}, error) {
 }
 
 func (self *Element) evaluate(script string, skipPrescript bool) (interface{}, error) {
-	if rv, err := self.document.tab.RPC(`DOM`, `resolveNode`, map[string]interface{}{
-		`backendNodeId`: self.BackendID(),
-	}); err == nil {
+	param := make(map[string]interface{})
+
+	if v := self.BackendID(); v != 0 {
+		param[`backendNodeId`] = self.BackendID()
+	} else if v := self.NodeID(); v != 0 {
+		param[`nodeId`] = self.NodeID()
+	} else {
+		return nil, fmt.Errorf("No node ID available for script evaluation")
+	}
+
+	if rv, err := self.document.tab.RPC(`DOM`, `resolveNode`, param); err == nil {
 		remoteObject := maputil.M(rv.Result)
 		callGroupId := stringutil.UUID().String()
 
