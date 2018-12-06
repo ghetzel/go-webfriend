@@ -19,4 +19,5 @@ require (
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/stretchr/testify v1.2.2
 	github.com/urfave/negroni v1.0.0
+	golang.org/x/tools v0.0.0-20181206194817-bcd4e47d0288 // indirect
 )

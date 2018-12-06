@@ -12,6 +12,7 @@ import (
 	"github.com/ghetzel/go-webfriend/commands/assert"
 	"github.com/ghetzel/go-webfriend/commands/cookies"
 	"github.com/ghetzel/go-webfriend/commands/core"
+	"github.com/ghetzel/go-webfriend/commands/file"
 	"github.com/ghetzel/go-webfriend/commands/page"
 )
 
@@ -23,6 +24,7 @@ type Environment struct {
 	Cookies *cookies.Commands
 	Core    *core.Commands
 	Page    *page.Commands
+	File    *file.Commands
 	browser *browser.Browser
 	script  *scripting.Friendscript
 	stack   []*scripting.Scope
@@ -44,11 +46,13 @@ func NewEnvironment(browser *browser.Browser) *Environment {
 	environment.Assert = assert.New(browser, environment)
 	environment.Cookies = cookies.New(browser, environment)
 	environment.Page = page.New(browser, environment)
+	environment.File = file.New(browser, environment)
 
 	environment.RegisterModule(``, environment.Core)
 	environment.RegisterModule(`assert`, environment.Assert)
 	environment.RegisterModule(`cookies`, environment.Cookies)
 	environment.RegisterModule(`page`, environment.Page)
+	environment.RegisterModule(`file`, environment.File)
 
 	// add our custom REPL commands
 	environment.RegisterCommandHandler(`help`, environment.handleReplHelp)
