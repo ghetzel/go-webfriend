@@ -1,11 +1,11 @@
 package core
 
 import (
-	"fmt"
 	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/ghetzel/go-webfriend/utils"
 )
 
@@ -36,7 +36,7 @@ type ClickArgs struct {
 // }
 // ```
 //
-func (self *Commands) Click(selector browser.Selector, args *ClickArgs) ([]*browser.Element, error) {
+func (self *Commands) Click(selector dom.Selector, args *ClickArgs) ([]*dom.Element, error) {
 	if args == nil {
 		args = &ClickArgs{}
 	}
@@ -51,14 +51,14 @@ func (self *Commands) Click(selector browser.Selector, args *ClickArgs) ([]*brow
 					time.Sleep(args.Delay)
 				}
 
-				if err := element.Click(); err != nil {
+				if _, err := self.browser.Tab().EvaluateOn(element, `this.click()`); err != nil {
 					return elements[0:i], err
 				}
 			}
 
 			return elements, nil
 		} else {
-			return nil, browser.TooManyMatchesErr(selector, 1, len(elements))
+			return nil, dom.TooManyMatchesErr(selector, 1, len(elements))
 		}
 	} else {
 		return nil, err
@@ -74,6 +74,6 @@ type ClickAtArgs struct {
 }
 
 // Click the page at the given X, Y coordinates.
-func (self *Commands) ClickAt(args *ClickAtArgs) ([]browser.Element, error) {
-	return nil, fmt.Errorf(`Not Implemented`)
+func (self *Commands) ClickAt(args *ClickAtArgs) ([]dom.Element, error) {
+	return nil, browser.NotImplemented
 }

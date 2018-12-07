@@ -65,8 +65,8 @@ func main() {
 			if len(resultLinks) > 0 {
 				// loop through all search result links and print their name and URL
 				for i, a := range resultLinks {
-					fmt.Printf("[%02d] %s\n", i, a.Text())
-					fmt.Printf("       %s\n", a.Attributes()[`href`])
+					fmt.Printf("[%02d] %s\n", i, a.Text)
+					fmt.Printf("       %s\n", a.Attributes[`href`])
 				}
 
 			} else {

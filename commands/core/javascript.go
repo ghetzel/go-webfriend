@@ -41,5 +41,5 @@ package core
 // After running, the `$result` variable will contain an array of zero or more strings.
 //
 func (self *Commands) Javascript(script string) (interface{}, error) {
-	return self.browser.Tab().DOM().Evaluate(script)
+	return self.browser.Tab().Evaluate(script)
 }

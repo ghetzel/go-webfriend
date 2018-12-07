@@ -18,10 +18,7 @@ import (
 	"github.com/ghetzel/friendscript/utils"
 	"github.com/ghetzel/go-stockutil/httputil"
 	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/pathutil"
-	"github.com/ghetzel/go-stockutil/sliceutil"
-	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/husobee/vestigo"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/mitchellh/go-ps"
@@ -275,50 +272,6 @@ func (self *Browser) Stop() error {
 		} else {
 			return err
 		}
-	}
-}
-
-func (self *Browser) ElementsFromSelector(selector interface{}) ([]*Element, bool, error) {
-	docroot := self.Tab().DOM()
-
-	if selector == nil {
-		return nil, true, nil
-	} else if sel, ok := selector.(Selector); ok {
-		if sel.IsNone() {
-			return nil, true, nil
-		} else {
-			if elements, err := docroot.Query(sel, nil); err == nil || IsElementNotFoundErr(err) {
-				return elements, false, nil
-			} else {
-				return nil, false, err
-			}
-		}
-	} else if elements, ok := selector.([]*Element); ok {
-		return elements, false, nil
-	} else if elmap, ok := selector.(map[string]interface{}); ok {
-		elmapM := maputil.M(elmap)
-
-		if element, ok := docroot.Element(int(elmapM.Int(`id`))); ok {
-			return []*Element{element}, false, nil
-		} else {
-			return nil, false, nil
-		}
-	} else if typeutil.IsArray(selector) {
-		var elements []*Element
-
-		err := sliceutil.Each(selector, func(i int, value interface{}) error {
-			elmapM := maputil.M(value)
-
-			if element, ok := docroot.Element(int(elmapM.Int(`id`))); ok {
-				elements = append(elements, element)
-			}
-
-			return nil
-		})
-
-		return elements, false, err
-	} else {
-		return nil, false, fmt.Errorf("Unrecognized selector input %T", selector)
 	}
 }
 

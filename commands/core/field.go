@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/dom"
 )
 
 type FieldArgs struct {
@@ -34,7 +34,7 @@ type FieldArgs struct {
 // }
 // ```
 //
-func (self *Commands) Field(selector browser.Selector, args *FieldArgs) ([]*browser.Element, error) {
+func (self *Commands) Field(selector dom.Selector, args *FieldArgs) ([]*dom.Element, error) {
 	if args == nil {
 		args = &FieldArgs{}
 	}
@@ -44,12 +44,12 @@ func (self *Commands) Field(selector browser.Selector, args *FieldArgs) ([]*brow
 	if elements, err := self.Select(selector, nil); err == nil {
 		for _, field := range elements {
 			if args.Autoclear {
-				if err := field.SetAttribute(`value`, ``); err != nil {
+				if _, err := self.browser.Tab().EvaluateOn(field, `this.value = ''`); err != nil {
 					return nil, fmt.Errorf("autoclear: %v", err)
 				}
 			}
 
-			if err := field.Focus(); err != nil {
+			if _, err := self.browser.Tab().EvaluateOn(field, `this.focus()`); err != nil {
 				return nil, fmt.Errorf("focus: %v", err)
 			}
 

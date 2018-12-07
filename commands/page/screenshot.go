@@ -10,12 +10,12 @@ import (
 
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/dom"
 )
 
 type ScreenshotArgs struct {
 	// If specified, the screenshot will attempt to capture just the matching element.
-	Selector browser.Selector `json:"selector,omitempty"`
+	Selector dom.Selector `json:"selector,omitempty"`
 
 	// Determines how to handle multiple elements that are matched by Selector.
 	// May be "tallest" or "first".
@@ -42,7 +42,7 @@ type ScreenshotArgs struct {
 
 type ScreenshotResponse struct {
 	// Details about the element that matched the given selector (if any).
-	Element *browser.Element `json:"element,omitempty"`
+	Element *dom.Element `json:"element,omitempty"`
 
 	// The width of the screenshot (in pixels).
 	Width int `json:"width"`
@@ -76,7 +76,6 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 	}
 
 	defaults.SetDefaults(args)
-	docroot := self.browser.Tab().DOM()
 	response := &ScreenshotResponse{}
 
 	var writer io.Writer
@@ -113,7 +112,7 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 	// if one or both of the dimensions are not explicitly given, fill them in from the current
 	// page dimensions (scroll width/height)
 	if args.Width == 0 || args.Height == 0 {
-		if pageWidth, pageHeight, err := docroot.PageSize(); err == nil {
+		if pageWidth, pageHeight, err := self.browser.Tab().PageSize(); err == nil {
 			if args.Width == 0 {
 				args.Width = int(pageWidth)
 			}
@@ -124,7 +123,7 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 		}
 	}
 
-	if err := self.screenshotPopulateArgsFromElement(docroot, args, response); err != nil {
+	if err := self.screenshotPopulateArgsFromElement(args, response); err != nil {
 		return response, err
 	}
 
@@ -201,15 +200,15 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 	}
 }
 
-func (self *Commands) screenshotPopulateArgsFromElement(docroot *browser.Document, args *ScreenshotArgs, response *ScreenshotResponse) error {
+func (self *Commands) screenshotPopulateArgsFromElement(args *ScreenshotArgs, response *ScreenshotResponse) error {
 	// if screenshotting an element, find that element now
 	if args.Selector != `` {
-		if elements, err := docroot.Query(args.Selector, nil); err == nil {
-			var winner *browser.Dimensions
+		if elements, err := self.browser.Tab().ElementQuery(args.Selector, nil); err == nil {
+			var winner *dom.Dimensions
 
 			for _, element := range elements {
 				if winner == nil {
-					if winnerD, err := element.Position(); err == nil {
+					if winnerD, err := self.browser.Tab().ElementPosition(element); err == nil {
 						winner = &winnerD
 						response.Element = element
 					} else {
@@ -220,7 +219,7 @@ func (self *Commands) screenshotPopulateArgsFromElement(docroot *browser.Documen
 					case `first`:
 						break
 					case `tallest`:
-						if elementD, err := element.Position(); err == nil {
+						if elementD, err := self.browser.Tab().ElementPosition(element); err == nil {
 							if elementD.Height > winner.Height {
 								winner = &elementD
 								response.Element = element

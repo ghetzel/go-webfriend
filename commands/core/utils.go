@@ -1,12 +1,11 @@
 package core
 
 import (
-	"fmt"
-
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/pathutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/jdxcode/netrc"
 )
 
@@ -21,8 +20,8 @@ func (self *Commands) Rpc(method string, args map[string]interface{}) (interface
 // [SKIP]
 // Change the current selector scope to be rooted at the given element. If
 // selector is empty, the scope is set to the document element (i.e.: global).
-func (self *Commands) SwitchRoot(selector browser.Selector) error {
-	return fmt.Errorf(`Not Implemented Yet`)
+func (self *Commands) SwitchRoot(selector dom.Selector) error {
+	return browser.NotImplemented
 }
 
 type HighlightArgs struct {
@@ -42,27 +41,29 @@ type HighlightArgs struct {
 // Highlight the node matching the given selector, or clear all highlights if
 // the selector is "none"
 func (self *Commands) Highlight(selector interface{}, args *HighlightArgs) error {
-	if args == nil {
-		args = &HighlightArgs{}
-	}
+	// if args == nil {
+	// 	args = &HighlightArgs{}
+	// }
 
-	defaults.SetDefaults(args)
+	// defaults.SetDefaults(args)
 
-	if elements, isNone, err := self.browser.ElementsFromSelector(selector); err == nil {
-		if isNone {
-			return self.browser.Tab().AsyncRPC(`DOM`, `hideHighlight`, nil)
-		} else {
-			for _, element := range elements {
-				if err := element.Highlight(args.R, args.G, args.B, args.A); err != nil {
-					return err
-				}
-			}
+	// if elements, err := self.browser.Tab().ElementQuery(selector, nil); err == nil {
+	// 	if len(elements) == 0 {
+	// 		return self.browser.Tab().AsyncRPC(`DOM`, `hideHighlight`, nil)
+	// 	} else {
+	// 		for _, element := range elements {
+	// 			if err := element.Highlight(args.R, args.G, args.B, args.A); err != nil {
+	// 				return err
+	// 			}
+	// 		}
 
-			return nil
-		}
-	} else {
-		return err
-	}
+	// 		return nil
+	// 	}
+	// } else {
+	// 	return err
+	// }
+
+	return browser.NotImplemented
 }
 
 type InspectArgs struct {
@@ -89,31 +90,33 @@ type InspectArgs struct {
 }
 
 // Retrieve the element at the given coordinates, optionally highlighting it.
-func (self *Commands) Inspect(args *InspectArgs) (*browser.Element, error) {
+func (self *Commands) Inspect(args *InspectArgs) (*dom.Element, error) {
 	if args == nil {
 		args = &InspectArgs{}
 	}
 
 	defaults.SetDefaults(args)
 
-	if rv, err := self.browser.Tab().RPC(`DOM`, `getNodeForLocation`, map[string]interface{}{
-		`x`: int(args.X),
-		`y`: int(args.Y),
-	}); err == nil {
-		if element, ok := self.browser.Tab().DOM().Element(int(rv.R().Int(`backendNodeId`))); ok {
-			if args.Highlight {
-				if err := element.Highlight(args.R, args.G, args.B, args.A); err != nil {
-					return nil, err
-				}
-			}
+	// if rv, err := self.browser.Tab().RPC(`DOM`, `getNodeForLocation`, map[string]interface{}{
+	// 	`x`: int(args.X),
+	// 	`y`: int(args.Y),
+	// }); err == nil {
+	// 	// if element, ok := self.browser.Tab().DOM().Element(int(rv.R().Int(`backendNodeId`))); ok {
+	// 	// 	if args.Highlight {
+	// 	// 		if err := element.Highlight(args.R, args.G, args.B, args.A); err != nil {
+	// 	// 			return nil, err
+	// 	// 		}
+	// 	// 	}
 
-			return element, nil
-		} else {
-			return nil, fmt.Errorf("No element was found at the given coordinates.")
-		}
-	} else {
-		return nil, err
-	}
+	// 	// 	return element, nil
+	// 	// } else {
+	// 	// }
+	// 	return nil, fmt.Errorf("No element was found at the given coordinates.")
+	// } else {
+	// 	return nil, err
+	// }
+
+	return nil, browser.NotImplemented
 }
 
 // Immediately close the browser without error or delay.

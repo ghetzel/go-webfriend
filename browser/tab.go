@@ -3,18 +3,23 @@ package browser
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/mathutil"
+	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
+	"github.com/ghetzel/go-stockutil/typeutil"
+	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/gobwas/glob"
 	"github.com/mafredri/cdp/devtool"
 )
@@ -181,7 +186,6 @@ type Tab struct {
 	waiters              sync.Map
 	networkRequests      sync.Map
 	accumulators         sync.Map
-	currentDocument      *Document
 	mostRecentFrameId    int64
 	mostRecentFrame      []byte
 	mostRecentDimensions []int
@@ -247,14 +251,6 @@ func (self *Tab) Navigate(url string) (*RpcMessage, error) {
 	}
 
 	return result, err
-}
-
-func (self *Tab) DOM() *Document {
-	if self.currentDocument == nil {
-		self.currentDocument = NewDocument(self, nil)
-	}
-
-	return self.currentDocument
 }
 
 func (self *Tab) StartScreencast(quality int, width int, height int) error {
@@ -479,27 +475,6 @@ func (self *Tab) registerInternalEvents() {
 		}
 
 		self.networkRequests.Store(requestId, request)
-	})
-
-	self.RegisterEventHandler(domTrackingEvents, func(event *Event) {
-		// log.Debugf("evt %v", event)
-		dom := self.DOM()
-
-		switch event.Name {
-		case `DOM.childNodeInserted`:
-			dom.addElementFromResult(maputil.M(event.Params.Get(`node`)))
-
-		case `DOM.setChildNodes`:
-			for _, node := range event.Params.Slice(`nodes`) {
-				dom.addElementFromResult(
-					maputil.M(node),
-				)
-			}
-
-		case `DOM.childNodeRemoved`:
-			nid := int(event.Params.Int(`nodeId`))
-			dom.elements.Delete(nid)
-		}
 	})
 
 	// monitor page URL and load state
@@ -758,8 +733,12 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 			case `node`:
 				if node, err := self.RPC(`DOM`, `describeNode`, map[string]interface{}{
 					`objectId`: result.String(`objectId`),
+					`depth`:    2,
 				}); err == nil {
-					return self.DOM().addElementFromResult(maputil.M(node.R().Get(`node`))), nil
+					return self.getElementFromResult(
+						result.String(`objectId`),
+						maputil.M(node.R().Get(`node`)),
+					), nil
 				} else {
 					return nil, err
 				}
@@ -782,4 +761,214 @@ func (self *Tab) releaseObjectGroup(gid string) error {
 	})
 
 	return err
+}
+
+func (self *Tab) ElementPosition(element *dom.Element) (dom.Dimensions, error) {
+	if result, err := self.EvaluateOn(element, `return Object.assign({}, this.getBoundingClientRect().toJSON())`); err == nil {
+		dimensions := maputil.M(result)
+
+		return dom.Dimensions{
+			Width:  int(dimensions.Int(`width`)),
+			Height: int(dimensions.Int(`height`)),
+			Top:    int(dimensions.Int(`top`)),
+			Left:   int(dimensions.Int(`left`)),
+			Bottom: int(dimensions.Int(`bottom`)),
+			Right:  int(dimensions.Int(`right`)),
+		}, nil
+	} else {
+		return dom.Dimensions{}, err
+	}
+}
+
+func (self *Tab) PageSize() (float64, float64, error) {
+	if result, err := self.Evaluate(`return [document.documentElement.scrollWidth, document.documentElement.scrollHeight]`); err == nil {
+		if sz := typeutil.V(result).Slice(); len(sz) == 2 {
+			return sz[0].Float(), sz[1].Float(), nil
+		} else {
+			return 0, 0, fmt.Errorf("Invalid response while retrieving page dimensions")
+		}
+	} else {
+		return 0, 0, err
+	}
+}
+
+func (self *Tab) ElementQuery(selector dom.Selector, parent *dom.Selector) ([]*dom.Element, error) {
+	psel := `document`
+
+	if parent != nil {
+		if parent.IsNone() {
+			return make([]*dom.Element, 0), nil
+		} else {
+			psel = fmt.Sprintf("document.querySelector(%q)", parent.String())
+		}
+	}
+
+	if results, err := self.Evaluate(fmt.Sprintf(
+		"return Array.from(%s.querySelectorAll(%q))",
+		psel,
+		selector,
+	)); err == nil {
+		elements := make([]*dom.Element, 0)
+
+		for _, result := range sliceutil.Sliceify(results) {
+			if element, ok := result.(*dom.Element); ok {
+				elements = append(elements, element)
+			}
+		}
+
+		return elements, nil
+	} else {
+		return nil, err
+	}
+}
+
+func (self *Tab) Evaluate(stmt string, exposed ...string) (interface{}, error) {
+	return self.evaluate(``, stmt, exposed)
+}
+
+func (self *Tab) EvaluateOn(element *dom.Element, stmt string, exposed ...string) (interface{}, error) {
+	if element == nil {
+		return nil, fmt.Errorf("Cannot call function on unspecified element")
+	} else if element.ID == `` {
+		return nil, fmt.Errorf("Cannot call function on element without an ID")
+	} else {
+		return self.evaluate(element.ID, stmt, exposed)
+	}
+}
+
+func (self *Tab) evaluate(objectId string, stmt string, exposed []string) (interface{}, error) {
+	callGroupId := stringutil.UUID().Base58()
+
+	var rv *RpcMessage
+	var err error
+
+	// oid <= 0 means call globally
+	if objectId == `` {
+		rv, err = self.RPC(`Runtime`, `evaluate`, map[string]interface{}{
+			`expression`: fmt.Sprintf(
+				"%s;\nvar fn_%s = function(){ %s }.bind(webfriend); fn_%s()",
+				self.getEvalPrescript(exposed),
+				callGroupId,
+				stmt,
+				callGroupId,
+			),
+			`returnByValue`: false,
+			`awaitPromise`:  false,
+			`objectGroup`:   callGroupId,
+		})
+	} else {
+		rv, err = self.RPC(`Runtime`, `callFunctionOn`, map[string]interface{}{
+			`objectId`: objectId,
+			`functionDeclaration`: fmt.Sprintf(
+				"function(){ %s; %s }",
+				self.getEvalPrescript(exposed),
+				stmt,
+			),
+			`returnByValue`: false,
+			`userGesture`:   true,
+			`awaitPromise`:  false,
+			`objectGroup`:   callGroupId,
+		})
+	}
+
+	if err == nil {
+		defer self.releaseObjectGroup(callGroupId)
+		out := maputil.M(rv.Result)
+
+		// return runtime exceptions as errors
+		if exc := out.Get(`exceptionDetails`); !exc.IsZero() {
+			excM := maputil.M(exc)
+
+			return nil, fmt.Errorf(
+				"Evaluation error: %v",
+				excM.String(`exception.description`, excM.String(`text`)),
+			)
+		} else if returnOid := out.String(`result.objectId`); returnOid != `` {
+			// recursively populate the output result and return it as a native value
+			return self.getJavascriptResponse(maputil.M(out.Get(`result`)))
+		} else if returnValue := out.Get(`result.value`).Value; returnValue != nil {
+			return returnValue, nil
+		} else {
+			return nil, nil
+		}
+	} else if strings.Contains(err.Error(), `Could not find object with given id`) {
+		log.Noticef(typeutil.Dump(rv))
+		return nil, fmt.Errorf("Element '%v' could not be found", objectId)
+	} else {
+		return nil, err
+	}
+}
+
+func (self *Tab) getEvalPrescript(exposed []string) string {
+	if scopeable := self.browser.scopeable; scopeable != nil {
+		if scope := scopeable.Scope(); scope != nil {
+			out := `var webfriend = `
+			jsData := make(map[string]interface{})
+
+			maputil.Walk(scope.Data(), func(value interface{}, path []string, isLeaf bool) error {
+				key := strings.Join(path, `.`)
+
+				if sliceutil.ContainsString(exposed, key) {
+					maputil.DeepSet(jsData, path, value)
+					return maputil.SkipDescendants
+				} else {
+					return nil
+				}
+			})
+
+			if data, err := json.Marshal(jsData); err == nil {
+				out += string(data)
+				return out
+			}
+		}
+	}
+
+	return ``
+}
+
+func (self *Tab) getElementFromResult(objectId string, node *maputil.Map) *dom.Element {
+	if backendNodeId := node.String(`backendNodeId`); backendNodeId != `` {
+		var element *dom.Element
+		var children = node.Slice(`children`)
+
+		// load the various properties from the given node map into a new elements
+		pair := node.String(`localName`, strings.ToLower(node.String(`nodeName`)))
+		ns, name := stringutil.SplitPairRightTrailing(pair, `:`)
+
+		log.Noticef("<%v> (objectId=%v)", name, objectId)
+
+		element = &dom.Element{
+			ID:         objectId,
+			Namespace:  ns,
+			Name:       name,
+			Attributes: make(map[string]interface{}),
+		}
+
+		for _, pair := range sliceutil.Chunks(node.Slice(`attributes`), 2) {
+			element.Attributes[typeutil.String(pair[0])] = typeutil.Auto(pair[1])
+		}
+
+		switch len(children) {
+		case 0:
+			element.Text = node.String(`nodeValue`)
+		default:
+			for _, child := range children {
+				childM := maputil.M(child)
+
+				switch childM.Int(`nodeType`) {
+				case 1:
+					if subel := self.getElementFromResult(childM.String(`objectId`), childM); subel != nil {
+						element.Text += subel.Text
+					}
+				case 3:
+					element.Text += childM.String(`nodeValue`)
+				}
+			}
+		}
+
+		return element
+	} else {
+		log.Warningf("Received invalid node")
+		return nil
+	}
 }
