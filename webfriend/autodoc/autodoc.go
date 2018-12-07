@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"os"
 
 	"github.com/ghetzel/go-stockutil/log"
@@ -12,7 +12,7 @@ import (
 func main() {
 	log.SetLevelString(sliceutil.OrString(os.Getenv(`LOGLEVEL`), `info`))
 
-	filename := `documentation.gob`
+	filename := `documentation.json`
 
 	if len(os.Args) > 1 {
 		filename = os.Args[1]
@@ -21,7 +21,7 @@ func main() {
 	if out, err := os.Create(filename); err == nil {
 		docs := webfriend.NewEnvironment(nil).Documentation()
 
-		if err := gob.NewEncoder(out).Encode(docs); err != nil {
+		if err := json.NewEncoder(out).Encode(docs); err != nil {
 			log.Fatal(err)
 		}
 	} else {

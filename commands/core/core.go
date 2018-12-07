@@ -9,13 +9,15 @@ import (
 
 type Commands struct {
 	*core.Commands
-	browser *browser.Browser
+	browser  *browser.Browser
+	exported []string
 }
 
 func New(browser *browser.Browser, env utils.Scopeable) *Commands {
 	cmd := &Commands{
 		Commands: core.New(env),
 		browser:  browser,
+		exported: make([]string, 0),
 	}
 
 	cmd.SetInstance(cmd)

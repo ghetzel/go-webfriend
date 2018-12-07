@@ -191,6 +191,7 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 		if waitForReply {
 			select {
 			case reply := <-self.reply:
+				// log.Debugf("[rpc] REPLY %d: %v", message.ID, typeutil.Dump(reply))
 				atomic.StoreInt64(&self.waitingForMessageId, 0)
 				return reply, nil
 

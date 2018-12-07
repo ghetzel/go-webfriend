@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/dom"
@@ -16,6 +17,9 @@ type FieldArgs struct {
 
 	// Whether to automatically send an "Enter" keystroke after typing in the given value
 	Enter bool `json:"enter"`
+
+	// An element to click after the field value is changed.
+	Click dom.Selector `json:"click"`
 }
 
 // Locate and enter data into a form input field.
@@ -58,9 +62,20 @@ func (self *Commands) Field(selector dom.Selector, args *FieldArgs) ([]*dom.Elem
 			}
 
 			if args.Enter {
-				self.Key(`Enter`, &KeyArgs{
+				if err := self.Key(`Enter`, &KeyArgs{
 					KeyCode: 13,
-				})
+				}); err != nil {
+					return nil, fmt.Errorf("keypress: %v", err)
+				}
+			}
+
+			if !args.Click.IsNone() {
+				if _, err := self.Click(args.Click, &ClickArgs{
+					Multiple: true,
+					Delay:    50 * time.Millisecond,
+				}); err != nil {
+					return nil, fmt.Errorf("click: %v", err)
+				}
 			}
 		}
 

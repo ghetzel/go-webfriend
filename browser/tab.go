@@ -736,7 +736,6 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 					`depth`:    2,
 				}); err == nil {
 					return self.getElementFromResult(
-						result.String(`objectId`),
 						maputil.M(node.R().Get(`node`)),
 					), nil
 				} else {
@@ -752,6 +751,20 @@ func (self *Tab) getJavascriptResponse(result *maputil.Map) (interface{}, error)
 		}
 	} else {
 		return result.Get(`value`), nil
+	}
+}
+
+func (self *Tab) resolveNode(backendNodeId int64) (string, error) {
+	if node, err := self.RPC(`DOM`, `resolveNode`, map[string]interface{}{
+		`backendNodeId`: backendNodeId,
+	}); err == nil {
+		if objectId := node.R().String(`object.objectId`); objectId != `` {
+			return objectId, nil
+		} else {
+			return ``, fmt.Errorf("Unable to retrieve RemoteObjectId")
+		}
+	} else {
+		return ``, err
 	}
 }
 
@@ -836,14 +849,18 @@ func (self *Tab) EvaluateOn(element *dom.Element, stmt string, exposed ...string
 	}
 }
 
-func (self *Tab) evaluate(objectId string, stmt string, exposed []string) (interface{}, error) {
+func (self *Tab) evaluate(remoteObjectId string, stmt string, exposed []string) (interface{}, error) {
 	callGroupId := stringutil.UUID().Base58()
 
 	var rv *RpcMessage
 	var err error
 
+	exposed = sliceutil.MapString(exposed, func(i int, value string) string {
+		return strings.TrimPrefix(value, `$`)
+	})
+
 	// oid <= 0 means call globally
-	if objectId == `` {
+	if remoteObjectId == `` {
 		rv, err = self.RPC(`Runtime`, `evaluate`, map[string]interface{}{
 			`expression`: fmt.Sprintf(
 				"%s;\nvar fn_%s = function(){ %s }.bind(webfriend); fn_%s()",
@@ -858,7 +875,7 @@ func (self *Tab) evaluate(objectId string, stmt string, exposed []string) (inter
 		})
 	} else {
 		rv, err = self.RPC(`Runtime`, `callFunctionOn`, map[string]interface{}{
-			`objectId`: objectId,
+			`objectId`: remoteObjectId,
 			`functionDeclaration`: fmt.Sprintf(
 				"function(){ %s; %s }",
 				self.getEvalPrescript(exposed),
@@ -892,8 +909,7 @@ func (self *Tab) evaluate(objectId string, stmt string, exposed []string) (inter
 			return nil, nil
 		}
 	} else if strings.Contains(err.Error(), `Could not find object with given id`) {
-		log.Noticef(typeutil.Dump(rv))
-		return nil, fmt.Errorf("Element '%v' could not be found", objectId)
+		return nil, fmt.Errorf("Element '%v' could not be found", remoteObjectId)
 	} else {
 		return nil, err
 	}
@@ -926,8 +942,8 @@ func (self *Tab) getEvalPrescript(exposed []string) string {
 	return ``
 }
 
-func (self *Tab) getElementFromResult(objectId string, node *maputil.Map) *dom.Element {
-	if backendNodeId := node.String(`backendNodeId`); backendNodeId != `` {
+func (self *Tab) getElementFromResult(node *maputil.Map) *dom.Element {
+	if remoteObjectId, err := self.resolveNode(node.Int(`backendNodeId`)); err == nil {
 		var element *dom.Element
 		var children = node.Slice(`children`)
 
@@ -935,10 +951,8 @@ func (self *Tab) getElementFromResult(objectId string, node *maputil.Map) *dom.E
 		pair := node.String(`localName`, strings.ToLower(node.String(`nodeName`)))
 		ns, name := stringutil.SplitPairRightTrailing(pair, `:`)
 
-		log.Noticef("<%v> (objectId=%v)", name, objectId)
-
 		element = &dom.Element{
-			ID:         objectId,
+			ID:         remoteObjectId,
 			Namespace:  ns,
 			Name:       name,
 			Attributes: make(map[string]interface{}),
@@ -957,7 +971,7 @@ func (self *Tab) getElementFromResult(objectId string, node *maputil.Map) *dom.E
 
 				switch childM.Int(`nodeType`) {
 				case 1:
-					if subel := self.getElementFromResult(childM.String(`objectId`), childM); subel != nil {
+					if subel := self.getElementFromResult(childM); subel != nil {
 						element.Text += subel.Text
 					}
 				case 3:
@@ -968,7 +982,7 @@ func (self *Tab) getElementFromResult(objectId string, node *maputil.Map) *dom.E
 
 		return element
 	} else {
-		log.Warningf("Received invalid node")
+		log.Warningf("Received invalid node: %v", err)
 		return nil
 	}
 }

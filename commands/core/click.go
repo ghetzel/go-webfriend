@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
@@ -46,14 +47,11 @@ func (self *Commands) Click(selector dom.Selector, args *ClickArgs) ([]*dom.Elem
 
 	if elements, err := self.Select(selector, nil); err == nil {
 		if len(elements) == 1 || args.Multiple {
-			for i, element := range elements {
-				if i > 0 && args.Delay > 0 {
-					time.Sleep(args.Delay)
-				}
-
-				if _, err := self.browser.Tab().EvaluateOn(element, `this.click()`); err != nil {
-					return elements[0:i], err
-				}
+			if _, err := self.browser.Tab().Evaluate(fmt.Sprintf(
+				"document.querySelectorAll(%q).forEach(function(i){ i.click() })",
+				selector,
+			)); err != nil {
+				return nil, err
 			}
 
 			return elements, nil
