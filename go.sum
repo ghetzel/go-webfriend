@@ -34,14 +34,14 @@ github.com/ghetzel/diecast v1.9.15 h1:xcYSsVb7gbj1aEDhs4x/+Yfkj708pLctesHRLHJ6On
 github.com/ghetzel/diecast v1.9.15/go.mod h1:XQ2W1E2vb9H5n0fagF7Ti4AiAVmqq8E3DoNVziO6k5c=
 github.com/ghetzel/friendscript v0.5.0 h1:3Ujg01YEO0TEp0Esls12rS3suoO/LA13Ucn5lpmfeN8=
 github.com/ghetzel/friendscript v0.5.0/go.mod h1:GZJ2FZRpgvURp4hUb/AdevNCnHKCWRpKLxtAl817F4g=
-github.com/ghetzel/friendscript v0.5.8 h1:rHePkF9Kq+Rj4QgBfuAgg9PbMVf9h1pDph/9ghnxKJc=
-github.com/ghetzel/friendscript v0.5.8/go.mod h1:FlffpNDIBMOhgJ2v6FjboOBSyhvov/kgAcZEb7GwHcM=
+github.com/ghetzel/friendscript v0.5.12 h1:SDNSp3ejV9tDHOPfOihU66SGNTKCBXVME0jjSZVXyd8=
+github.com/ghetzel/friendscript v0.5.12/go.mod h1:XvuzlXrryHG6DoHBgUNCi7KQTqzXH+Lgxe5AMD8E8c8=
 github.com/ghetzel/go-defaults v1.2.0 h1:U1T64bxhBc6nVZ68QXch1hoHq43h6isqgbvG7kxY9Uc=
 github.com/ghetzel/go-defaults v1.2.0/go.mod h1:xWhTgOoc4UNWT7sl3oyNFqtKzEbUKI9C3rqbwtwdxFw=
 github.com/ghetzel/go-stockutil v1.5.49 h1:SQEo4cLlzLidi9j+u+AvcYdN6jy5yqpJAB8L+YGn4VY=
 github.com/ghetzel/go-stockutil v1.5.49/go.mod h1:Y2IAZKZNEGeZZD46Cwd94CoA1Oh+Bx0N4c2z5FpMT5s=
-github.com/ghetzel/go-stockutil v1.6.22 h1:pVFJhsE6jXN/JFFOqWyMcRJbixGk4oAAwvV8xEijwwk=
-github.com/ghetzel/go-stockutil v1.6.22/go.mod h1:+m7v45hx86ukaOof7faN1mFqW+PtmUbRwBG9Lt8ftEk=
+github.com/ghetzel/go-stockutil v1.6.25 h1:dvL/9oExNREIoccqfGbHTTukKrueeGoABSUEhd+pxPw=
+github.com/ghetzel/go-stockutil v1.6.25/go.mod h1:+m7v45hx86ukaOof7faN1mFqW+PtmUbRwBG9Lt8ftEk=
 github.com/ghetzel/go-webfriend v0.9.23/go.mod h1:4tjKFGdCtac9eXJ8Hz48DSCoiwjhzynwFFiyhsLfMnI=
 github.com/ghetzel/uuid v0.0.0-20171129191014-dec09d789f3d h1:YVJe7KwVYazt90hCc/q2dYJVS3062AY6QdT6iHd+Kh8=
 github.com/ghetzel/uuid v0.0.0-20171129191014-dec09d789f3d/go.mod h1:7CCemW/spiphukVWb/v2WWYeZkydh30TwSRBh48irZQ=
@@ -188,8 +188,6 @@ golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
-golang.org/x/tools v0.0.0-20181206194817-bcd4e47d0288 h1:uFWEpVI5nk2F/22rsVg40mbEixNPRNrL/d/Qea/VtQk=
-golang.org/x/tools v0.0.0-20181206194817-bcd4e47d0288/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

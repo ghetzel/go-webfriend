@@ -20,8 +20,10 @@ func main() {
 
 	if out, err := os.Create(filename); err == nil {
 		docs := webfriend.NewEnvironment(nil).Documentation()
+		enc := json.NewEncoder(out)
+		enc.SetIndent(``, `  `)
 
-		if err := json.NewEncoder(out).Encode(docs); err != nil {
+		if err := enc.Encode(docs); err != nil {
 			log.Fatal(err)
 		}
 	} else {

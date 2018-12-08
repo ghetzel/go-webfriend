@@ -1,7 +1,7 @@
 package server
 
 import (
-	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
