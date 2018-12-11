@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
 	"path"
 	"strings"
 	"sync"
@@ -19,6 +20,7 @@ import (
 	"github.com/ghetzel/go-stockutil/httputil"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/pathutil"
+	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/husobee/vestigo"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/mitchellh/go-ps"
@@ -69,6 +71,7 @@ type Browser struct {
 	scopeable                   utils.Scopeable
 	pathWriters                 []PathHandlerFunc
 	pathReaders                 []PathReaderFunc
+	stopped                     bool
 }
 
 func NewBrowser() *Browser {
@@ -145,6 +148,12 @@ func (self *Browser) Launch() error {
 		return err
 	}
 
+	// force disable sandboxing if the effective uid is 0 (root)
+	if u, err := user.Current(); err == nil && typeutil.Int(u.Uid) == 0 {
+		log.Debugf("Sandboxing is force disabled when running as root")
+		self.NoSandbox = true
+	}
+
 	if cmd, err := argonaut.Command(self); err == nil {
 		if self.isTempUserDataDir {
 			if err := self.createFirstRunPreferences(); err != nil {
@@ -176,6 +185,7 @@ func (self *Browser) Launch() error {
 		// launch the browser
 		go func() {
 			log.Debugf("[browser] Executing: %v", strings.Join(self.cmd.Args, ` `))
+			self.stopped = false
 			self.exitchan <- self.cmd.Run()
 		}()
 
@@ -235,6 +245,8 @@ func (self *Browser) Wait() error {
 }
 
 func (self *Browser) Stop() error {
+	self.stopped = true
+
 	if self.cmd == nil {
 		return nil
 	}

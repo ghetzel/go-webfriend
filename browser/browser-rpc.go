@@ -11,8 +11,7 @@ import (
 )
 
 var rpcConnectTimeout = (10 * time.Second)
-var rpcConnectRetryInterval = (125 * time.Millisecond)
-var rpcConnectMaxRetries = 40
+var rpcConnectRetryInterval = (250 * time.Millisecond)
 
 func (self *Browser) connectRPC(address string) error {
 	rpcAddr := fmt.Sprintf("http://%v", address)
@@ -20,9 +19,12 @@ func (self *Browser) connectRPC(address string) error {
 
 	self.devtools = devtool.New(rpcAddr)
 	connected := false
+	started := time.Now()
 
-	for i := 0; i < rpcConnectMaxRetries; i++ {
-		if version, err := self.devtools.Version(self.ctx()); err == nil {
+	for time.Since(started) <= rpcConnectTimeout {
+		if self.stopped {
+			return fmt.Errorf("Browser process stopped before RPC connection could be established")
+		} else if version, err := self.devtools.Version(self.ctx()); err == nil {
 			connected = true
 			log.Debugf("Connected to %v; protocol %v", version.Browser, version.Protocol)
 			break
@@ -34,7 +36,7 @@ func (self *Browser) connectRPC(address string) error {
 	if connected {
 		return self.syncState()
 	} else {
-		return fmt.Errorf("Failed to connect to RPC interface after %d attempts", rpcConnectMaxRetries)
+		return fmt.Errorf("Failed to connect to RPC interface after %v", rpcConnectTimeout)
 	}
 }
 

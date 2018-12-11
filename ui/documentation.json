@@ -461,7 +461,7 @@
             "name": "clear_requests",
             "types": "bool",
             "description": "Whether the resources stack that is queried in page::resources and\npage::resource is cleared before navigating. Set this to false to\npreserve the ability to retrieve data that was loaded on previous pages.",
-            "default": true
+            "default": false
           },
           {
             "name": "require_originating_request",

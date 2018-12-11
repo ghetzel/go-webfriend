@@ -39,7 +39,7 @@ type GoArgs struct {
 	// Whether the resources stack that is queried in page::resources and
 	// page::resource is cleared before navigating. Set this to false to
 	// preserve the ability to retrieve data that was loaded on previous pages.
-	ClearRequests bool `json:"clear_requests" default:"true"`
+	ClearRequests bool `json:"clear_requests" default:"false"`
 
 	// Whether the originating network request is required in the return value.  If this is
 	// false, the response may be missing status, headers, and timing details.
