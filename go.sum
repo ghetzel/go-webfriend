@@ -34,8 +34,8 @@ github.com/ghetzel/diecast v1.9.15 h1:xcYSsVb7gbj1aEDhs4x/+Yfkj708pLctesHRLHJ6On
 github.com/ghetzel/diecast v1.9.15/go.mod h1:XQ2W1E2vb9H5n0fagF7Ti4AiAVmqq8E3DoNVziO6k5c=
 github.com/ghetzel/friendscript v0.5.0 h1:3Ujg01YEO0TEp0Esls12rS3suoO/LA13Ucn5lpmfeN8=
 github.com/ghetzel/friendscript v0.5.0/go.mod h1:GZJ2FZRpgvURp4hUb/AdevNCnHKCWRpKLxtAl817F4g=
-github.com/ghetzel/friendscript v0.5.13 h1:7SxevZ5REovzHr9oZOoeWqU3g8jivx8Tj0VC7IcBCGM=
-github.com/ghetzel/friendscript v0.5.13/go.mod h1:yQZzZ7GedHOumCg2mt84dDGjC/aUkAfi0MrTykLHdpA=
+github.com/ghetzel/friendscript v0.6.0 h1:j3Nm/L28qvq7cNWw7MgsNETvI6dElj2lF5WDpHnBDHo=
+github.com/ghetzel/friendscript v0.6.0/go.mod h1:RKPCC70+Y9dMh1iKPVz2jOBj/OZzaAx7cICvydPuazc=
 github.com/ghetzel/go-defaults v1.2.0 h1:U1T64bxhBc6nVZ68QXch1hoHq43h6isqgbvG7kxY9Uc=
 github.com/ghetzel/go-defaults v1.2.0/go.mod h1:xWhTgOoc4UNWT7sl3oyNFqtKzEbUKI9C3rqbwtwdxFw=
 github.com/ghetzel/go-stockutil v1.5.49 h1:SQEo4cLlzLidi9j+u+AvcYdN6jy5yqpJAB8L+YGn4VY=
@@ -95,6 +95,8 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/kyokomi/emoji v2.0.0+incompatible h1:ftqSD1PzBkSr3I4/0ZZ7Cluaxv6sNi8CkhYE56Son6A=
+github.com/kyokomi/emoji v2.0.0+incompatible/go.mod h1:mZ6aGCD7yk8j6QY6KICwnZ2pxoszVseX1DNoGtU2tBA=
 github.com/mafredri/cdp v0.18.5 h1:WlXMmqYRtou6YPwID4rgasehL1Nz54t94xihs/BRKnY=
 github.com/mafredri/cdp v0.18.5/go.mod h1:hgdiA0yp1uqhSaDOHJWPgXpMbh+LAfUdD9vbN2AM8gE=
 github.com/mafredri/cdp v0.19.2 h1:JExliRppW8AcRsjhd2kYmhVvJgdPJm/CXQ8IZl0jkOw=
@@ -108,6 +110,8 @@ github.com/mattn/go-isatty v0.0.4 h1:bnP0vzxcAdeI1zdubAl5PjU6zsERjGZb7raWodagDYs
 github.com/mattn/go-isatty v0.0.4/go.mod h1:M+lRXTBqGeGNdLjl/ufCoiOlB5xdOkqRJdNxMWT7Zi4=
 github.com/mattn/go-runewidth v0.0.3 h1:a+kO+98RDGEfo6asOGMmpodZq4FNtnGP54yps8BzLR4=
 github.com/mattn/go-runewidth v0.0.3/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
+github.com/mattn/go-runewidth v0.0.4 h1:2BvfKmzob6Bmd4YsL0zygOqfdFnK7GR4QL06Do4/p7Y=
+github.com/mattn/go-runewidth v0.0.4/go.mod h1:LwmH8dsx7+W8Uxz3IHJYH5QSwggIsqBzpuz5H//U1FU=
 github.com/mattn/go-shellwords v1.0.3 h1:K/VxK7SZ+cvuPgFSLKi5QPI9Vr/ipOf4C1gN+ntueUk=
 github.com/mattn/go-shellwords v1.0.3/go.mod h1:3xCvwCdWdlDJUrvuMn7Wuy9eWs4pE8vqg+NOMyg4B2o=
 github.com/mattn/go-tty v0.0.0-20180219170247-931426f7535a h1:8TGB3DFRNl06DB1Q6zBX+I7FDoCUZY2fmMS9WGUIIpw=
@@ -188,6 +192,8 @@ golang.org/x/sys v0.0.0-20181107165924-66b7b1311ac8/go.mod h1:STP8DvDyc/dI5b8T5h
 golang.org/x/text v0.3.0 h1:g61tztE5qeGQ89tm6NTjjM9VPIm088od1l6aSorWRWg=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/tools v0.0.0-20180917221912-90fa682c2a6e/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
+golang.org/x/tools v0.0.0-20181218020041-13ba8ad772df h1:sXpV2FbQYylCBI9NPmrOEEFd/PTh5prLXXWYpQef3u0=
+golang.org/x/tools v0.0.0-20181218020041-13ba8ad772df/go.mod h1:n7NCudcB/nEzxVGmLbDWY5pfWTLqBcC2KZ6jyYvM4mQ=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 h1:qIbj1fsPNlZgppZ+VLlY7N33q108Sa+fhmuc+sWQYwY=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
