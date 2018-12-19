@@ -1173,7 +1173,7 @@
             "name": "request_type",
             "types": "string",
             "description": "The type of data in Body, specifying how it should be encoded.  Valid values are \"raw\", \"form\", and \"json\"",
-            "default": "\"raw\""
+            "default": "\"json\""
           },
           {
             "name": "response_type",
@@ -1236,7 +1236,7 @@
             "name": "request_type",
             "types": "string",
             "description": "The type of data in Body, specifying how it should be encoded.  Valid values are \"raw\", \"form\", and \"json\"",
-            "default": "\"raw\""
+            "default": "\"json\""
           },
           {
             "name": "response_type",
@@ -1344,7 +1344,7 @@
             "name": "request_type",
             "types": "string",
             "description": "The type of data in Body, specifying how it should be encoded.  Valid values are \"raw\", \"form\", and \"json\"",
-            "default": "\"raw\""
+            "default": "\"json\""
           },
           {
             "name": "response_type",
@@ -1452,7 +1452,7 @@
             "name": "request_type",
             "types": "string",
             "description": "The type of data in Body, specifying how it should be encoded.  Valid values are \"raw\", \"form\", and \"json\"",
-            "default": "\"raw\""
+            "default": "\"json\""
           },
           {
             "name": "response_type",
@@ -1560,7 +1560,7 @@
             "name": "request_type",
             "types": "string",
             "description": "The type of data in Body, specifying how it should be encoded.  Valid values are \"raw\", \"form\", and \"json\"",
-            "default": "\"raw\""
+            "default": "\"json\""
           },
           {
             "name": "response_type",
@@ -1668,7 +1668,7 @@
             "name": "request_type",
             "types": "string",
             "description": "The type of data in Body, specifying how it should be encoded.  Valid values are \"raw\", \"form\", and \"json\"",
-            "default": "\"raw\""
+            "default": "\"json\""
           },
           {
             "name": "response_type",
@@ -1776,7 +1776,7 @@
             "name": "request_type",
             "types": "string",
             "description": "The type of data in Body, specifying how it should be encoded.  Valid values are \"raw\", \"form\", and \"json\"",
-            "default": "\"raw\""
+            "default": "\"json\""
           },
           {
             "name": "response_type",
