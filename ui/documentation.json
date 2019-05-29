@@ -963,6 +963,17 @@
         }
       },
       {
+        "name": "codepoints",
+        "description": "Return an array of Unicode codepoints for each character in the given string.",
+        "argument": {
+          "name": "input",
+          "types": "any"
+        },
+        "return": {
+          "types": "[]int"
+        }
+      },
+      {
         "name": "format",
         "description": "Format the given string according to the given pattern and values.",
         "argument": {
