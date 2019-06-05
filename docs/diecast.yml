@@ -14,16 +14,9 @@ mounts:
 - mount: /api/documentation
   to:    ../ui/documentation.json
 
-- mount: /go-webfriend/js
-  to:    ../ui/js
-
-- mount: /go-webfriend/css
-  to:    ../ui/css
-
-- mount: /go-webfriend/img
-  to:    ../ui/img
-
 start:
-  command:          'bash -c "curl -o index.html ${DIECAST_ADDRESS}/"'
+- command:          'bash -c "curl -o index.html ${DIECAST_ADDRESS}/"'
   delay:            '250ms'
+
+- command:          'bash -c "curl -o style.css ${DIECAST_ADDRESS}/style.scss"'
   exitOnCompletion: true

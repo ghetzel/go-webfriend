@@ -1,0 +1,253 @@
+body > nav {
+    height: 62px;
+}
+
+h1 a, h2 a, h3 a {
+    color: inherit;
+}
+
+.code, pre > code {
+    border-radius: 0.25em;
+    background-color: #343A40;
+    color: #EEEEEE;
+    font-family: monospace;
+    white-space: pre-wrap;
+    padding: 1em;
+    margin-bottom: 0;
+    width: 100%;
+    display: block;
+}
+
+.code-unselectable {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.box-label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 8pt;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-top: 0px;
+    border-left: 0px;
+    padding: 1px 3px;
+    border-bottom-right-radius: 3px;
+    min-width: 50px;
+    text-align: center;
+}
+
+code {
+    color: inherit;
+    background: #EEEEEE;
+    padding: 0.125em;
+    border-radius: 0.125em;
+}
+
+table th > p,
+table td > p {
+    margin: 0;
+}
+
+table code {
+    background: transparent;
+}
+
+h3 {
+    margin-bottom: 0.5em;
+}
+
+.nav-pills .nav-link {
+    border-radius: 0;
+    padding: 0.2rem;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #162D4F;
+}
+
+#logo {
+    width: 100%;
+}
+
+#logo img {
+    display: block;
+    margin: auto;
+    margin-bottom: 1.5em;
+}
+
+#commands {
+    padding: 0;
+}
+
+#sidebar {
+    position: sticky;
+    top: 0px;
+}
+
+#content {
+    padding-top: 15px;
+    position: relative;
+}
+
+.bg-webfriend {
+    background-color: #343A40 !important;
+}
+
+.bg-webfriend a {
+    color: #EEEEEE;
+}
+
+.bg-webfriend-dark {
+    background-color: #222629 !important;
+    color: #EEEEEE;
+}
+
+.bg-webfriend-dark a {
+    color: #EEEEEE;
+}
+
+.unselectable, .code-unselectable {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.fs-modules {
+    /* Type colors (text) */
+    /* ---------------------------------------------------------------------------*/
+}
+
+.fs-modules .fs-module-commands {
+    margin-top: 1em;
+}
+
+.fs-modules .fs-module-commands .fs-command {
+    border-bottom: 2px solid #96D789;
+    margin-bottom: 1em;
+    padding-top: 1em;
+}
+
+.fs-modules .fs-module-commands .fs-command .fs-command-options {
+    margin-top: 0.125em;
+}
+
+.fs-modules .fs-module-commands .fs-command .fs-command-opt > *:first-child {
+    padding-left: 1em;
+    padding-right: 1em;
+}
+
+.fs-modules .fs-module-commands .fs-command > div > p > code {
+    background-color: #343A40 !important;
+    color: #EEEEEE !important;
+    padding: 4px 33px;
+    display: block;
+    width: 100%;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-family: monospace;
+    white-space: pre;
+}
+
+.fs-modules .fs-module-commands .fs-command h4 {
+    margin-top: 1em;
+}
+
+.fs-modules .fs-module-commands .fs-command h5 {
+    margin: 1.5em 0;
+    margin-bottom: 1em;
+}
+
+.fs-modules h2 {
+    width: calc(100% + 1.5rem);
+    background-color: #222629;
+    padding: 4px 1.5rem;
+    padding-bottom: 5px;
+    margin: auto -1.5rem;
+    margin-bottom: 0;
+    color: #79A4D9;
+    font-size: 20pt;
+}
+
+.fs-modules h2 + .fs-module-summary {
+    width: calc(100% + 1.5rem);
+    background-color: #555555;
+    margin: auto -1.5rem;
+    margin-bottom: 0;
+    padding: 5px 1.5rem;
+    color: white;
+}
+
+.fs-modules .fs-module-summary p {
+    margin: 0;
+}
+
+.fs-modules .fs-module-description {
+    margin-top: 1em;
+}
+
+.fs-modules h3 {
+    font-family: monospace;
+    font-size: 14pt;
+}
+
+.fs-modules .fs-type {
+    background-color: #333333;
+    color: white;
+    border-radius: 3px;
+    width: auto;
+    font-size: 90%;
+    padding: 0 5px;
+    /* Type colors (fills) */
+    /* ---------------------------------------------------------------------------*/
+}
+
+.fs-modules .fs-type.fs-type-any {
+    background-color: #7f24b3;
+}
+
+.fs-modules .fs-type.fs-type-bool {
+    background-color: #b32424;
+}
+
+.fs-modules .fs-type.fs-type-int, .fs-modules .fs-type.fs-type-float {
+    background-color: #1a89ca;
+}
+
+.fs-modules .fs-type.fs-type-string, .fs-modules .fs-type.fs-type-selector {
+    background-color: #45a120;
+}
+
+.fs-modules .fs-type.fs-type-duration, .fs-modules .fs-type.fs-type-time {
+    background-color: #cf7c00;
+}
+
+.fs-modules .fs-type.fs-type-map {
+    background-color: #cf00a2;
+}
+
+.fs-modules .fs-type-text.fs-type-any {
+    color: #7f24b3;
+}
+
+.fs-modules .fs-type-text.fs-type-bool {
+    color: #b32424;
+}
+
+.fs-modules .fs-type-text.fs-type-int, .fs-modules .fs-type-text.fs-type-float {
+    color: #1a89ca;
+}
+
+.fs-modules .fs-type-text.fs-type-string, .fs-modules .fs-type-text.fs-type-selector {
+    color: #45a120;
+}
+
+.fs-modules .fs-type-text.fs-type-duration, .fs-modules .fs-type-text.fs-type-time {
+    color: #cf7c00;
+}
+
+.fs-modules .fs-type-text.fs-type-map, .fs-modules .fs-type-text.fs-type-object {
+    color: #cf00a2;
+}

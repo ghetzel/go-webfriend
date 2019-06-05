@@ -18,8 +18,10 @@ require (
 	github.com/mafredri/cdp v0.19.2
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936
+	github.com/mjibson/esc v0.2.0 // indirect
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/term v0.0.0-20180730021639-bffc007b7fd5 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/urfave/negroni v1.0.0
+	golang.org/x/tools v0.0.0-20190603231351-8aaa1484dc10 // indirect
 )
