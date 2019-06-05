@@ -14,8 +14,8 @@ all: $(UIFILES)
 .PHONY: $(UIFILES)
 $(UIFILES):
 	@echo "Copy $(@)"
-	@test -d "$(dir $(@))" || mkdir -p "$(dir $(@))"
-	@cp ../ui/$(subst assets/,,$(@)) $(@)
+	@test -d "src/$(dir $(@))" || mkdir -p "src/$(dir $(@))"
+	@cp ../ui/$(subst assets/,,$(@)) src/$(@)
 
 src/assets/img:
 	cd src/assets/img && make

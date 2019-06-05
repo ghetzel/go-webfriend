@@ -1,11 +1,11 @@
 <div id="logo">
     <img
-        src="/go-webfriend/assets/img/webfriend-arms-128.png"
+        src="/go-webfriend/src/assets/img/webfriend-arms-128.png"
         alt="Webfriend Icon"
         height="128"
     >
     <img
-        src="/go-webfriend/assets/img/webfriend-text-light-bg-36.png"
+        src="/go-webfriend/src/assets/img/webfriend-text-light-bg-36.png"
         height="36"
         alt="Webfriend Logo"
     >
