@@ -18,5 +18,5 @@ start:
 - command:          'bash -c "curl -o index.html ${DIECAST_ADDRESS}/"'
   delay:            '250ms'
 
-- command:          'bash -c "curl -o style.css ${DIECAST_ADDRESS}/style.scss"'
+- command:          'bash -c "curl -o assets/css/style.css ${DIECAST_ADDRESS}/style.scss"'
   exitOnCompletion: true
