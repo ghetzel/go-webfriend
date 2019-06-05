@@ -19,8 +19,6 @@
 
 ## Installation
 
-TODO: make this section much more detailed.
-
 ```
 go get github.com/ghetzel/go-webfriend/cmd/webfriend
 ```
@@ -57,3 +55,11 @@ go get github.com/ghetzel/go-webfriend/cmd/webfriend
     <div></div>
 </details>
 -->
+
+## Usage
+
+### As a standalone utility
+
+### As a server
+
+### As a Golang library
