@@ -35,6 +35,7 @@ type CallDoc struct {
 type CallDocSet []*CallDoc
 
 type ModuleDoc struct {
+	DisplayName string     `json:"display_name"`
 	Name        string     `json:"name"`
 	Summary     string     `json:"summary,omitempty"`
 	Description string     `json:"description,omitempty"`
@@ -139,8 +140,9 @@ func (self *Environment) Documentation() []*ModuleDoc {
 			mod = m
 		} else {
 			mod = &ModuleDoc{
-				Name:     name,
-				Commands: make(CallDocSet, 0),
+				DisplayName: mangleModName(name),
+				Name:        name,
+				Commands:    make(CallDocSet, 0),
 			}
 
 			mods[name] = mod
@@ -449,6 +451,11 @@ func astTypeToString(ty ast.Expr) string {
 		name = strings.TrimSuffix(name, `64`)
 		name = strings.TrimSuffix(name, `128`)
 
+		switch name {
+		case `Reader`, `Writer`:
+			name = `stream`
+		}
+
 		return name
 	} else if _, ok := ty.(*ast.InterfaceType); ok {
 		return `any`
@@ -458,5 +465,14 @@ func astTypeToString(ty ast.Expr) string {
 		return fmt.Sprintf("[]%v", astTypeToString(arrayOf.Elt))
 	} else {
 		return `UNKNOWN`
+	}
+}
+
+func mangleModName(in string) string {
+	switch in {
+	case `fmt`:
+		return `format`
+	default:
+		return in
 	}
 }

@@ -1,0 +1,29 @@
+root: src
+
+patterns:
+- '*.html'
+- '*.md'
+- '*.scss'
+- '/go-webfriend/js/codemirror/hints/friendscript-hint.js'
+
+header:
+  page:
+    prefix: /go-webfriend
+
+mounts:
+- mount: /api/documentation
+  to:    ../ui/documentation.json
+
+- mount: /go-webfriend/js
+  to:    ../ui/js
+
+- mount: /go-webfriend/css
+  to:    ../ui/css
+
+- mount: /go-webfriend/img
+  to:    ../ui/img
+
+start:
+  command:          'bash -c "curl -o index.html ${DIECAST_ADDRESS}/"'
+  delay:            '250ms'
+  exitOnCompletion: true

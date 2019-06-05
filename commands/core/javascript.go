@@ -15,16 +15,14 @@ import (
 // #### Examples
 //
 // ##### Use the `webfriend` local variable to access Friendscript data from JavaScript, make a change, then pass it back.
-//
 // ```
 // $pi = 3.0
 //
 // javascript "return webfriend.pi + 0.14" -> $pi
+// # $pi is now 3.14
 // ```
-// The `$pi` variable should be equal to 3.14 after this runs.
 //
 // ##### Inject a script that will retrieve all `<a>` tags on a page and return their "href" attributes (if present).
-//
 // ```
 // javascript begin
 //     var as = document.querySelectorAll('a');
@@ -40,10 +38,10 @@ import (
 //     }
 //
 //     return hrefs;
-// end
-// ```
+// end -> $result
 //
-// After running, the `$result` variable will contain an array of zero or more strings.
+// # $result now contains an array of zero or more strings as returned from JavaScript.
+// ```
 //
 func (self *Commands) Javascript(script string) (interface{}, error) {
 	return self.browser.Tab().Evaluate(script, self.exported...)

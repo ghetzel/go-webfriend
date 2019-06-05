@@ -57,6 +57,9 @@ type WriteResponse struct {
 	Size int64 `json:"size,omitempty"`
 }
 
+// Write a value or a stream of data to a file at the given path.  The destination path can be a local
+// filesystem path, a URI that uses a custom scheme registered outside of the application, or the string
+// "temporary", which will write to a temporary file whose path will be returned in the response.
 func (self *Commands) Write(destination interface{}, args *WriteArgs) (*WriteResponse, error) {
 	if args == nil {
 		args = &WriteArgs{}

@@ -21,7 +21,7 @@ type TypeArgs struct {
 	// How long that each individual keystroke will remain down for.
 	KeyDownTime time.Duration `json:"key_down_time" default:"30ms"`
 
-	// An amount of time to randomly vary the key_down_time duration from within each keystroke.
+	// An amount of time to randomly vary the `key_down_time` duration from within each keystroke.
 	KeyDownJitter time.Duration `json:"key_down_jitter"`
 
 	// How long to wait between issuing individual keystrokes.

@@ -1,5 +1,6 @@
 [
   {
+    "display_name": "assert",
     "name": "assert",
     "summary": "Suite of testing-oriented commands that will trigger errors or failures if they aren't satistifed.",
     "description": "The Assert module is aimed at making it easier to write scripts that perform test validation,\nas is frequently done during automated acceptance testing of web applications.",
@@ -119,6 +120,7 @@
     ]
   },
   {
+    "display_name": "cookies",
     "name": "cookies",
     "summary": "Commands for interacting with the browser's cookie storage backend.",
     "commands": [
@@ -156,7 +158,7 @@
         "description": "List all cookies, either for the given set of URLs or for the current tab (if omitted).",
         "options": [
           {
-            "name": "ur_ls",
+            "name": "urls",
             "types": "[]string",
             "description": "an array of strings representing the URLs to retrieve cookies for.  If omitted, the\nURL of the current browser tab will be used"
           }
@@ -229,6 +231,7 @@
     ]
   },
   {
+    "display_name": "core",
     "name": "core",
     "summary": "Commonly used commands for basic browser interaction.",
     "commands": [
@@ -633,7 +636,7 @@
       },
       {
         "name": "javascript",
-        "description": "Inject Javascript into the current page, evaluate it, and return the results.\nThe script is wrapped in an anonymous function whose return value will be\nreturned from this command as a native data type.\n\nScripts will have access to all exported variables in the calling script (exported with the\n\"export\" command). They are available to injected script as a plain object accessible using\nthe \"webfriend\" variable.\n\n#### Examples\n\n##### Use the `webfriend` local variable to access Friendscript data from JavaScript, make a change, then pass it back.\n\n```\n$pi = 3.0\n\njavascript \"return webfriend.pi + 0.14\" -\u003e $pi\n```\nThe `$pi` variable should be equal to 3.14 after this runs.\n\n##### Inject a script that will retrieve all `\u003ca\u003e` tags on a page and return their \"href\" attributes (if present).\n\n```\njavascript begin\n   var as = document.querySelectorAll('a');\n   var hrefs = [];\n\n   for(var i = 0; i \u003c as.length; i++) {\n       var a = as[i];\n       var href = a.getAttribute('href');\n\n       if (href \u0026\u0026 href.length) {\n           hrefs.push(href);\n       }\n   }\n\n   return hrefs;\nend\n```\n\nAfter running, the `$result` variable will contain an array of zero or more strings.",
+        "description": "Inject Javascript into the current page, evaluate it, and return the results.\nThe script is wrapped in an anonymous function whose return value will be\nreturned from this command as a native data type.\n\nScripts will have access to all exported variables in the calling script (exported with the\n\"export\" command). They are available to injected script as a plain object accessible using\nthe \"webfriend\" variable.\n\n#### Examples\n\n##### Use the `webfriend` local variable to access Friendscript data from JavaScript, make a change, then pass it back.\n```\n$pi = 3.0\n\njavascript \"return webfriend.pi + 0.14\" -\u003e $pi\n# $pi is now 3.14\n```\n\n##### Inject a script that will retrieve all `\u003ca\u003e` tags on a page and return their \"href\" attributes (if present).\n```\njavascript begin\n   var as = document.querySelectorAll('a');\n   var hrefs = [];\n\n   for(var i = 0; i \u003c as.length; i++) {\n       var a = as[i];\n       var href = a.getAttribute('href');\n\n       if (href \u0026\u0026 href.length) {\n           hrefs.push(href);\n       }\n   }\n\n   return hrefs;\nend -\u003e $result\n\n# $result now contains an array of zero or more strings as returned from JavaScript.\n```",
         "argument": {
           "name": "script",
           "types": "string"
@@ -738,7 +741,7 @@
           {
             "name": "mobile",
             "types": "any",
-            "description": "Whether to emulate a mobile device or not. If a map is provided, mobile\nemulation will be enabled and configured using the following keys:\n\n   width (int, optional), The width of the mobile screen to emulate.;\n\n   height (int, optional), The height of the mobile screen to emulate.;\n\n   x (int, optional), The horizontal position of the currently viewable\n                      portion of the mobile screen.;\n\n   y (int, optional), The vertical position of the currently viewable\n                      portion of the mobile screen.;"
+            "description": "Whether to emulate a mobile device or not. If a map is provided, mobile\nemulation will be enabled and configured using the following keys:\n\n\u003cbr\u003e\n\nValue    | Data Type     | Description\n---------|---------------|-------------\n*width*  | int, optional | The width of the mobile screen to emulate.\n*height* | int, optional | The height of the mobile screen to emulate.\n*x*      | int, optional | The horizontal position of the currently viewable portion of the mobile screen.\n*y*      | int, optional | The vertical position of the currently viewable portion of the mobile screen."
           },
           {
             "name": "fit_window",
@@ -868,7 +871,7 @@
           {
             "name": "key_down_jitter",
             "types": "Duration",
-            "description": "An amount of time to randomly vary the key_down_time duration from within each keystroke."
+            "description": "An amount of time to randomly vary the `key_down_time` duration from within each keystroke."
           },
           {
             "name": "delay",
@@ -933,11 +936,55 @@
     ]
   },
   {
+    "display_name": "file",
     "name": "file",
     "summary": "File IO commands",
-    "commands": []
+    "commands": [
+      {
+        "name": "write",
+        "description": "Write a value or a stream of data to a file at the given path.  The destination path can be a local\nfilesystem path, a URI that uses a custom scheme registered outside of the application, or the string\n\"temporary\", which will write to a temporary file whose path will be returned in the response.",
+        "argument": {
+          "name": "destination",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "data",
+            "types": "stream",
+            "description": "The data to write as a stream."
+          },
+          {
+            "name": "value",
+            "types": "any",
+            "description": "The data to write as a discrete value."
+          },
+          {
+            "name": "autoclose",
+            "types": "bool",
+            "description": "Whether to attempt to close the destination (if possible) after reading/writing.",
+            "default": true
+          }
+        ],
+        "return": {
+          "types": "WriteResponse",
+          "parameters": [
+            {
+              "name": "path",
+              "types": "string",
+              "description": "The filesystem path that the data was written to."
+            },
+            {
+              "name": "size",
+              "types": "int",
+              "description": "The size of the data (in bytes)."
+            }
+          ]
+        }
+      }
+    ]
   },
   {
+    "display_name": "format",
     "name": "fmt",
     "commands": [
       {
@@ -1153,6 +1200,7 @@
     ]
   },
   {
+    "display_name": "http",
     "name": "http",
     "commands": [
       {
@@ -1865,6 +1913,7 @@
     ]
   },
   {
+    "display_name": "page",
     "name": "page",
     "summary": "Commands for inspecting and manipulating the current DOM document and browser viewport.",
     "commands": [
@@ -2107,10 +2156,12 @@
     ]
   },
   {
+    "display_name": "utils",
     "name": "utils",
     "commands": []
   },
   {
+    "display_name": "vars",
     "name": "vars",
     "commands": [
       {

@@ -101,7 +101,7 @@ func New(browser *browser.Browser, scopeable utils.Scopeable) *Commands {
 type ListArgs struct {
 	// an array of strings representing the URLs to retrieve cookies for.  If omitted, the
 	// URL of the current browser tab will be used
-	URLs []string `json:"urls"`
+	Urls []string `json:"urls"`
 }
 
 // List all cookies, either for the given set of URLs or for the current tab (if omitted).
@@ -114,8 +114,8 @@ func (self *Commands) List(args *ListArgs) ([]*Cookie, error) {
 
 	params := make(map[string]interface{})
 
-	if len(args.URLs) > 0 {
-		params[`urls`] = args.URLs
+	if len(args.Urls) > 0 {
+		params[`urls`] = args.Urls
 	}
 
 	if response, err := self.browser.Tab().RPC(`Network`, `getCookies`, params); err == nil {

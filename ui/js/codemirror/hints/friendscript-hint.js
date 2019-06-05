@@ -3,6 +3,7 @@ layout: none
 bindings:
 - name:     docs
   resource: '/api/documentation'
+  parser:   json
 ---
 var friendscriptKeywords = [
   'if',

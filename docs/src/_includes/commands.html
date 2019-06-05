@@ -1,0 +1,138 @@
+---
+bindings:
+-   name:     docs
+    resource: /api/documentation
+    parser:   json
+---
+<!--
+    <nav class="col-2 fs-sidebar" id="sidebar">
+        <ul class="sticky-top">
+            {{ range $i, $module := $.bindings.docs }}
+            <li class="nav-item">
+                <a class="nav-link" href="#fs-{{ $module.name }}" data-toggle="collapse" data-target="#fs-module-{{ $module.name }}-nav">
+                    {{ titleize $module.name }} Module
+                </a>
+
+                <ul id="fs-module-{{ $module.name }}-nav" class="fs-nav-module collapse show">
+                {{ range $j, $command := $module.commands }}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#fs-{{ $module.name }}::{{ $command.name }}">
+                            {{ $command.name }}
+                        </a>
+                    </li>
+                {{ end }}
+                </ul>
+            </li>
+            {{ end }}
+        </ul>
+    </nav>
+-->
+<div id="commands" class="fs-modules">
+    {{ range $i, $module := $.bindings.docs }}
+    <div class="fs-module" data-fs-module="{{ $module.name }}" id="fs-{{ $module.name }}">
+        <h2><a href="#fs-{{ $module.name }}">{{ titleize (or $module.display_name $module.name) }} Module</a></h2>
+        {{ if $module.summary }}
+        <div class="fs-module-summary">{{ markdown $module.summary }}</div>
+        {{ end }}
+
+        {{ if $module.description }}
+        <div class="fs-module-description">{{ markdown $module.description }}</div>
+        {{ end }}
+
+        <div class="fs-module-commands">
+        {{ range $j, $command := $module.commands }}
+            <div class="fs-command" id="fs-{{ $module.name }}::{{ $command.name }}">
+                <h3>
+                    <a href="#fs-{{ $module.name }}::{{ $command.name }}"><b>{{ if nex $module.name `core` }}{{ $module.name }}::{{ end }}{{ $command.name }}</b></a>
+
+                    {{ if $command.argument }}
+                        <span class="fs-type-text fs-type-{{ lower $command.argument.types }}">{{ upper $command.argument.name }}</span>
+                    {{ end }}
+
+                    {{ if $command.options }}
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            {{ range $k, $opt := $command.options }}
+                            <tr class="fs-command-opt">
+                                <th>{{ $opt.name }}:</th>
+                                <td class="fs-type-text fs-type-{{ lower $opt.types }} pr-3">{{ lower $opt.types }}</td>
+                                <td class="fs-type-text fs-type-{{ lower $opt.types }}">{{ $opt.default }}</td>
+                            </tr>
+                            {{ end }}
+                        </tbody>
+                    </table>
+                    }
+                    {{ end }}
+                    {{ if $command.return }}
+                    {{   if hasSuffix $command.return.types `Response` }}
+                    -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                    {{   else }}
+                    -> <span class="fs-type-text fs-type-{{ lower $command.return.types }} pr-3">{{ lower $command.return.types }}</span>
+                    {{   end }}
+                    {{ end }}
+                </h3>
+                {{ if $command.description }}
+                <br />
+                <div>{{ markdown $command.description }}</div>
+                {{ else }}
+                <p><i>No description provided.</i></p>
+                {{ end }}
+
+                {{ if $command.options }}
+                <h4>Parameters</h4>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $k, $opt := $command.options }}
+                    <tr>
+                        <th>{{ $opt.name }}</th>
+                        <td>
+                            <span class="fs-type fs-type-{{ lower $opt.types }}">{{ lower $opt.types }}</span>
+                        </td>
+                        <td><pre>{{ or (asStr $opt.default) `-` }}</pre></td>
+                        <td>{{ markdown $opt.description }}</td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+                {{ end }}
+
+                {{ if $command.return.parameters }}
+                <h4>Return Parameters</h4>
+
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {{ range $k, $opt := $command.return.parameters }}
+                    <tr>
+                        <th>{{ $opt.name }}</th>
+                        <td>
+                            <span class="fs-type fs-type-{{ lower $opt.types }}">{{ lower $opt.types }}</span>
+                        </td>
+                        <td>{{ markdown $opt.description }}</td>
+                    </tr>
+                    {{ end }}
+                    </tbody>
+                </table>
+                {{ end }}
+            </div>
+        {{ end }}
+        </div>
+    </div>
+    {{ end }}
+</div>
