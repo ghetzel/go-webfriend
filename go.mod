@@ -6,10 +6,10 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.17.0
-	github.com/ghetzel/diecast v1.11.5
+	github.com/ghetzel/diecast v1.11.11
 	github.com/ghetzel/friendscript v0.6.4
 	github.com/ghetzel/go-defaults v1.2.0
-	github.com/ghetzel/go-stockutil v1.7.44
+	github.com/ghetzel/go-stockutil v1.7.50
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/gorilla/websocket v1.4.0
@@ -18,10 +18,8 @@ require (
 	github.com/mafredri/cdp v0.19.2
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936
-	github.com/mjibson/esc v0.2.0 // indirect
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/pkg/term v0.0.0-20180730021639-bffc007b7fd5 // indirect
 	github.com/stretchr/testify v1.3.0
 	github.com/urfave/negroni v1.0.0
-	golang.org/x/tools v0.0.0-20190603231351-8aaa1484dc10 // indirect
 )
