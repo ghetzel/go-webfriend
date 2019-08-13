@@ -98,6 +98,114 @@
 as is frequently done during automated acceptance testing of web applications.</p>
 </div>
         <div class="fs-module-commands">
+            <div class="fs-command" id="fs-assert::compare">
+                <h3>
+                    <a href="#fs-assert::compare"><b>assert::compare</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not equal to the other value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::contains">
+                <h3>
+                    <a href="#fs-assert::contains"><b>assert::contains</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value does not contain another value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
             <div class="fs-command" id="fs-assert::empty">
                 <h3>
                     <a href="#fs-assert::empty"><b>assert::empty</b></a>
@@ -106,6 +214,60 @@ as is frequently done during automated acceptance testing of web applications.</
                 <br />
                 <div><p>Return an error if the given value not empty.</p>
 </div>
+            </div>
+            <div class="fs-command" id="fs-assert::equal">
+                <h3>
+                    <a href="#fs-assert::equal"><b>assert::equal</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not equal to the other value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::exists">
                 <h3>
@@ -124,6 +286,114 @@ as is frequently done during automated acceptance testing of web applications.</
                 <br />
                 <div><p>Return an error if the given value is not false.</p>
 </div>
+            </div>
+            <div class="fs-command" id="fs-assert::gt">
+                <h3>
+                    <a href="#fs-assert::gt"><b>assert::gt</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not numerically greater than the second value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::gte">
+                <h3>
+                    <a href="#fs-assert::gte"><b>assert::gte</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not numerically greater than or equal to the second value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::is_array">
                 <h3>
@@ -196,6 +466,222 @@ as is frequently done during automated acceptance testing of web applications.</
                 <br />
                 <div><p>Return an error if the given value is not parsable as a time.</p>
 </div>
+            </div>
+            <div class="fs-command" id="fs-assert::lt">
+                <h3>
+                    <a href="#fs-assert::lt"><b>assert::lt</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not numerically less than the second value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::lte">
+                <h3>
+                    <a href="#fs-assert::lte"><b>assert::lte</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not numerically less than or equal to the second value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::not_contains">
+                <h3>
+                    <a href="#fs-assert::not_contains"><b>assert::not_contains</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value contains another value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::not_equal">
+                <h3>
+                    <a href="#fs-assert::not_equal"><b>assert::not_equal</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is equal to the other value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::not_null">
                 <h3>

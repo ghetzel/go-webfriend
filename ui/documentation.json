@@ -6,12 +6,66 @@
     "description": "The Assert module is aimed at making it easier to write scripts that perform test validation,\nas is frequently done during automated acceptance testing of web applications.",
     "commands": [
       {
+        "name": "compare",
+        "description": "Return an error if the given value is not equal to the other value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
+      },
+      {
+        "name": "contains",
+        "description": "Return an error if the given value does not contain another value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
+      },
+      {
         "name": "empty",
         "description": "Return an error if the given value not empty.",
         "argument": {
           "name": "value",
           "types": "any"
         }
+      },
+      {
+        "name": "equal",
+        "description": "Return an error if the given value is not equal to the other value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "exists",
@@ -28,6 +82,42 @@
           "name": "value",
           "types": "any"
         }
+      },
+      {
+        "name": "gt",
+        "description": "Return an error if the given value is not numerically greater than the second value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
+      },
+      {
+        "name": "gte",
+        "description": "Return an error if the given value is not numerically greater than or equal to the second value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "is_array",
@@ -92,6 +182,78 @@
           "name": "value",
           "types": "any"
         }
+      },
+      {
+        "name": "lt",
+        "description": "Return an error if the given value is not numerically less than the second value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
+      },
+      {
+        "name": "lte",
+        "description": "Return an error if the given value is not numerically less than or equal to the second value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
+      },
+      {
+        "name": "not_contains",
+        "description": "Return an error if the given value contains another value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
+      },
+      {
+        "name": "not_equal",
+        "description": "Return an error if the given value is equal to the other value.",
+        "argument": {
+          "name": "have",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any"
+          },
+          {
+            "name": "test",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "not_null",

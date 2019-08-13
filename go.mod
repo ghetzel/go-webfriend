@@ -1,15 +1,17 @@
 module github.com/ghetzel/go-webfriend
 
+go 1.12
+
 require (
 	github.com/c-bata/go-prompt v0.2.2 // indirect
 	github.com/dickeyxxx/netrc v0.0.0-20190329161231-b36f1c51d91d // indirect
 	github.com/fatih/color v1.7.0
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.17.0
-	github.com/ghetzel/diecast v1.11.11
-	github.com/ghetzel/friendscript v0.6.4
+	github.com/ghetzel/diecast v1.12.15
+	github.com/ghetzel/friendscript v0.6.5
 	github.com/ghetzel/go-defaults v1.2.0
-	github.com/ghetzel/go-stockutil v1.7.50
+	github.com/ghetzel/go-stockutil v1.8.2
 	github.com/gobwas/glob v0.2.3
 	github.com/google/go-cmp v0.3.0 // indirect
 	github.com/gorilla/websocket v1.4.0

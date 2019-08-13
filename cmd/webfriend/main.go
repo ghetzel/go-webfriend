@@ -8,6 +8,8 @@ import (
 
 	"github.com/ghetzel/cli"
 	"github.com/ghetzel/go-stockutil/log"
+	"github.com/ghetzel/go-stockutil/stringutil"
+	"github.com/ghetzel/go-stockutil/typeutil"
 	webfriend "github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/server"
@@ -47,6 +49,10 @@ func main() {
 		cli.BoolFlag{
 			Name:  `print-vars, P`,
 			Usage: `Print the final state of all variables upon script completion.`,
+		},
+		cli.StringSliceFlag{
+			Name:  `var, V`,
+			Usage: `Set one or more variables ([deeply.nested.]key=value) before executing the script.`,
 		},
 	}
 
@@ -91,6 +97,12 @@ func main() {
 
 			// evaluate Friendscript / run the REPL
 			script := webfriend.NewEnvironment(chrome)
+
+			// pre-populate initial variables
+			for _, pair := range c.StringSlice(`var`) {
+				k, v := stringutil.SplitPair(pair, `=`)
+				script.Set(k, typeutil.Auto(v))
+			}
 
 			go func() {
 				if c.Bool(`server`) {
@@ -141,7 +153,7 @@ func main() {
 			select {
 			case err := <-exiterr:
 				if err != nil {
-					log.Error(err)
+					log.Fatal(err)
 				}
 			}
 		} else {

@@ -7,9 +7,11 @@ package assert
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/ghetzel/friendscript"
 	"github.com/ghetzel/friendscript/utils"
+	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/timeutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
@@ -154,4 +156,108 @@ func (self *Commands) IsArray(value interface{}) error {
 	} else {
 		return fmt.Errorf("Expected array value")
 	}
+}
+
+type BinaryComparison struct {
+	Value interface{} `json:"value"`
+	Test  string      `json:"test"`
+}
+
+func bc(args *BinaryComparison, op string) *BinaryComparison {
+	if args == nil {
+		args = &BinaryComparison{}
+	}
+
+	defaults.SetDefaults(args)
+
+	if op != `` {
+		args.Test = op
+	}
+
+	return args
+}
+
+// Return an error if the given value is not equal to the other value.
+func (self *Commands) Compare(have interface{}, args *BinaryComparison) error {
+	if args == nil {
+		args = &BinaryComparison{}
+	}
+
+	defaults.SetDefaults(args)
+	want := args.Value
+
+	switch args.Test {
+	case ``, `eq`:
+		if typeutil.String(have) != typeutil.String(want) {
+			return fmt.Errorf("expected %q == %q", have, want)
+		}
+	case `ne`:
+		if typeutil.String(have) == typeutil.String(want) {
+			return fmt.Errorf("expected %q != %q", have, want)
+		}
+	case `contains`:
+		if !strings.Contains(typeutil.String(have), typeutil.String(want)) {
+			return fmt.Errorf("expected %q to contain %q", have, want)
+		}
+	case `gt`:
+		if typeutil.Float(have) <= typeutil.Float(want) {
+			return fmt.Errorf("expected %v > %v", have, want)
+		}
+	case `gte`:
+		if typeutil.Float(have) < typeutil.Float(want) {
+			return fmt.Errorf("expected %v >= %v", have, want)
+		}
+	case `lt`:
+		if typeutil.Float(have) >= typeutil.Float(want) {
+			return fmt.Errorf("expected %v < %v", have, want)
+		}
+	case `lte`:
+		if typeutil.Float(have) > typeutil.Float(want) {
+			return fmt.Errorf("expected %v <= %v", have, want)
+		}
+	default:
+		return fmt.Errorf("invalid comparison %q", args.Test)
+	}
+
+	return nil
+}
+
+// Return an error if the given value is not equal to the other value.
+func (self *Commands) Equal(have interface{}, args *BinaryComparison) error {
+	return self.Compare(have, bc(args, `eq`))
+}
+
+// Return an error if the given value is equal to the other value.
+func (self *Commands) NotEqual(have interface{}, args *BinaryComparison) error {
+	return self.Compare(have, bc(args, `ne`))
+}
+
+// Return an error if the given value does not contain another value.
+func (self *Commands) Contains(have interface{}, args *BinaryComparison) error {
+	return self.Compare(have, bc(args, `contains`))
+}
+
+// Return an error if the given value contains another value.
+func (self *Commands) NotContains(have interface{}, args *BinaryComparison) error {
+	return self.Compare(have, bc(args, `not-contains`))
+}
+
+// Return an error if the given value is not numerically greater than the second value.
+func (self *Commands) Gt(have interface{}, args *BinaryComparison) error {
+	return self.Compare(have, bc(args, `gt`))
+}
+
+// Return an error if the given value is not numerically greater than or equal to the second value.
+func (self *Commands) Gte(have interface{}, args *BinaryComparison) error {
+	return self.Compare(have, bc(args, `gte`))
+}
+
+// Return an error if the given value is not numerically less than the second value.
+func (self *Commands) Lt(have interface{}, args *BinaryComparison) error {
+	return self.Compare(have, bc(args, `lt`))
+}
+
+// Return an error if the given value is not numerically less than or equal to the second value.
+func (self *Commands) Lte(have interface{}, args *BinaryComparison) error {
+	return self.Compare(have, bc(args, `lte`))
 }
