@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/stretchr/testify/require"
+	"github.com/ghetzel/testify/require"
 )
 
 func TestPathHandlers(t *testing.T) {
