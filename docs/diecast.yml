@@ -1,22 +1,22 @@
 root: src
 
 patterns:
-- '*.html'
-- '*.md'
-- '*.scss'
-- '/go-webfriend/js/codemirror/hints/friendscript-hint.js'
+  - "*.html"
+  - "*.md"
+  - "*.scss"
+  - "/go-webfriend/js/codemirror/hints/friendscript-hint.js"
 
 header:
   page:
     prefix: /go-webfriend
 
 mounts:
-- mount: /api/documentation
-  to:    ../ui/documentation.json
+  - mount: /api/documentation
+    to: ../ui/documentation.json
 
 start:
-- command:          'bash -c "curl -o index.html ${DIECAST_ADDRESS}/"'
-  delay:            '250ms'
+  - command: 'bash -c "curl -o index.html $DIECAST_ADDRESS/"'
+    delay: "250ms"
 
-- command:          'bash -c "curl -o src/assets/css/style.css ${DIECAST_ADDRESS}/style.scss"'
-  exitOnCompletion: true
+  - command: 'bash -c "curl -o src/assets/css/style.css $DIECAST_ADDRESS/style.scss"'
+    exitOnCompletion: true

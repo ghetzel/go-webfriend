@@ -29,5 +29,5 @@ docs: fmt
 	cd docs && make
 
 build: fmt
-	go build --ldflags '-extldflags "-static"' -installsuffix cgo -ldflags '-s' -o bin/$(WEBFRIEND_BIN) cmd/webfriend/*.go
+	go build -tags nocgo --ldflags '-extldflags "-static"' -ldflags '-s' -o bin/$(WEBFRIEND_BIN) cmd/webfriend/*.go
 	which webfriend && cp -v bin/$(WEBFRIEND_BIN) `which webfriend` || true
