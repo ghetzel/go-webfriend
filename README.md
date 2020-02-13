@@ -7,25 +7,23 @@
 
 ## ALPHA ALERT
 
-This software is under _heavy_ development and should not be considered production-ready.  Much of it works, but much is still yet to
-be implemented.  It is a ground-up rewrite of my [Python version](https://github.com/ghetzel/webfriend) of this project.
+This software is under _heavy_ development and should not be considered production-ready. Much of it works, but much is still yet to
+be implemented. It is a ground-up rewrite of my [Python version](https://github.com/ghetzel/webfriend) of this project.
 Documentation and examples are missing and incomplete at this time, but I am working on it as I am able.
 
 I welcome polite feedback, comments, and suggestions.
 
 ## Overview
 
-Webfriend is a Golang library and command-line utility that integrates with the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) to control a Google Chrome or Chromium browser instance.  There is also a purpose-built scripting language (called [Friendscript](docs/intro.md)) that is designed to be an easy-to-learn environment for writing simple or complex browser automation scripts.
-
+Webfriend is a Golang library and command-line utility that integrates with the [Chrome DevTools Protocol](https://chromedevtools.github.io/devtools-protocol/) to control a Google Chrome or Chromium browser instance. There is also a purpose-built scripting language (called [Friendscript](docs/intro.md)) that is designed to be an easy-to-learn environment for writing simple or complex browser automation scripts.
 
 ### Some of the things that you can use Webfriend for:
 
-* Take full-page screenshots of web pages.
+- Take full-page screenshots of web pages.
 
-* Automate tedious or repetitive tasks on web pages that otherwise would require extensive user input with a keyboard, mouse, or touchscreen device.
+- Automate tedious or repetitive tasks on web pages that otherwise would require extensive user input with a keyboard, mouse, or touchscreen device.
 
-* Execute pre-defined tests against web pages and serve as an automated testing framework for verifying frontend functionality.
-
+- Execute pre-defined tests against web pages and serve as an automated testing framework for verifying frontend functionality.
 
 * Automatically login to websites with complex authentication flows.
 
@@ -35,7 +33,7 @@ Webfriend is a Golang library and command-line utility that integrates with the 
 
 ### Operation and Usage
 
-Webfriend by default operates using [Headless Chrome](https://developers.google.com/web/updates/2017/04/headless-chrome) mode, but can also just as easily run Chrome in the foreground in a graphical environment.  Importantly, headless operation allows you to **run Webfriend on servers without running `Xfvb` or `X11`.**  In this sense, it operates as a potentially-faster alternative to <a href="http://phantomjs.org/" target="_blank">phantomjs</a> or <a href="http://www.seleniumhq.org/" target="_blank">Selenium</a> while also providing almost all of the capabilities of the complete Google Chrome/Chromium browser.
+Webfriend by default operates using [Headless Chrome](https://developers.google.com/web/updates/2017/04/headless-chrome) mode, but can also just as easily run Chrome in the foreground in a graphical environment. Importantly, headless operation allows you to **run Webfriend on servers without running `Xfvb` or `X11`.** In this sense, it operates as a potentially-faster alternative to <a href="http://phantomjs.org/" target="_blank">phantomjs</a> or <a href="http://www.seleniumhq.org/" target="_blank">Selenium</a> while also providing almost all of the capabilities of the complete Google Chrome/Chromium browser.
 
 Using [Friendscript](docs/intro.md), straightforward and composable scripts can be written and combined together to create fast, modular, and flexible processes that can be used to solve real problems.
 
@@ -47,10 +45,10 @@ go install github.com/ghetzel/go-webfriend/webfriend
 
 ## Documentation
 
-* Friendscript (Web Automation Scripting Language)
+- Friendscript (Web Automation Scripting Language)
 
-    - [Beginner's Guide](docs/intro.md)
+  - [Beginner's Guide](INTRO.md)
 
-    - [Language Overview](docs/language.md)
+  - [Language Overview](LANGUAGE.md)
 
-    - [Command Reference](docs/commands.md)
+  - [Command Reference](https://ghetzel.github.io/go-webfriend/#funcref)
