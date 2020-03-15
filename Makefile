@@ -3,6 +3,7 @@
 PKGS           := $(shell go list ./... 2> /dev/null | grep -v '/vendor')
 LOCALS         := $(shell find . -type f -name '*.go' -not -path "./vendor*/*")
 WEBFRIEND_BIN  ?= webfriend-$(shell go env GOOS)-$(shell go env GOARCH)
+CGO_ENABLED    ?= 0
 
 .EXPORT_ALL_VARIABLES:
 GO111MODULE  = on

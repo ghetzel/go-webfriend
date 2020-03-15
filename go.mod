@@ -6,10 +6,10 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.17.0
-	github.com/ghetzel/diecast v1.17.2
+	github.com/ghetzel/diecast v1.17.15
 	github.com/ghetzel/friendscript v0.6.6
 	github.com/ghetzel/go-defaults v1.2.0
-	github.com/ghetzel/go-stockutil v1.8.42
+	github.com/ghetzel/go-stockutil v1.8.57
 	github.com/ghetzel/testify v1.4.1
 	github.com/gobwas/glob v0.2.3
 	github.com/gorilla/websocket v1.4.0
