@@ -115,10 +115,10 @@ type parsedSource struct {
 }
 
 func (self *Environment) Documentation() []*ModuleDoc {
-	mods := make(map[string]*ModuleDoc)
-	modnames := []string{`core`}
-	remaining := make([]string, 0)
-	modules := self.Modules()
+	var mods = make(map[string]*ModuleDoc)
+	var modnames = []string{`core`}
+	var remaining = make([]string, 0)
+	var modules = self.Modules()
 
 	for name := range modules {
 		if name == `core` {
@@ -132,8 +132,7 @@ func (self *Environment) Documentation() []*ModuleDoc {
 	modnames = append(modnames, remaining...)
 
 	for _, name := range modnames {
-		module := modules[name]
-
+		var module = modules[name]
 		var mod *ModuleDoc
 
 		if m, ok := mods[name]; ok {
@@ -148,7 +147,7 @@ func (self *Environment) Documentation() []*ModuleDoc {
 			mods[name] = mod
 		}
 
-		sourcePaths := []string{
+		var sourcePaths = []string{
 			fmt.Sprintf("../friendscript/commands/%s/*.go", name),
 			fmt.Sprintf("commands/%s/*.go", name),
 		}
@@ -159,13 +158,13 @@ func (self *Environment) Documentation() []*ModuleDoc {
 			if parsed, err := parseCommandSourceCode(sourcePath); err == nil {
 				mod.Summary = parsed.Summary
 				mod.Description = parsed.Docs
-				moduleT := reflect.TypeOf(module)
+				var moduleT = reflect.TypeOf(module)
 
 				log.Debugf("Methods: %d", moduleT.NumMethod())
 
 				for i := 0; i < moduleT.NumMethod(); i++ {
-					fn := moduleT.Method(i)
-					key := stringutil.Underscore(fn.Name)
+					var fn = moduleT.Method(i)
+					var key = stringutil.Underscore(fn.Name)
 
 					switch key {
 					case `execute_command`, `format_command_name`, `set_instance`, `new`:
@@ -237,7 +236,7 @@ func (self *Environment) Documentation() []*ModuleDoc {
 		}
 	}
 
-	sortedMods := make([]*ModuleDoc, 0)
+	var sortedMods = make([]*ModuleDoc, 0)
 
 	for _, mod := range mods {
 		sortedMods = append(sortedMods, mod)
@@ -251,7 +250,7 @@ func (self *Environment) Documentation() []*ModuleDoc {
 }
 
 func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
-	parsed := &parsedSource{
+	var parsed = &parsedSource{
 		Functions: make(map[string]parsedFunc),
 		Structs:   make(map[string]parsedStruct),
 	}
@@ -266,8 +265,8 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 				nil,
 				parser.ParseComments,
 			); err == nil {
-				lines := strings.Split(astCommentGroupToString(source.Doc), "\n")
-				goToDocs := false
+				var lines = strings.Split(astCommentGroupToString(source.Doc), "\n")
+				var goToDocs = false
 
 				for _, line := range lines {
 					if strings.TrimSpace(line) == `` {
@@ -325,8 +324,8 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 						if gdecl := decl.(*ast.GenDecl); len(gdecl.Specs) > 0 {
 							if typeSpec, ok := gdecl.Specs[0].(*ast.TypeSpec); ok {
 								if structType, ok := typeSpec.Type.(*ast.StructType); ok {
-									key := typeSpec.Name.Name
-									stc := parsedStruct{
+									var key = typeSpec.Name.Name
+									var stc = parsedStruct{
 										Name:   key,
 										Fields: make([]*parsedStructField, 0),
 									}
@@ -337,7 +336,7 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 											continue
 										}
 
-										structField := &parsedStructField{
+										var structField = &parsedStructField{
 											Name:             sfield.Names[0].Name,
 											Type:             astTypeToString(sfield.Type),
 											FriendscriptName: stringutil.Underscore(sfield.Names[0].Name),
@@ -345,7 +344,7 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 										}
 
 										if sfield.Tag != nil {
-											tags := strings.Split(
+											var tags = strings.Split(
 												stringutil.Unwrap(sfield.Tag.Value, "`", "`"),
 												` `,
 											)
@@ -398,10 +397,10 @@ func parseCommandSourceCode(fileglob string) (*parsedSource, error) {
 
 func astCommentGroupToString(cg *ast.CommentGroup) string {
 	if cg != nil {
-		out := ``
+		var out string
 
 		for _, c := range cg.List {
-			line := strings.TrimSpace(c.Text)
+			var line = strings.TrimSpace(c.Text)
 
 			if !strings.HasPrefix(line, `//`) {
 				continue
@@ -421,7 +420,7 @@ func astCommentGroupToString(cg *ast.CommentGroup) string {
 }
 
 func processComment(out string) string {
-	lines := strings.Split(out, "\n")
+	var lines = strings.Split(out, "\n")
 
 	for i := range lines {
 		lines[i] = strings.TrimPrefix(lines[i], `//`)
@@ -441,7 +440,7 @@ func astTypeToString(ty ast.Expr) string {
 	}
 
 	if ident, ok := ty.(*ast.Ident); ok {
-		name := ident.Name
+		var name = ident.Name
 
 		name = strings.TrimPrefix(name, `*`)
 		name = strings.TrimPrefix(name, `u`)

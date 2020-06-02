@@ -60,6 +60,7 @@ type Browser struct {
 	Environment                 map[string]interface{} `argonaut:"-"`
 	Directory                   string                 `argonaut:"-"`
 	Preferences                 *Preferences           `argonaut:"-"`
+	RemoteAddress               string
 	cmd                         *exec.Cmd
 	exitchan                    chan error
 	devtools                    *devtool.DevTools
@@ -90,7 +91,7 @@ func NewBrowser() *Browser {
 }
 
 func Start() (*Browser, error) {
-	browser := NewBrowser()
+	var browser = NewBrowser()
 	return browser, browser.Launch()
 }
 
@@ -127,97 +128,103 @@ func (self *Browser) SetScope(scopeable utils.Scopeable) {
 }
 
 func (self *Browser) Launch() error {
-	if self.UserDataDirectory == `` {
-		if userDataDir, err := ioutil.TempDir(``, `webfriend-`); err == nil {
-			self.UserDataDirectory = userDataDir
-			self.isTempUserDataDir = true
-		} else {
-			return err
-		}
-	}
+	var remoteAddr = self.RemoteAddress
 
-	if self.RemoteDebuggingPort <= 0 {
-		if port, err := freeport.GetFreePort(); err == nil {
-			self.RemoteDebuggingPort = port
-		} else {
-			return err
-		}
-	}
-
-	if err := self.preparePaths(); err != nil {
-		return err
-	}
-
-	// force disable sandboxing if the effective uid is 0 (root)
-	if u, err := user.Current(); err == nil && typeutil.Int(u.Uid) == 0 {
-		log.Debugf("Sandboxing is force disabled when running as root")
-		self.NoSandbox = true
-	}
-
-	if cmd, err := argonaut.Command(self); err == nil {
-		if self.isTempUserDataDir {
-			if err := self.createFirstRunPreferences(); err != nil {
-				return err
-			}
-
-			if err := self.preparePreferencesPrelaunch(); err != nil {
+	// no remote address, so we're starting our own session
+	if remoteAddr == `` {
+		if self.UserDataDirectory == `` {
+			if userDataDir, err := ioutil.TempDir(``, `webfriend-`); err == nil {
+				self.UserDataDirectory = userDataDir
+				self.isTempUserDataDir = true
+			} else {
 				return err
 			}
 		}
 
-		if args := os.Getenv(`WEBFRIEND_BROWSER_ARGS`); args != `` {
-			cmd.Args = append(cmd.Args, strings.Split(args, ` `)...)
+		if self.RemoteDebuggingPort <= 0 {
+			if port, err := freeport.GetFreePort(); err == nil {
+				self.RemoteDebuggingPort = port
+			} else {
+				return err
+			}
 		}
 
-		self.cmd = cmd
-
-		for k, v := range self.Environment {
-			self.cmd.Env = append(self.cmd.Env, fmt.Sprintf("%v=%v", k, v))
+		if err := self.preparePaths(); err != nil {
+			return err
 		}
 
-		if self.Directory != `` {
-			self.cmd.Dir = self.Directory
+		// force disable sandboxing if the effective uid is 0 (root)
+		if u, err := user.Current(); err == nil && typeutil.Int(u.Uid) == 0 {
+			log.Debugf("Sandboxing is force disabled when running as root")
+			self.NoSandbox = true
 		}
 
-		self.cmd.Stdout = httputil.NewWritableLogger(httputil.Info, `[PROC] `)
-		self.cmd.Stderr = httputil.NewWritableLogger(httputil.Warning, `[PROC] `)
+		if cmd, err := argonaut.Command(self); err == nil {
+			if self.isTempUserDataDir {
+				if err := self.createFirstRunPreferences(); err != nil {
+					return err
+				}
 
-		// launch the browser
-		go func() {
-			log.Debugf("[browser] Executing: %v", strings.Join(self.cmd.Args, ` `))
-			self.stopped = false
-			self.exitchan <- self.cmd.Run()
-		}()
+				if err := self.preparePreferencesPrelaunch(); err != nil {
+					return err
+				}
+			}
 
-		select {
-		case err := <-self.exitchan:
-			if err == nil {
-				if eerr, ok := err.(*exec.ExitError); ok {
-					if status, ok := eerr.Sys().(syscall.WaitStatus); ok {
-						err = fmt.Errorf("Process exited prematurely with status %d", status.ExitStatus())
-					} else if eerr.Success() {
-						err = fmt.Errorf("Process exited prematurely without error")
+			if args := os.Getenv(`WEBFRIEND_BROWSER_ARGS`); args != `` {
+				cmd.Args = append(cmd.Args, strings.Split(args, ` `)...)
+			}
+
+			self.cmd = cmd
+
+			for k, v := range self.Environment {
+				self.cmd.Env = append(self.cmd.Env, fmt.Sprintf("%v=%v", k, v))
+			}
+
+			if self.Directory != `` {
+				self.cmd.Dir = self.Directory
+			}
+
+			self.cmd.Stdout = httputil.NewWritableLogger(httputil.Info, `[PROC] `)
+			self.cmd.Stderr = httputil.NewWritableLogger(httputil.Warning, `[PROC] `)
+
+			// launch the browser
+			go func() {
+				log.Debugf("[browser] Executing: %v", strings.Join(self.cmd.Args, ` `))
+				self.stopped = false
+				self.exitchan <- self.cmd.Run()
+			}()
+
+			select {
+			case err := <-self.exitchan:
+				if err == nil {
+					if eerr, ok := err.(*exec.ExitError); ok {
+						if status, ok := eerr.Sys().(syscall.WaitStatus); ok {
+							err = fmt.Errorf("Process exited prematurely with status %d", status.ExitStatus())
+						} else if eerr.Success() {
+							err = fmt.Errorf("Process exited prematurely without error")
+						}
+					}
+
+					if err == nil {
+						err = fmt.Errorf("Process exited prematurely with non-zero status")
 					}
 				}
 
-				if err == nil {
-					err = fmt.Errorf("Process exited prematurely with non-zero status")
-				}
-			}
-
-			return err
-		case <-time.After(self.StartWait):
-			log.Debugf("[browser] Process stayed running for %v", self.StartWait)
-
-			if err := self.connectRPC(fmt.Sprintf("127.0.0.1:%d", self.RemoteDebuggingPort)); err == nil {
-				return nil
-			} else {
-				defer self.Stop()
 				return err
+			case <-time.After(self.StartWait):
+				log.Debugf("[browser] Process stayed running for %v", self.StartWait)
+				remoteAddr = `localhost:` + typeutil.String(self.RemoteDebuggingPort)
+				self.stopped = false
 			}
+		} else {
+			return err
 		}
+	}
+
+	if err := self.connectRPC(remoteAddr); err == nil {
+		return nil
 	} else {
-		return err
+		return self.stopWithError(err)
 	}
 }
 
@@ -245,6 +252,10 @@ func (self *Browser) Wait() error {
 }
 
 func (self *Browser) Stop() error {
+	return self.stopWithError(nil)
+}
+
+func (self *Browser) stopWithError(xerr error) error {
 	self.stopped = true
 
 	if self.cmd == nil {
@@ -267,13 +278,13 @@ func (self *Browser) Stop() error {
 		log.Debugf("[browser] Killing browser process %d", process.Pid)
 
 		if err := process.Kill(); err == nil {
-			started := time.Now()
-			deadline := started.Add(ProcessExitMaxWait)
+			var started = time.Now()
+			var deadline = started.Add(ProcessExitMaxWait)
 
 			for t := started; t.Before(deadline); t = time.Now() {
 				if proc, err := ps.FindProcess(process.Pid); err == nil && proc == nil {
 					log.Debugf("[browser] PID %d is gone", process.Pid)
-					return nil
+					return xerr
 				}
 
 				log.Debugf("[browser] Polling for PID %d to disappear", process.Pid)

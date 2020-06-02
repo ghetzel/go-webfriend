@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -21,6 +22,7 @@ func main() {
 	app.Usage = webfriend.Slogan
 	app.Version = webfriend.Version
 	app.EnableBashCompletion = true
+	app.ArgsUsage = `[FILENAME]`
 
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
@@ -30,21 +32,24 @@ func main() {
 			EnvVar: `LOGLEVEL`,
 		},
 		cli.BoolFlag{
-			Name:  `debug, D`,
-			Usage: `Whether to open the browser in a non-headless mode for debugging purposes.`,
+			Name:   `debug, D`,
+			Usage:  `Whether to open the browser in a non-headless mode for debugging purposes.`,
+			EnvVar: `WEBFRIEND_DEBUG`,
 		},
 		cli.BoolFlag{
 			Name:  `interactive, I`,
 			Usage: `Start Webfriend in an interactive Friendscript shell.`,
 		},
 		cli.BoolFlag{
-			Name:  `server, S`,
-			Usage: `Whether to run the Webfriend Debugging Server`,
+			Name:   `server, S`,
+			Usage:  `Whether to run the Webfriend Debugging Server`,
+			EnvVar: `WEBFRIEND_SERVER`,
 		},
 		cli.StringFlag{
-			Name:  `address, a`,
-			Usage: `If running the Webfriend Debugging Server, this specifies the [address]:port to listen on.`,
-			Value: `:19222`,
+			Name:   `address, a`,
+			Usage:  `If running the Webfriend Debugging Server, this specifies the [address]:port to listen on.`,
+			Value:  `:19222`,
+			EnvVar: `WEBFRIEND_SERVER_ADDR`,
 		},
 		cli.BoolFlag{
 			Name:  `print-vars, P`,
@@ -53,6 +58,15 @@ func main() {
 		cli.StringSliceFlag{
 			Name:  `var, V`,
 			Usage: `Set one or more variables ([deeply.nested.]key=value) before executing the script.`,
+		},
+		cli.StringFlag{
+			Name:   `remote-debugging-address, r`,
+			Usage:  `If given, Webfriend will connect to an already-running DevTools instance instead of starting its own browser.`,
+			EnvVar: `WEBFRIEND_REMOTE_DEBUG_ADDR`,
+		},
+		cli.StringFlag{
+			Name:  `execute, e`,
+			Usage: `Execute the given argument as a Friendscript in the connected session, then exit.`,
 		},
 	}
 
@@ -76,9 +90,10 @@ func main() {
 		chrome = browser.NewBrowser()
 		chrome.Headless = !c.Bool(`debug`)
 		chrome.HideScrollbars = true
+		chrome.RemoteAddress = c.String(`remote-debugging-address`)
 
 		if err := chrome.Launch(); err == nil {
-			exiterr := make(chan error)
+			var exiterr = make(chan error)
 			defer chrome.Stop()
 
 			defer func() {
@@ -96,7 +111,7 @@ func main() {
 			}()
 
 			// evaluate Friendscript / run the REPL
-			script := webfriend.NewEnvironment(chrome)
+			var script = webfriend.NewEnvironment(chrome)
 
 			// pre-populate initial variables
 			for _, pair := range c.StringSlice(`var`) {
@@ -118,8 +133,10 @@ func main() {
 				} else {
 					var input io.Reader
 
-					if c.NArg() > 0 {
-						filename := c.Args().First()
+					if e := c.String(`execute`); e != `` {
+						input = bytes.NewBufferString(e)
+					} else if c.NArg() > 0 {
+						var filename = c.Args().First()
 
 						switch filename {
 						case `-`:
