@@ -14,6 +14,7 @@ import (
 	webfriend "github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/server"
+	"github.com/ory/dockertest/v3"
 )
 
 func main() {
@@ -59,6 +60,12 @@ func main() {
 			Name:  `var, V`,
 			Usage: `Set one or more variables ([deeply.nested.]key=value) before executing the script.`,
 		},
+		cli.IntFlag{
+			Name:   `remote-debugging-port, R`,
+			Usage:  `Explicitly provide the port number for the DevTools protocol.`,
+			EnvVar: `WEBFRIEND_REMOTE_DEBUG_PORT`,
+			Value:  browser.DefaultDebuggingPort,
+		},
 		cli.StringFlag{
 			Name:   `remote-debugging-address, r`,
 			Usage:  `If given, Webfriend will connect to an already-running DevTools instance instead of starting its own browser.`,
@@ -67,6 +74,41 @@ func main() {
 		cli.StringFlag{
 			Name:  `execute, e`,
 			Usage: `Execute the given argument as a Friendscript in the connected session, then exit.`,
+		},
+		cli.StringFlag{
+			Name:   `container, C`,
+			Usage:  `If provided, Webfriend will launch and monitor a Chrome session inside of this Docker container.`,
+			EnvVar: `WEBFRIEND_CONTAINER`,
+		},
+		cli.StringFlag{
+			Name:   `container-memory`,
+			Usage:  `Specify the amount of memory allocated to the container.`,
+			Value:  browser.DefaultContainerMemory,
+			EnvVar: `WEBFRIEND_CONTAINER_MEMORY`,
+		},
+		cli.StringFlag{
+			Name:   `container-shm-size`,
+			Usage:  `Specify the amount of shared memory allocated to the container.`,
+			Value:  browser.DefaultContainerSharedMemory,
+			EnvVar: `WEBFRIEND_CONTAINER_SHMSIZE`,
+		},
+		cli.StringFlag{
+			Name:   `container-name`,
+			Usage:  `Explicitly provide the container name.`,
+			EnvVar: `WEBFRIEND_CONTAINER_NAME`,
+		},
+		cli.StringFlag{
+			Name:   `container-hostname`,
+			Usage:  `Explicitly set the hostname that will be visible inside the container.`,
+			EnvVar: `WEBFRIEND_CONTAINER_HOSTNAME`,
+		},
+		cli.StringSliceFlag{
+			Name:  `container-volume`,
+			Usage: `Provide additional volumes to expose to the container; specified as: --container-volume=/outer/path:/inner/path[:ro]`,
+		},
+		cli.StringSliceFlag{
+			Name:  `container-port`,
+			Usage: `Provide additional ports to expose from the container; specified as: --container-port=OUTERPORT:INNERPORT`,
 		},
 	}
 
@@ -90,7 +132,22 @@ func main() {
 		chrome = browser.NewBrowser()
 		chrome.Headless = !c.Bool(`debug`)
 		chrome.HideScrollbars = true
+		chrome.RemoteDebuggingPort = c.Int(`remote-debugging-port`)
 		chrome.RemoteAddress = c.String(`remote-debugging-address`)
+
+		if i := c.String(`container`); i != `` {
+			chrome.Container = &browser.Container{
+				RunOptions: dockertest.RunOptions{
+					Name:     c.String(`container-name`),
+					Hostname: c.String(`container-hostname`),
+				},
+				ImageName:    i,
+				Memory:       c.String(`container-memory`),
+				SharedMemory: c.String(`container-shm-size`),
+				Volumes:      c.StringSlice(`container-volume`),
+				Publish:      c.StringSlice(`container-port`),
+			}
+		}
 
 		if err := chrome.Launch(); err == nil {
 			var exiterr = make(chan error)
