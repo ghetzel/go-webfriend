@@ -14,7 +14,6 @@ import (
 	webfriend "github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/server"
-	"github.com/ory/dockertest/v3"
 )
 
 func main() {
@@ -119,15 +118,8 @@ func main() {
 		return nil
 	}
 
-	app.After = func(c *cli.Context) error {
-		if chrome != nil {
-			return chrome.Stop()
-		} else {
-			return nil
-		}
-	}
-
 	app.Action = func(c *cli.Context) {
+		defer browser.StopAllActiveBrowsers()
 		log.Debugf("Starting %s %s", c.App.Name, c.App.Version)
 		chrome = browser.NewBrowser()
 		chrome.Headless = !c.Bool(`debug`)
@@ -137,21 +129,18 @@ func main() {
 
 		if i := c.String(`container`); i != `` {
 			chrome.Container = &browser.Container{
-				RunOptions: dockertest.RunOptions{
-					Name:     c.String(`container-name`),
-					Hostname: c.String(`container-hostname`),
-				},
+				Name:         c.String(`container-name`),
+				Hostname:     c.String(`container-hostname`),
 				ImageName:    i,
+				Volumes:      c.StringSlice(`container-volume`),
 				Memory:       c.String(`container-memory`),
 				SharedMemory: c.String(`container-shm-size`),
-				Volumes:      c.StringSlice(`container-volume`),
 				Publish:      c.StringSlice(`container-port`),
 			}
 		}
 
 		if err := chrome.Launch(); err == nil {
 			var exiterr = make(chan error)
-			defer chrome.Stop()
 
 			defer func() {
 				if r := recover(); r != nil {
@@ -208,7 +197,7 @@ func main() {
 							}
 						}
 					} else {
-						exiterr <- fmt.Errorf("Must specify a Friendscript filename to execute.")
+						exiterr <- nil
 						return
 					}
 

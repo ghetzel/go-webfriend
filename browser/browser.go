@@ -15,6 +15,7 @@ import (
 	"syscall"
 	"time"
 
+	docker "github.com/docker/docker/client"
 	"github.com/ghetzel/argonaut"
 	"github.com/ghetzel/friendscript/utils"
 	"github.com/ghetzel/go-stockutil/executil"
@@ -26,18 +27,53 @@ import (
 	"github.com/husobee/vestigo"
 	"github.com/mafredri/cdp/devtool"
 	"github.com/mitchellh/go-ps"
-	"github.com/ory/dockertest/v3"
 	"github.com/phayes/freeport"
 )
 
-var rpcGlobalTimeout = (60 * time.Second)
-var DefaultStartWait = time.Duration(500) * time.Millisecond
+var DefaultStartWait = (time.Second / 2)
 var ProcessExitMaxWait = 10 * time.Second
 var ProcessExitCheckInterval = 125 * time.Millisecond
 var DefaultDebuggingPort = 0 // 0 = allocate an ephemeral port
+var DefaultStartURL = `about:blank`
+var DefaultContainerMemory = `512m`
+var DefaultContainerSharedMemory = `256m`
+var DebuggerInnerPort = 9222
+var DefaultUserDirPath = `/var/tmp`
+var ContainerInspectTimeout = 3 * time.Second
+var DefaultContainerTargetAddr = `localhost`
+
+var rpcGlobalTimeout = (60 * time.Second)
+var rpcConnectTimeout = (10 * time.Second)
+var rpcConnectRetryInterval = (250 * time.Millisecond)
 
 type PathHandlerFunc = func(string) (string, io.Writer, bool)
 type PathReaderFunc = func(string) (io.ReadCloser, bool)
+
+var activeBrowserInstances sync.Map
+
+func init() {
+	// we keep track of all active & running browser instances.  if we get exit signals,
+	// go through and stop them before exiting
+	go executil.TrapSignals(func(sig os.Signal) bool {
+		StopAllActiveBrowsers()
+		return false
+	}, os.Interrupt, syscall.SIGTERM)
+}
+
+func StopAllActiveBrowsers() {
+	log.Debugf("[browser] Cleaning up active instances")
+
+	activeBrowserInstances.Range(func(id interface{}, b interface{}) bool {
+		if browser, ok := b.(*Browser); ok {
+			log.Debugf("[%v] Cleaning up instance", id)
+			browser.Stop()
+		}
+
+		return true
+	})
+
+	log.Debugf("[browser] Cleanup complete. Time to die.")
+}
 
 type Browser struct {
 	Command                     argonaut.CommandName   `argonaut:",joiner=[=]"`
@@ -66,6 +102,7 @@ type Browser struct {
 	Directory                   string                 `argonaut:"-"`
 	Preferences                 *Preferences           `argonaut:"-"`
 	Container                   *Container             `argonaut:"-"`
+	ID                          string                 `argonaut:"-"`
 	RemoteAddress               string
 	cmd                         *exec.Cmd
 	exitchan                    chan error
@@ -79,13 +116,15 @@ type Browser struct {
 	pathWriters                 []PathHandlerFunc
 	pathReaders                 []PathReaderFunc
 	stopped                     bool
-	dockerPool                  *dockertest.Pool
+	stopping                    bool
+	dockerClient                *docker.Client
 }
 
 func NewBrowser() *Browser {
 	return &Browser{
+		ID:                  stringutil.UUID().Base58(),
 		Command:             argonaut.CommandName(LocateChromeExecutable()),
-		URL:                 `about:blank`,
+		URL:                 DefaultStartURL,
 		Headless:            true,
 		RemoteDebuggingPort: 0,
 		Preferences:         GetDefaultPreferences(),
@@ -135,6 +174,8 @@ func (self *Browser) SetScope(scopeable utils.Scopeable) {
 }
 
 func (self *Browser) Launch() error {
+	activeBrowserInstances.Store(self.ID, self)
+
 	var remoteAddr = self.RemoteAddress
 
 	// no remote address, so we're starting our own session
@@ -203,24 +244,28 @@ func (self *Browser) Launch() error {
 
 			// if requested, shove everything inside of a docker container
 			if container := self.Container; container != nil {
+				container.Name = fmt.Sprintf("webfriend-%s", self.ID)
 				container.Env = self.cmd.Env
 				container.Cmd = append(self.cmd.Args)
 
-				proto, endpoint := stringutil.SplitPairTrailing(container.Endpoint, `://`)
 				var perr error
 
-				switch proto {
-				case `tls`:
-					self.dockerPool, perr = dockertest.NewTLSPool(endpoint, container.TlsCertPath)
-				default:
-					self.dockerPool, perr = dockertest.NewPool(endpoint)
+				if container.Endpoint == `` {
+					self.dockerClient, perr = docker.NewEnvClient()
+				} else {
+					self.dockerClient, perr = docker.NewClient(
+						container.Endpoint,
+						``,
+						nil,
+						nil,
+					)
 				}
 
 				if perr != nil {
 					return fmt.Errorf("docker endpoint: %v", err)
 				}
 
-				if err := self.Container.Validate(self.dockerPool); err != nil {
+				if err := self.Container.Validate(self.dockerClient); err != nil {
 					return fmt.Errorf("invalid container config: %v", err)
 				}
 
@@ -228,22 +273,26 @@ func (self *Browser) Launch() error {
 				for i, arg := range container.Cmd {
 					switch k, v := stringutil.SplitPair(arg, `=`); k {
 					case `--user-data-dir`:
-						container.Volumes = append(container.Volumes, fmt.Sprintf("%s:%s", v, `/var/tmp`))
-						container.Cmd[i] = k + `=/var/tmp`
+						container.Volumes = append(container.Volumes, fmt.Sprintf("%s:%s", v, container.UserDirPath))
+						container.Cmd[i] = k + `=` + container.UserDirPath
 
 					case `--remote-debugging-port`:
-						container.Publish = append(container.Publish, fmt.Sprintf("%d:9222", self.RemoteDebuggingPort))
-						container.Cmd[i] = k + `=9222`
+						container.Publish = append(container.Publish, fmt.Sprintf("%d:%d", self.RemoteDebuggingPort, DebuggerInnerPort))
+						container.Cmd[i] = k + `=` + typeutil.String(DebuggerInnerPort)
+						container.OuterPort = self.RemoteDebuggingPort
 					}
 				}
 
 				if err := container.Start(); err == nil {
+					self.stopped = false
+
 					select {
 					case <-time.After(self.StartWait):
-						if container.IsRunning() {
-							log.Debugf("[browser] Container stayed running for %v", self.StartWait)
-							remoteAddr = `localhost:` + typeutil.String(self.RemoteDebuggingPort)
-							self.stopped = false
+						if addr := container.DebuggerAddr(); addr != `` {
+							log.Debugf("[%s] Container stayed running for %v", self.ID, self.StartWait)
+							remoteAddr = addr
+						} else {
+							return fmt.Errorf("No debugger available after %v", self.StartWait)
 						}
 					}
 				} else {
@@ -255,7 +304,7 @@ func (self *Browser) Launch() error {
 
 				// launch the browser
 				go func() {
-					log.Debugf("[browser] Executing: %v", strings.Join(self.cmd.Args, ` `))
+					log.Debugf("[%s] Executing: %v", self.ID, strings.Join(self.cmd.Args, ` `))
 					self.stopped = false
 					self.exitchan <- self.cmd.Run()
 				}()
@@ -278,7 +327,7 @@ func (self *Browser) Launch() error {
 
 					return err
 				case <-time.After(self.StartWait):
-					log.Debugf("[browser] Process stayed running for %v", self.StartWait)
+					log.Debugf("[%s] Process stayed running for %v", self.ID, self.StartWait)
 					remoteAddr = `localhost:` + typeutil.String(self.RemoteDebuggingPort)
 					self.stopped = false
 				}
@@ -323,7 +372,18 @@ func (self *Browser) Stop() error {
 }
 
 func (self *Browser) stopWithError(xerr error) error {
+	if self.stopping {
+		return nil
+	}
+
 	self.stopped = true
+	self.stopping = true
+
+	defer func() {
+		self.cleanupUserDataDirectory()
+		self.cleanupActiveReference()
+		self.stopping = false
+	}()
 
 	if self.cmd == nil {
 		return nil
@@ -331,9 +391,8 @@ func (self *Browser) stopWithError(xerr error) error {
 
 	self.tabLock.Lock()
 	defer self.tabLock.Unlock()
-	defer self.cleanupUserDataDirectory()
 
-	log.Debug("[browser] Stopping Webfriend...")
+	log.Debugf("[%v] Stopping Webfriend...", self.ID)
 
 	for _, tab := range self.tabs {
 		tab.Disconnect()
@@ -342,7 +401,7 @@ func (self *Browser) stopWithError(xerr error) error {
 	// take different paths depending on whether we're containerized or not
 	if container := self.Container; container != nil {
 		if container.Name != `` {
-			log.Debugf("[browser] Stopping Docker container %s", container.Name)
+			log.Debugf("[%s] Stopping Docker container %s", self.ID, container.Name)
 
 			if err := executil.Command(`docker`, `kill`, container.Name).Run(); err == nil {
 				return xerr
@@ -356,7 +415,7 @@ func (self *Browser) stopWithError(xerr error) error {
 		if process := self.cmd.Process; process == nil {
 			return fmt.Errorf("Process not running")
 		} else {
-			log.Debugf("[browser] Killing browser process %d", process.Pid)
+			log.Debugf("[%s] Killing browser process %d", self.ID, process.Pid)
 
 			if err := process.Kill(); err == nil {
 				var started = time.Now()
@@ -364,15 +423,15 @@ func (self *Browser) stopWithError(xerr error) error {
 
 				for t := started; t.Before(deadline); t = time.Now() {
 					if proc, err := ps.FindProcess(process.Pid); err == nil && proc == nil {
-						log.Debugf("[browser] PID %d is gone", process.Pid)
+						log.Debugf("[%s] PID %d is gone", self.ID, process.Pid)
 						return xerr
 					}
 
-					log.Debugf("[browser] Polling for PID %d to disappear", process.Pid)
+					log.Debugf("[%s] Polling for PID %d to disappear", self.ID, process.Pid)
 					time.Sleep(ProcessExitCheckInterval)
 				}
 
-				return fmt.Errorf("Could not confirm process %d exited", process.Pid)
+				return fmt.Errorf("[%s] Could not confirm process %d exited", self.ID, process.Pid)
 			} else {
 				return err
 			}
@@ -382,7 +441,7 @@ func (self *Browser) stopWithError(xerr error) error {
 
 func (self *Browser) cleanupUserDataDirectory() error {
 	if self.isTempUserDataDir && pathutil.DirExists(self.UserDataDirectory) {
-		log.Debugf("[browser] Cleaning up temporary profile %s", self.UserDataDirectory)
+		log.Debugf("[%s] Cleaning up temporary profile %s", self.ID, self.UserDataDirectory)
 		return os.RemoveAll(self.UserDataDirectory)
 	}
 
@@ -399,6 +458,10 @@ func (self *Browser) preparePaths() error {
 	}
 
 	return nil
+}
+
+func (self *Browser) cleanupActiveReference() {
+	activeBrowserInstances.Delete(self.ID)
 }
 
 func (self *Browser) createFirstRunPreferences() error {

@@ -10,16 +10,13 @@ import (
 	"github.com/mafredri/cdp/devtool"
 )
 
-var rpcConnectTimeout = (10 * time.Second)
-var rpcConnectRetryInterval = (250 * time.Millisecond)
-
 func (self *Browser) connectRPC(address string) error {
-	rpcAddr := fmt.Sprintf("http://%v", address)
-	log.Debugf("DevTools RPC Address: %v", rpcAddr)
+	var connected bool
+	var rpcAddr = fmt.Sprintf("http://%v", address)
+	var started = time.Now()
 
+	log.Debugf("[%s] DevTools RPC Address: %v", self.ID, rpcAddr)
 	self.devtools = devtool.New(rpcAddr)
-	connected := false
-	started := time.Now()
 
 	for time.Since(started) <= rpcConnectTimeout {
 		if self.stopped {

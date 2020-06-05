@@ -3,9 +3,10 @@ module github.com/ghetzel/go-webfriend
 go 1.12
 
 require (
-	github.com/Nvveen/Gotty v0.0.0-20120604004816-cd527374f1e5 // indirect
-	github.com/containerd/continuity v0.0.0-20200413184840-d3ef23f19fbb // indirect
-	github.com/docker/go-connections v0.4.0 // indirect
+	github.com/Microsoft/go-winio v0.4.14 // indirect
+	github.com/docker/distribution v2.7.1+incompatible // indirect
+	github.com/docker/docker v1.13.1
+	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
 	github.com/fatih/color v1.7.0
@@ -22,9 +23,11 @@ require (
 	github.com/jdxcode/netrc v0.0.0-20180207092346-e1a19c977509
 	github.com/mafredri/cdp v0.28.0
 	github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936
-	github.com/opencontainers/image-spec v1.0.1 // indirect
-	github.com/ory/dockertest v3.3.5+incompatible // indirect
-	github.com/ory/dockertest/v3 v3.6.0
+	github.com/onsi/ginkgo v1.10.1 // indirect
+	github.com/onsi/gomega v1.7.0 // indirect
+	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/urfave/negroni v1.0.1-0.20191011213438-f4316798d5d3
+	golang.org/x/sys v0.0.0-20200121082415-34d275377bf9 // indirect
+	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
