@@ -30,7 +30,7 @@ import (
 	"github.com/phayes/freeport"
 )
 
-var DefaultStartWait = (time.Second / 2)
+var DefaultStartWait = time.Second
 var ProcessExitMaxWait = 10 * time.Second
 var ProcessExitCheckInterval = 125 * time.Millisecond
 var DefaultDebuggingPort = 0 // 0 = allocate an ephemeral port
@@ -41,26 +41,36 @@ var DebuggerInnerPort = 9222
 var DefaultUserDirPath = `/var/tmp`
 var ContainerInspectTimeout = 3 * time.Second
 var DefaultContainerTargetAddr = `localhost`
+var DefaultContainerRuntime = `docker`
 
 var rpcGlobalTimeout = (60 * time.Second)
-var rpcConnectTimeout = (10 * time.Second)
+var rpcConnectTimeout = (60 * time.Second)
 var rpcConnectRetryInterval = (250 * time.Millisecond)
 
 type PathHandlerFunc = func(string) (string, io.Writer, bool)
 type PathReaderFunc = func(string) (io.ReadCloser, bool)
 
 var activeBrowserInstances sync.Map
+var globalSignal = make(chan os.Signal, 1)
+var globalStopping bool
 
 func init() {
 	// we keep track of all active & running browser instances.  if we get exit signals,
 	// go through and stop them before exiting
 	go executil.TrapSignals(func(sig os.Signal) bool {
+		globalSignal <- sig
 		StopAllActiveBrowsers()
 		return false
 	}, os.Interrupt, syscall.SIGTERM)
 }
 
 func StopAllActiveBrowsers() {
+	if globalStopping {
+		return
+	} else {
+		globalStopping = true
+	}
+
 	log.Debugf("[browser] Cleaning up active instances")
 
 	activeBrowserInstances.Range(func(id interface{}, b interface{}) bool {
@@ -101,7 +111,7 @@ type Browser struct {
 	Environment                 map[string]interface{} `argonaut:"-"`
 	Directory                   string                 `argonaut:"-"`
 	Preferences                 *Preferences           `argonaut:"-"`
-	Container                   *Container             `argonaut:"-"`
+	Container                   Container              `argonaut:"-"`
 	ID                          string                 `argonaut:"-"`
 	RemoteAddress               string
 	cmd                         *exec.Cmd
@@ -122,7 +132,7 @@ type Browser struct {
 
 func NewBrowser() *Browser {
 	return &Browser{
-		ID:                  stringutil.UUID().Base58(),
+		ID:                  strings.ToLower(stringutil.UUID().Base58()),
 		Command:             argonaut.CommandName(LocateChromeExecutable()),
 		URL:                 DefaultStartURL,
 		Headless:            true,
@@ -244,51 +254,47 @@ func (self *Browser) Launch() error {
 
 			// if requested, shove everything inside of a docker container
 			if container := self.Container; container != nil {
-				container.Name = fmt.Sprintf("webfriend-%s", self.ID)
-				container.Env = self.cmd.Env
-				container.Cmd = append(self.cmd.Args)
+				cfg := container.Config()
+				cfg.Name = fmt.Sprintf("webfriend-%s", self.ID)
+				cfg.Env = self.cmd.Env
+				cfg.Cmd = append(self.cmd.Args)
 
-				var perr error
-
-				if container.Endpoint == `` {
-					self.dockerClient, perr = docker.NewEnvClient()
-				} else {
-					self.dockerClient, perr = docker.NewClient(
-						container.Endpoint,
-						``,
-						nil,
-						nil,
-					)
+				if err := cfg.Validate(); err != nil {
+					return fmt.Errorf("invalid container config: %v", err)
 				}
 
-				if perr != nil {
-					return fmt.Errorf("docker endpoint: %v", err)
-				}
-
-				if err := self.Container.Validate(self.dockerClient); err != nil {
+				if err := container.Validate(); err != nil {
 					return fmt.Errorf("invalid container config: %v", err)
 				}
 
 				// rework the command we're running inside the container
-				for i, arg := range container.Cmd {
+				for i, arg := range cfg.Cmd {
 					switch k, v := stringutil.SplitPair(arg, `=`); k {
 					case `--user-data-dir`:
-						container.Volumes = append(container.Volumes, fmt.Sprintf("%s:%s", v, container.UserDirPath))
-						container.Cmd[i] = k + `=` + container.UserDirPath
+						cfg.Volumes = append(cfg.Volumes, fmt.Sprintf("%s:%s", v, cfg.UserDirPath))
+						cfg.Cmd[i] = k + `=` + cfg.UserDirPath
 
 					case `--remote-debugging-port`:
-						container.Publish = append(container.Publish, fmt.Sprintf("%d:%d", self.RemoteDebuggingPort, DebuggerInnerPort))
-						container.Cmd[i] = k + `=` + typeutil.String(DebuggerInnerPort)
-						container.OuterPort = self.RemoteDebuggingPort
+						cfg.AddPort(self.RemoteDebuggingPort, DebuggerInnerPort, ``)
+						cfg.Cmd[i] = k + `=` + typeutil.String(DebuggerInnerPort)
+						cfg.SetTargetPort(self.RemoteDebuggingPort)
 					}
 				}
 
 				if err := container.Start(); err == nil {
 					self.stopped = false
+					log.Debugf("[%s] Container %v starting...", self.ID, container)
 
 					select {
+					case sig := <-globalSignal:
+						if err := container.Stop(); err == nil {
+							return fmt.Errorf("Container startup interrupted with signal %v", sig)
+						} else {
+							return err
+						}
+
 					case <-time.After(self.StartWait):
-						if addr := container.DebuggerAddr(); addr != `` {
+						if addr := container.Address(); addr != `` {
 							log.Debugf("[%s] Container stayed running for %v", self.ID, self.StartWait)
 							remoteAddr = addr
 						} else {
@@ -400,16 +406,13 @@ func (self *Browser) stopWithError(xerr error) error {
 
 	// take different paths depending on whether we're containerized or not
 	if container := self.Container; container != nil {
-		if container.Name != `` {
-			log.Debugf("[%s] Stopping Docker container %s", self.ID, container.Name)
+		log.Debugf("[%s] Stopping container %v", container.ID(), container)
 
-			if err := executil.Command(`docker`, `kill`, container.Name).Run(); err == nil {
-				return xerr
-			} else {
-				return err
-			}
+		if err := container.Stop(); err == nil {
+			return xerr
 		} else {
-			return fmt.Errorf("Cannot stop Docker container: no name available")
+			log.Error(err)
+			return err
 		}
 	} else {
 		if process := self.cmd.Process; process == nil {

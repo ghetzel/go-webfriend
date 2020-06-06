@@ -80,6 +80,12 @@ func main() {
 			EnvVar: `WEBFRIEND_CONTAINER`,
 		},
 		cli.StringFlag{
+			Name:   `container-engine, X`,
+			Usage:  `Specifies the container runtime to utilize: docker, kubernetes`,
+			Value:  browser.DefaultContainerRuntime,
+			EnvVar: `WEBFRIEND_CONTAINER_ENGINE`,
+		},
+		cli.StringFlag{
 			Name:   `container-memory`,
 			Usage:  `Specify the amount of memory allocated to the container.`,
 			Value:  browser.DefaultContainerMemory,
@@ -120,6 +126,7 @@ func main() {
 
 	app.Action = func(c *cli.Context) {
 		defer browser.StopAllActiveBrowsers()
+
 		log.Debugf("Starting %s %s", c.App.Name, c.App.Version)
 		chrome = browser.NewBrowser()
 		chrome.Headless = !c.Bool(`debug`)
@@ -128,36 +135,31 @@ func main() {
 		chrome.RemoteAddress = c.String(`remote-debugging-address`)
 
 		if i := c.String(`container`); i != `` {
-			chrome.Container = &browser.Container{
-				Name:         c.String(`container-name`),
-				Hostname:     c.String(`container-hostname`),
-				ImageName:    i,
-				Volumes:      c.StringSlice(`container-volume`),
-				Memory:       c.String(`container-memory`),
-				SharedMemory: c.String(`container-shm-size`),
-				Publish:      c.StringSlice(`container-port`),
+			switch rt := c.String(`container-engine`); rt {
+			case `docker`:
+				chrome.Container = browser.NewDockerContainer(``)
+			case `kubernetes`:
+				chrome.Container = browser.NewKubernetesContainer()
+			default:
+				log.Fatalf("invalid container engine %q", rt)
+				return
+			}
+
+			if cfg := chrome.Container.Config(); cfg != nil {
+				cfg.Name = c.String(`container-name`)
+				cfg.Hostname = c.String(`container-hostname`)
+				cfg.ImageName = i
+				cfg.Volumes = c.StringSlice(`container-volume`)
+				cfg.Memory = c.String(`container-memory`)
+				cfg.SharedMemory = c.String(`container-shm-size`)
+				cfg.Ports = c.StringSlice(`container-port`)
 			}
 		}
 
 		if err := chrome.Launch(); err == nil {
-			var exiterr = make(chan error)
-
-			defer func() {
-				if r := recover(); r != nil {
-					log.Criticalf("Emergency Stop: %v", r)
-					chrome.Stop()
-					os.Exit(127)
-				}
-			}()
-
-			// if Chrome exits before we do, cleanup and quit
-			go func() {
-				err := chrome.Wait()
-				exiterr <- err
-			}()
-
 			// evaluate Friendscript / run the REPL
 			var script = webfriend.NewEnvironment(chrome)
+			var wferr error
 
 			// pre-populate initial variables
 			for _, pair := range c.StringSlice(`var`) {
@@ -165,16 +167,15 @@ func main() {
 				script.Set(k, typeutil.Auto(v))
 			}
 
-			go func() {
+			for {
 				if c.Bool(`server`) {
-					exiterr <- server.NewServer(script).ListenAndServe(c.String(`address`))
-					return
+					wferr = server.NewServer(script).ListenAndServe(c.String(`address`))
 				} else if c.Bool(`interactive`) {
 					if scope, err := script.REPL(); err == nil {
 						fmt.Println(scope)
-						exiterr <- nil
 					} else {
-						exiterr <- fmt.Errorf("runtime error: %v", err)
+						wferr = fmt.Errorf("runtime error: %v", err)
+						break
 					}
 				} else {
 					var input io.Reader
@@ -192,35 +193,31 @@ func main() {
 								log.Debugf("Friendscript being read from file %s", file.Name())
 								input = file
 							} else {
-								exiterr <- fmt.Errorf("file error: %v", err)
-								return
+								wferr = fmt.Errorf("file error: %v", err)
+								break
 							}
 						}
 					} else {
-						exiterr <- nil
-						return
+						break
 					}
 
 					if scope, err := script.EvaluateReader(input); err == nil {
 						if c.Bool(`print-vars`) {
 							fmt.Println(scope)
 						}
-
-						exiterr <- nil
 					} else {
-						exiterr <- fmt.Errorf("runtime error: %v", err)
+						wferr = fmt.Errorf("runtime error: %v", err)
 					}
 				}
-			}()
 
-			select {
-			case err := <-exiterr:
-				if err != nil {
-					log.Fatal(err)
-				}
+				break
+			}
+
+			if wferr != nil {
+				log.Fatal(wferr)
 			}
 		} else {
-			log.Criticalf("could not launch browser: %v", err)
+			log.Fatalf("could not launch browser: %v", err)
 		}
 	}
 
