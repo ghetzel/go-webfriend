@@ -8,15 +8,14 @@ CGO_ENABLED    ?= 0
 .EXPORT_ALL_VARIABLES:
 GO111MODULE  = on
 
-all: fmt deps build docs
+all: fmt deps autodoc build docs
 
 fmt:
 	@go list github.com/mjibson/esc || go get github.com/mjibson/esc/...
 	@go list golang.org/x/tools/cmd/goimports || go get golang.org/x/tools/cmd/goimports
 	gofmt -w $(LOCALS)
 	go vet ./...
-	go build -i -o bin/webfriend-autodoc cmd/webfriend-autodoc/*.go
-	go generate -x ./...
+	go mod tidy
 
 deps:
 	@go list github.com/pointlander/peg || go get github.com/pointlander/peg
@@ -25,10 +24,15 @@ deps:
 test: fmt deps
 	go test $(PKGS)
 
+autodoc:
+	go build -i -o bin/webfriend-autodoc cmd/webfriend-autodoc/*.go
+	go generate -x ./...
+
 docs: fmt
 	cd docs && make
 
-build: fmt
-	-go mod tidy
+$(WEBFRIEND_BIN):
 	go build -tags nocgo --ldflags '-extldflags "-static"' -ldflags '-s' -o bin/$(WEBFRIEND_BIN) cmd/webfriend/*.go
 	which webfriend && cp -v bin/$(WEBFRIEND_BIN) `which webfriend` || true
+
+build: $(WEBFRIEND_BIN)

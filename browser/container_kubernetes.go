@@ -3,7 +3,6 @@ package browser
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/ghetzel/go-stockutil/fileutil"
 	"github.com/ghetzel/go-stockutil/log"
@@ -21,20 +20,31 @@ import (
 var DefaultKubeConfigFile = `~/.kube/config`
 var KubeContainerInstanceName = `browser`
 
+type k8sReady error
+
 type KubernetesContainer struct {
 	*ContainerConfig
-	k8s        *kubernetes.Clientset
-	id         string
-	kubeConfig string
-	memory     resource.Quantity
-	pod        *v1.Pod
+	k8s            *kubernetes.Clientset
+	id             string
+	kubeConfig     string
+	memory         resource.Quantity
+	pod            *v1.Pod
+	stopped        bool
+	errchan        chan error
+	firstOuterPort string
+	lastError      error
 }
 
 func NewKubernetesContainer() *KubernetesContainer {
 	return &KubernetesContainer{
 		ContainerConfig: &ContainerConfig{},
 		kubeConfig:      DefaultKubeConfigFile,
+		errchan:         make(chan error, 1),
 	}
+}
+
+func (self *KubernetesContainer) StartErr() <-chan error {
+	return self.errchan
 }
 
 func (self *KubernetesContainer) ID() string {
@@ -83,10 +93,10 @@ func (self *KubernetesContainer) Start() error {
 		Limits:   make(map[v1.ResourceName]resource.Quantity),
 	}
 
-	if !self.memory.IsZero() {
-		resources.Requests[v1.ResourceMemory] = self.memory
-		resources.Limits[v1.ResourceMemory] = self.memory
-	}
+	// if !self.memory.IsZero() {
+	// 	resources.Requests[v1.ResourceMemory] = self.memory
+	// 	resources.Limits[v1.ResourceMemory] = self.memory
+	// }
 
 	if pod, err := self.podapi().Create(&v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
@@ -112,13 +122,8 @@ func (self *KubernetesContainer) Start() error {
 	}); err == nil {
 		self.pod = pod
 		self.id = pod.Name
+		self.stopped = false
 
-		for !self.IsRunning() {
-			log.Infof("not running")
-			time.Sleep(time.Second)
-		}
-
-		log.Noticef("running")
 		return nil
 	} else {
 		return err
@@ -132,8 +137,14 @@ func (self *KubernetesContainer) podapi() v1typed.PodInterface {
 func (self *KubernetesContainer) containerPorts() (ports []v1.ContainerPort) {
 	for _, port := range self.Ports {
 		outer, inner := stringutil.SplitPair(port, `:`)
+
+		if self.firstOuterPort == `` {
+			self.firstOuterPort = outer
+		}
+
 		inner, p := stringutil.SplitPair(inner, `/`)
 		var port = v1.ContainerPort{
+			Name:          `cdp-debugger`,
 			HostPort:      int32(typeutil.Int(outer)),
 			ContainerPort: int32(typeutil.Int(inner)),
 		}
@@ -168,7 +179,10 @@ func (self *KubernetesContainer) envVars() (envs []v1.EnvVar) {
 
 func (self *KubernetesContainer) Address() string {
 	if self.IsRunning() {
-		return self.TargetAddr
+		// TODO: need to work out the correct method of ascertaining the IP;
+		// best guess right now: detect if we're "in cluster", thus can use the PodIP,
+		// else, use the HostIP.
+		return self.pod.Status.HostIP + `:` + self.firstOuterPort
 	} else {
 		return ``
 	}
@@ -179,15 +193,54 @@ func (self *KubernetesContainer) IsRunning() bool {
 		return false
 	}
 
-	if p, err := self.podapi().UpdateStatus(self.pod); err == nil {
+	if p, err := self.podapi().Get(self.pod.Name, metav1.GetOptions{}); err == nil {
 		self.pod = p
+		switch phase := p.Status.Phase; phase {
+		case v1.PodRunning:
+			return true
+		case v1.PodPending:
+			return false
+		default:
+			var merr error
+
+			if r := p.Status.Reason; r != `` {
+				merr = log.AppendError(merr, fmt.Errorf(r))
+			}
+
+			for _, status := range p.Status.ContainerStatuses {
+				if wait := status.State.Waiting; wait != nil {
+					if strings.Contains(wait.Reason, `Err`) || strings.Contains(wait.Reason, `Backoff`) {
+						merr = log.AppendError(merr, fmt.Errorf("%s: %s", wait.Reason, wait.Message))
+					}
+				} else if term := status.State.Terminated; term != nil {
+					merr = log.AppendError(merr, fmt.Errorf(
+						"exited with code %d: %s - %s",
+						term.ExitCode,
+						term.Reason,
+						term.Message,
+					))
+				}
+			}
+
+			if merr != nil {
+				self.lastError = merr
+			}
+		}
 	}
 
-	return (self.pod.Status.Phase == v1.PodRunning)
+	return false
 }
 
 func (self *KubernetesContainer) Stop() error {
-	return self.podapi().Delete(self.pod.Name, nil)
+	if self.pod != nil {
+		var podname = self.pod.Name
+		self.pod = nil
+		self.stopped = true
+
+		return self.podapi().Delete(podname, nil)
+	} else {
+		return nil
+	}
 }
 
 func (self *KubernetesContainer) Validate() error {

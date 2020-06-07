@@ -214,11 +214,13 @@ func main() {
 			}
 
 			if wferr != nil {
-				log.Fatal(wferr)
+				log.Critical(wferr)
 			}
 		} else {
-			log.Fatalf("could not launch browser: %v", err)
+			log.Criticalf("could not launch browser: %v", err)
 		}
+
+		browser.StopAllActiveBrowsers()
 	}
 
 	app.Run(os.Args)

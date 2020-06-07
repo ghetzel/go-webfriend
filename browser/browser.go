@@ -30,7 +30,7 @@ import (
 	"github.com/phayes/freeport"
 )
 
-var DefaultStartWait = time.Second
+var DefaultStartWait = 10 * time.Second
 var ProcessExitMaxWait = 10 * time.Second
 var ProcessExitCheckInterval = 125 * time.Millisecond
 var DefaultDebuggingPort = 0 // 0 = allocate an ephemeral port
@@ -75,7 +75,6 @@ func StopAllActiveBrowsers() {
 
 	activeBrowserInstances.Range(func(id interface{}, b interface{}) bool {
 		if browser, ok := b.(*Browser); ok {
-			log.Debugf("[%v] Cleaning up instance", id)
 			browser.Stop()
 		}
 
@@ -127,6 +126,7 @@ type Browser struct {
 	pathReaders                 []PathReaderFunc
 	stopped                     bool
 	stopping                    bool
+	connected                   bool
 	dockerClient                *docker.Client
 }
 
@@ -285,6 +285,13 @@ func (self *Browser) Launch() error {
 					self.stopped = false
 					log.Debugf("[%s] Container %v starting...", self.ID, container)
 
+					go func() {
+						for !container.IsRunning() {
+							time.Sleep(time.Second)
+						}
+					}()
+
+				startWaitSelect:
 					select {
 					case sig := <-globalSignal:
 						if err := container.Stop(); err == nil {
@@ -293,13 +300,20 @@ func (self *Browser) Launch() error {
 							return err
 						}
 
-					case <-time.After(self.StartWait):
-						if addr := container.Address(); addr != `` {
-							log.Debugf("[%s] Container stayed running for %v", self.ID, self.StartWait)
-							remoteAddr = addr
-						} else {
-							return fmt.Errorf("No debugger available after %v", self.StartWait)
+					default:
+						for t := time.Now(); time.Since(t) < self.StartWait; t = time.Now() {
+							if container.IsRunning() {
+								if addr := container.Address(); addr != `` {
+									log.Debugf("[%s] Container stayed running for %v", self.ID, self.StartWait)
+									remoteAddr = addr
+									break startWaitSelect
+								}
+							}
+
+							time.Sleep(ProcessExitCheckInterval)
 						}
+
+						return fmt.Errorf("No debugger available after %v", self.StartWait)
 					}
 				} else {
 					return err
@@ -350,6 +364,10 @@ func (self *Browser) Launch() error {
 	}
 }
 
+func (self *Browser) IsConnected() bool {
+	return self.connected
+}
+
 func (self *Browser) ctx() context.Context {
 	c := context.Background()
 	// c, _ = context.WithTimeout(c, rpcGlobalTimeout)
@@ -391,10 +409,6 @@ func (self *Browser) stopWithError(xerr error) error {
 		self.stopping = false
 	}()
 
-	if self.cmd == nil {
-		return nil
-	}
-
 	self.tabLock.Lock()
 	defer self.tabLock.Unlock()
 
@@ -415,6 +429,10 @@ func (self *Browser) stopWithError(xerr error) error {
 			return err
 		}
 	} else {
+		if self.cmd == nil {
+			return xerr
+		}
+
 		if process := self.cmd.Process; process == nil {
 			return fmt.Errorf("Process not running")
 		} else {

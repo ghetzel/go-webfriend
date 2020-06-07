@@ -11,7 +11,10 @@ import (
 )
 
 func (self *Browser) connectRPC(address string) error {
-	var connected bool
+	if address == `` {
+		return fmt.Errorf("no address provided")
+	}
+
 	var rpcAddr = fmt.Sprintf("http://%v", address)
 	var started = time.Now()
 
@@ -22,7 +25,7 @@ func (self *Browser) connectRPC(address string) error {
 		if self.stopped {
 			return fmt.Errorf("Browser process stopped before RPC connection could be established")
 		} else if version, err := self.devtools.Version(self.ctx()); err == nil {
-			connected = true
+			self.connected = true
 			log.Debugf("Connected to %v; protocol %v", version.Browser, version.Protocol)
 			break
 		} else {
@@ -30,7 +33,7 @@ func (self *Browser) connectRPC(address string) error {
 		}
 	}
 
-	if connected {
+	if self.connected {
 		return self.syncState()
 	} else {
 		return fmt.Errorf("Failed to connect to RPC interface after %v", rpcConnectTimeout)
@@ -76,9 +79,11 @@ func (self *Browser) syncState() error {
 			}
 
 		} else {
+			self.connected = false
 			return fmt.Errorf("DevTools error: %v", err)
 		}
 	} else {
+		self.connected = false
 		return fmt.Errorf("DevTools connection unavailable")
 	}
 

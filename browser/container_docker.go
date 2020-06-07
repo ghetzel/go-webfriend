@@ -233,7 +233,13 @@ func (self *DockerContainer) Stop() error {
 			ctx, cn := context.WithTimeout(context.Background(), ProcessExitMaxWait)
 			defer cn()
 
-			return self.client.ContainerRemove(ctx, self.id, types.ContainerRemoveOptions{})
+			if err := self.client.ContainerRemove(ctx, self.id, types.ContainerRemoveOptions{}); err == nil {
+				return nil
+			} else if log.ErrContains(err, `already in progress`) {
+				return nil
+			} else {
+				return err
+			}
 		} else {
 			return err
 		}
