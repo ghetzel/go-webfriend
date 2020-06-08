@@ -15,7 +15,7 @@ require (
 	github.com/ghetzel/diecast v1.17.15
 	github.com/ghetzel/friendscript v0.6.6
 	github.com/ghetzel/go-defaults v1.2.0
-	github.com/ghetzel/go-stockutil v1.8.63
+	github.com/ghetzel/go-stockutil v1.8.68
 	github.com/ghetzel/testify v1.4.1
 	github.com/gobwas/glob v0.2.3
 	github.com/gorilla/websocket v1.4.2

@@ -222,6 +222,8 @@ func (self *Browser) Launch() error {
 		if self.Container != nil {
 			// disable sandboxing inside of container environment
 			self.NoSandbox = true
+			self.DisableSetuidSandbox = true
+			self.DisableGPU = true
 
 			// allow remote debugging (port forwarding into the container requires this)
 			self.RemoteDebuggingAddress = `0.0.0.0`
@@ -257,7 +259,15 @@ func (self *Browser) Launch() error {
 				cfg := container.Config()
 				cfg.Name = fmt.Sprintf("webfriend-%s", self.ID)
 				cfg.Env = self.cmd.Env
-				cfg.Cmd = append(self.cmd.Args)
+
+				if len(cfg.Cmd) == 0 {
+					cfg.Cmd = append(self.cmd.Args)
+				} else {
+					// if there's already something in Cmd, then we're going to treat the auto-generated command
+					// as a list of arguments to append to that Cmd, but we should discard the first entry because
+					// that's going to be a path to a binary we're not calling.
+					cfg.Cmd = append(cfg.Cmd, self.cmd.Args[1:]...)
+				}
 
 				if err := cfg.Validate(); err != nil {
 					return fmt.Errorf("invalid container config: %v", err)
@@ -283,7 +293,7 @@ func (self *Browser) Launch() error {
 
 				if err := container.Start(); err == nil {
 					self.stopped = false
-					log.Debugf("[%s] Container %v starting...", self.ID, container)
+					log.Debugf("[%s] Container %v starting (waiting up to %v)...", self.ID, container, self.StartWait)
 
 					go func() {
 						for !container.IsRunning() {
@@ -301,7 +311,9 @@ func (self *Browser) Launch() error {
 						}
 
 					default:
-						for t := time.Now(); time.Since(t) < self.StartWait; t = time.Now() {
+						var start = time.Now()
+
+						for time.Since(start) < self.StartWait {
 							if container.IsRunning() {
 								if addr := container.Address(); addr != `` {
 									log.Debugf("[%s] Container stayed running for %v", self.ID, self.StartWait)
@@ -324,7 +336,7 @@ func (self *Browser) Launch() error {
 
 				// launch the browser
 				go func() {
-					log.Debugf("[%s] Executing: %v", self.ID, strings.Join(self.cmd.Args, ` `))
+					log.Debugf("[%s] Executing: %v (waiting up to %v)", self.ID, strings.Join(self.cmd.Args, ` `), self.StartWait)
 					self.stopped = false
 					self.exitchan <- self.cmd.Run()
 				}()

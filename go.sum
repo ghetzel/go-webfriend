@@ -112,8 +112,8 @@ github.com/ghetzel/go-stockutil v1.6.17/go.mod h1:+m7v45hx86ukaOof7faN1mFqW+PtmU
 github.com/ghetzel/go-stockutil v1.8.3/go.mod h1:zHk/p1VcoQbWngvmelsQbFbZ6eIQDA4D3ryZPYLoZ1I=
 github.com/ghetzel/go-stockutil v1.8.4/go.mod h1:tq1ycYqlC1z9ZX/Pvgz+sePJvpHsJbd692w8936ed+U=
 github.com/ghetzel/go-stockutil v1.8.56/go.mod h1:Upalidr5qSOijbhYb6yED2X2rDoFFFVhl2z0H/hyCmw=
-github.com/ghetzel/go-stockutil v1.8.63 h1:Pc77Et5SfJNx3ywbRZM76TdDNN2yZqSxWnn8W0bviUY=
-github.com/ghetzel/go-stockutil v1.8.63/go.mod h1:KqhSSBcr1OSwnl8uoZpJoCUlZXgfWTZg3reO3YAY4Zo=
+github.com/ghetzel/go-stockutil v1.8.68 h1:TOb2R7oXD0Rcn3somRspyK5aFdMhqALnbM3vyHcTgbs=
+github.com/ghetzel/go-stockutil v1.8.68/go.mod h1:CODe2TOlt9Lp4lG/woz9jdnG+w++UDy0by3FhiOds+A=
 github.com/ghetzel/go-webfriend v0.9.23/go.mod h1:4tjKFGdCtac9eXJ8Hz48DSCoiwjhzynwFFiyhsLfMnI=
 github.com/ghetzel/go-webfriend v0.9.40/go.mod h1:RDBxcAknpDWMJFOKS9AFiNldv+R6siUKFB4DDv+BGRI=
 github.com/ghetzel/go-webfriend v0.9.60/go.mod h1:NIJBphot+TvSgLtv8r4LioTcrUsbkYvX8WrK8YoK768=
@@ -176,6 +176,8 @@ github.com/h2non/filetype v0.0.0-20180727100300-6f0781f86f6a/go.mod h1:isekKqOuh
 github.com/h2non/filetype v1.0.5/go.mod h1:isekKqOuhMj+s/7r3rIeTErIRy4Rub5uBWHfvMusLMU=
 github.com/h2non/filetype v1.0.8 h1:le8gpf+FQA0/DlDABbtisA1KiTS0Xi+YSC/E8yY3Y14=
 github.com/h2non/filetype v1.0.8/go.mod h1:isekKqOuhMj+s/7r3rIeTErIRy4Rub5uBWHfvMusLMU=
+github.com/h2non/filetype v1.0.13-0.20200520201155-df519de6e270 h1:NJYu+dyMrWcvIcvCsVGx0sT9rHOl1dsztF2eIrSHLcM=
+github.com/h2non/filetype v1.0.13-0.20200520201155-df519de6e270/go.mod h1:319b3zT68BvV+WRj7cwy856M2ehB3HqNOt6sy1HndBY=
 github.com/hashicorp/errwrap v1.0.0 h1:hLrqtEDnRye3+sgx6z4qVLNuviH3MR5aQ0ykNJa/UYA=
 github.com/hashicorp/errwrap v1.0.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.0.0 h1:iVjPR7a6H0tWELX5NxNe7bYopibicUzc7uPribsnS6o=
@@ -274,9 +276,8 @@ github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrk
 github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936 h1:kw1v0NlnN+GZcU8Ma8CLF2Zzgjfx95gs3/GN3vYAPpo=
 github.com/mitchellh/go-ps v0.0.0-20170309133038-4fdf99ab2936/go.mod h1:r1VsdOzOPt1ZSrGZWFoNhsAedKnEd6r9Np1+5blZCWk=
 github.com/mitchellh/mapstructure v1.0.0/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
+github.com/mitchellh/mapstructure v1.1.2 h1:fmNYVwqnSfB9mZU6OS2O6GsXM+wcskZDuKQzvN1EDeE=
 github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
-github.com/mitchellh/mapstructure v1.3.0 h1:iDwIio/3gk2QtLLEsqU5lInaMzos0hDTz8a6lazSFVw=
-github.com/mitchellh/mapstructure v1.3.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/mjibson/esc v0.1.0/go.mod h1:9Hw9gxxfHulMF5OJKCyhYD7PzlSdhzXyaGEBRPH1OPs=
 github.com/mjibson/esc v0.2.0 h1:k96hdaR9Z+nMcnDwNrOvhdBqtjyMrbVyxLpsRCdP2mA=
 github.com/mjibson/esc v0.2.0/go.mod h1:9Hw9gxxfHulMF5OJKCyhYD7PzlSdhzXyaGEBRPH1OPs=

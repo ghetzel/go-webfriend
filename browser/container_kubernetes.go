@@ -109,13 +109,14 @@ func (self *KubernetesContainer) Start() error {
 			Hostname:      self.Hostname,
 			Containers: []v1.Container{
 				{
-					Name:       KubeContainerInstanceName,
-					Image:      self.ImageName,
-					Command:    self.Cmd,
-					WorkingDir: self.WorkingDir,
-					Ports:      self.containerPorts(),
-					Env:        self.envVars(),
-					Resources:  resources,
+					Name:            KubeContainerInstanceName,
+					Image:           self.ImageName,
+					ImagePullPolicy: v1.PullAlways,
+					Command:         self.Cmd,
+					WorkingDir:      self.WorkingDir,
+					Ports:           self.containerPorts(),
+					Env:             self.envVars(),
+					Resources:       resources,
 				},
 			},
 		},
@@ -145,7 +146,6 @@ func (self *KubernetesContainer) containerPorts() (ports []v1.ContainerPort) {
 		inner, p := stringutil.SplitPair(inner, `/`)
 		var port = v1.ContainerPort{
 			Name:          `cdp-debugger`,
-			HostPort:      int32(typeutil.Int(outer)),
 			ContainerPort: int32(typeutil.Int(inner)),
 		}
 
@@ -182,7 +182,7 @@ func (self *KubernetesContainer) Address() string {
 		// TODO: need to work out the correct method of ascertaining the IP;
 		// best guess right now: detect if we're "in cluster", thus can use the PodIP,
 		// else, use the HostIP.
-		return self.pod.Status.HostIP + `:` + self.firstOuterPort
+		return self.pod.Status.PodIP + `:` + self.firstOuterPort
 	} else {
 		return ``
 	}

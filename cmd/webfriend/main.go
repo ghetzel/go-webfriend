@@ -8,6 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/ghetzel/cli"
+	"github.com/ghetzel/go-stockutil/executil"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
@@ -59,6 +60,11 @@ func main() {
 			Name:  `var, V`,
 			Usage: `Set one or more variables ([deeply.nested.]key=value) before executing the script.`,
 		},
+		cli.DurationFlag{
+			Name:  `start-wait-time, W`,
+			Usage: `The amount of time that Webfriend should wait for the browser to startup before assuming it never will and killing it.`,
+			Value: browser.DefaultStartWait,
+		},
 		cli.IntFlag{
 			Name:   `remote-debugging-port, R`,
 			Usage:  `Explicitly provide the port number for the DevTools protocol.`,
@@ -78,6 +84,11 @@ func main() {
 			Name:   `container, C`,
 			Usage:  `If provided, Webfriend will launch and monitor a Chrome session inside of this Docker container.`,
 			EnvVar: `WEBFRIEND_CONTAINER`,
+		},
+		cli.StringFlag{
+			Name:   `container-command`,
+			Usage:  `Overrides the command given to the container. Note: this will affect the efficacy of other command line flags that are used when generating the command to run.`,
+			EnvVar: `WEBFRIEND_CONTAINER_CMD`,
 		},
 		cli.StringFlag{
 			Name:   `container-engine, X`,
@@ -133,6 +144,7 @@ func main() {
 		chrome.HideScrollbars = true
 		chrome.RemoteDebuggingPort = c.Int(`remote-debugging-port`)
 		chrome.RemoteAddress = c.String(`remote-debugging-address`)
+		chrome.StartWait = c.Duration(`start-wait-time`)
 
 		if i := c.String(`container`); i != `` {
 			switch rt := c.String(`container-engine`); rt {
@@ -153,6 +165,10 @@ func main() {
 				cfg.Memory = c.String(`container-memory`)
 				cfg.SharedMemory = c.String(`container-shm-size`)
 				cfg.Ports = c.StringSlice(`container-port`)
+
+				if cmd := c.String(`container-command`); cmd != `` {
+					cfg.Cmd = executil.MustSplit(cmd)
+				}
 			}
 		}
 
