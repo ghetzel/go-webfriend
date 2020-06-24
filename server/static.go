@@ -6,6 +6,8 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/base64"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -100,7 +102,24 @@ func (f *_escFile) Close() error {
 }
 
 func (f *_escFile) Readdir(count int) ([]os.FileInfo, error) {
-	return nil, nil
+	if !f.isDir {
+		return nil, fmt.Errorf(" escFile.Readdir: '%s' is not directory", f.name)
+	}
+
+	fis, ok := _escDirs[f.local]
+	if !ok {
+		return nil, fmt.Errorf(" escFile.Readdir: '%s' is directory, but we have no info about content of this dir, local=%s", f.name, f.local)
+	}
+	limit := count
+	if count <= 0 || limit > len(fis) {
+		limit = len(fis)
+	}
+
+	if len(fis) == 0 && count > 0 {
+		return nil, io.EOF
+	}
+
+	return fis[0:limit], nil
 }
 
 func (f *_escFile) Stat() (os.FileInfo, error) {
@@ -191,6 +210,7 @@ func FSMustString(useLocal bool, name string) string {
 var _escData = map[string]*_escFile{
 
 	"/_includes/head.html": {
+		name:    "head.html",
 		local:   "ui/_includes/head.html",
 		size:    2516,
 		modtime: 1500000000,
@@ -215,6 +235,7 @@ AAD//6GFhADUCQAA
 	},
 
 	"/_layouts/basic.html": {
+		name:    "basic.html",
 		local:   "ui/_layouts/basic.html",
 		size:    1203,
 		modtime: 1500000000,
@@ -231,6 +252,7 @@ RWk4G/9a3OtkxkCxYJWcm/oQGf3eUCnL09OEqojT0wudnDXQOLCRATnuhT3YD5VLsQi4eF4SS4NWLaug
 	},
 
 	"/_layouts/default.html": {
+		name:    "default.html",
 		local:   "ui/_layouts/default.html",
 		size:    3718,
 		modtime: 1500000000,
@@ -258,6 +280,7 @@ Imrtv8Iw0WpvUHvroGXKcybH2Zm5g+IIKbNpscA190uVNEpggFor7c9leFxdiDCoNDYo7SfMWS1m2TZm
 	},
 
 	"/css/bootstrap.min.css": {
+		name:    "bootstrap.min.css",
 		local:   "ui/css/bootstrap.min.css",
 		size:    127343,
 		modtime: 1500000000,
@@ -589,6 +612,7 @@ nbp4rmL0c1SW6fn4X//596/7omjqporKeZ6e53Fdz/OodP7w5f8PAAD//8SqlT1v8QEA
 	},
 
 	"/css/bootstrap.min.css.map": {
+		name:    "bootstrap.min.css.map",
 		local:   "ui/css/bootstrap.min.css.map",
 		size:    514728,
 		modtime: 1500000000,
@@ -2013,6 +2037,7 @@ rnb4bw//HwAA//9k8J9yqNoHAA==
 	},
 
 	"/css/codemirror.css": {
+		name:    "codemirror.css",
 		local:   "ui/css/codemirror.css",
 		size:    8542,
 		modtime: 1500000000,
@@ -2063,6 +2088,7 @@ BbUyHUqt0FSbzdFKpuaQHNnBv7/YJ9NOLb28ngznVk2UWNLHE3xvjv1vAAAA//+nmtk2XiEAAA==
 	},
 
 	"/css/editor/show-hint.css": {
+		name:    "show-hint.css",
 		local:   "ui/css/editor/show-hint.css",
 		size:    623,
 		modtime: 1500000000,
@@ -2077,6 +2103,7 @@ g1R9ooOpKGsVP5qnYTX1w8xFvAcAAP//XrAerG8CAAA=
 	},
 
 	"/css/editor/webfriend.css": {
+		name:    "webfriend.css",
 		local:   "ui/css/editor/webfriend.css",
 		size:    2560,
 		modtime: 1500000000,
@@ -2097,6 +2124,7 @@ LE4rnqDK3658N7+6G8+v92TRnwAAAP///pyHtgAKAAA=
 	},
 
 	"/css/font-awesome.min.css": {
+		name:    "font-awesome.min.css",
 		local:   "ui/css/font-awesome.min.css",
 		size:    31000,
 		modtime: 1500000000,
@@ -2220,6 +2248,7 @@ tW742zXqbWpRb1fmEsYm9Zjvf/iPAAAA///cOPUCGHkAAA==
 	},
 
 	"/css/font-hind.css": {
+		name:    "font-hind.css",
 		local:   "ui/css/font-hind.css",
 		size:    1554,
 		modtime: 1500000000,
@@ -2233,6 +2262,7 @@ xsTHMI6GQo6JyafDmEedRL8kmGSm7LYmD2YkIRkz3jvfjvMnzrYzzt5Y1Qva2NYm2PY2TosxF8+Ye2UF
 	},
 
 	"/css/jquery.json-browse.css": {
+		name:    "jquery.json-browse.css",
 		local:   "ui/css/jquery.json-browse.css",
 		size:    1149,
 		modtime: 1500000000,
@@ -2250,6 +2280,7 @@ m/fm2UXE2cXS6zhxey1mM8Oq5fvJ9tmpXXSU9P/o0Z8BAAD//4pU9JF9BAAA
 	},
 
 	"/css/webfriend.css": {
+		name:    "webfriend.css",
 		local:   "ui/css/webfriend.css",
 		size:    10824,
 		modtime: 1500000000,
@@ -2296,6 +2327,7 @@ sn6gTms3bXppM1INbu8GzqrCVEXzsqjKYk4yLJQDBimjFJWiG5tW7U3TgaiaHPwfyUvGJaranf8EAAD/
 	},
 
 	"/docs.html": {
+		name:    "docs.html",
 		local:   "ui/docs.html",
 		size:    7774,
 		modtime: 1500000000,
@@ -2331,6 +2363,7 @@ LO/od2ztJ5Th+2y7RCFnoESG9WOSKb7iUSZnRSnVT6U6JPifHAL+RxlaaQSS+P8sOczAYTzKhOTiwurT
 	},
 
 	"/documentation.json": {
+		name:    "documentation.json",
 		local:   "ui/documentation.json",
 		size:    80984,
 		modtime: 1500000000,
@@ -2508,6 +2541,7 @@ wQ8/urcfn1f1zTiKUi+bLsOVelkTiH5bhDdY4o6iRhsl4A2sxy4QEWJV7kE2t4I0EYUCjWqcXchUiltQ
 	},
 
 	"/fonts/FontAwesome.otf": {
+		name:    "FontAwesome.otf",
 		local:   "ui/fonts/FontAwesome.otf",
 		size:    134808,
 		modtime: 1500000000,
@@ -4379,6 +4413,7 @@ jjCDNtq5/25Jr8U9fXDJNgYimiHPuJ395ekO//4fAAD//zGhgsKYDgIA
 	},
 
 	"/fonts/Hind-Bold.woff2": {
+		name:    "Hind-Bold.woff2",
 		local:   "ui/fonts/Hind-Bold.woff2",
 		size:    16028,
 		modtime: 1500000000,
@@ -4655,6 +4690,7 @@ rKFJVHG3RIee+tgzpUovmCYNKBgAAAABAAD//zaqplqcPgAA
 	},
 
 	"/fonts/Hind-Light.woff2": {
+		name:    "Hind-Light.woff2",
 		local:   "ui/fonts/Hind-Light.woff2",
 		size:    15632,
 		modtime: 1500000000,
@@ -4924,6 +4960,7 @@ wEr7HQ7bk7kNnrnfjnTd5np35H0qBQ5zH51+w+3vjAs+96JSlZdN61DYg1kAAAABAAD//+IXUDUQPQAA
 	},
 
 	"/fonts/Hind-Medium.woff2": {
+		name:    "Hind-Medium.woff2",
 		local:   "ui/fonts/Hind-Medium.woff2",
 		size:    16508,
 		modtime: 1500000000,
@@ -5208,6 +5245,7 @@ jWx0S3jr+btua2DTZpHDT+yZRppwicCkF4PmBxaAO7fGNH8mDoYfH/yAS1tdccy2CGtcBy9OdePOStj5
 	},
 
 	"/fonts/Hind-Regular.woff2": {
+		name:    "Hind-Regular.woff2",
 		local:   "ui/fonts/Hind-Regular.woff2",
 		size:    15960,
 		modtime: 1500000000,
@@ -5483,6 +5521,7 @@ bi2+E770eyq7F7W9EgAAAQAA//8bvz4kWD4AAA==
 	},
 
 	"/fonts/Hind-SemiBold.woff2": {
+		name:    "Hind-SemiBold.woff2",
 		local:   "ui/fonts/Hind-SemiBold.woff2",
 		size:    16304,
 		modtime: 1500000000,
@@ -5764,6 +5803,7 @@ AAD//89NpEmwPwAA
 	},
 
 	"/fonts/fontawesome-webfont.eot": {
+		name:    "fontawesome-webfont.eot",
 		local:   "ui/fonts/fontawesome-webfont.eot",
 		size:    165742,
 		modtime: 1500000000,
@@ -7430,6 +7470,7 @@ EEJFyhdvQICfRYCYuW9T0vfpn3R8QzJ7+/GqxS00frV17NH/LwAA//9PcB26bocCAA==
 	},
 
 	"/fonts/fontawesome-webfont.svg": {
+		name:    "fontawesome-webfont.svg",
 		local:   "ui/fonts/fontawesome-webfont.svg",
 		size:    444379,
 		modtime: 1500000000,
@@ -9652,6 +9693,7 @@ FdEvv/7oUA+VjS+//ehQD7nOL7//6FAP+YQvf/zoUA/h65cv3z/U9uXf//3L/v/+un01WE3pw8H+9V/+
 	},
 
 	"/fonts/fontawesome-webfont.ttf": {
+		name:    "fontawesome-webfont.ttf",
 		local:   "ui/fonts/fontawesome-webfont.ttf",
 		size:    165548,
 		modtime: 1500000000,
@@ -11317,6 +11359,7 @@ FLp9Ct0+ha6iYX2KhvX1KXT7FLp9Ct0+hW6fQrdPodun0O1T6PYrdPsVuv0K3X6Fbr9Ct1+h26/Q7aeS
 	},
 
 	"/fonts/fontawesome-webfont.woff": {
+		name:    "fontawesome-webfont.woff",
 		local:   "ui/fonts/fontawesome-webfont.woff",
 		size:    98024,
 		modtime: 1500000000,
@@ -12958,6 +13001,7 @@ Yc3SlFxPim8oxZ3hLfa2ZLv5n9VT4mHWald7hrfa25L9puYkd6WnOctT42E2WpWS/ayGMnelpDnLTSN5
 	},
 
 	"/fonts/fontawesome-webfont.woff2": {
+		name:    "fontawesome-webfont.woff2",
 		local:   "ui/fonts/fontawesome-webfont.woff2",
 		size:    77160,
 		modtime: 1500000000,
@@ -14253,6 +14297,7 @@ akiI/xcAAP//p8MXVWgtAQA=
 	},
 
 	"/home.html": {
+		name:    "home.html",
 		local:   "ui/home.html",
 		size:    3027,
 		modtime: 1500000000,
@@ -14282,6 +14327,7 @@ AAD//+ngstjTCwAA
 	},
 
 	"/img/logo-text-darkbg.svg": {
+		name:    "logo-text-darkbg.svg",
 		local:   "ui/img/logo-text-darkbg.svg",
 		size:    10454,
 		modtime: 1500000000,
@@ -14335,6 +14381,7 @@ ks3c/Ssp2XxpGeGyZHO1au9312/+HgAA//89zWCP1igAAA==
 	},
 
 	"/img/logo-text.svg": {
+		name:    "logo-text.svg",
 		local:   "ui/img/logo-text.svg",
 		size:    8956,
 		modtime: 1500000000,
@@ -14385,6 +14432,7 @@ LO8S+5exvF+8hhA+trzh1/2mOx/evvl3AAAA//+RKjbl/CIAAA==
 	},
 
 	"/img/stars.png": {
+		name:    "stars.png",
 		local:   "ui/img/stars.png",
 		size:    269634,
 		modtime: 1500000000,
@@ -18876,6 +18924,7 @@ FKUUOQ/JxDfNWTYHPu2Z2Kezf6v/e/FAz1S3RvtpzP8FAAD//+CD/7VCHQQA
 	},
 
 	"/img/twinkling.png": {
+		name:    "twinkling.png",
 		local:   "ui/img/twinkling.png",
 		size:    5648,
 		modtime: 1500000000,
@@ -18979,6 +19028,7 @@ zH8Ai3ZYHlzJGLcAAAAASUVORK5CYIIBAAD//xWwofMQFgAA
 	},
 
 	"/img/webfriend-48.png": {
+		name:    "webfriend-48.png",
 		local:   "ui/img/webfriend-48.png",
 		size:    2531,
 		modtime: 1500000000,
@@ -19030,6 +19080,7 @@ P3K5vv8P0YOcrHQ7jkAAAAAASUVORK5CYIIBAAD//w4eWXPjCQAA
 	},
 
 	"/img/webfriend-full.svg": {
+		name:    "webfriend-full.svg",
 		local:   "ui/img/webfriend-full.svg",
 		size:    8711,
 		modtime: 1500000000,
@@ -19081,6 +19132,7 @@ KWx94hZjlFoAk2TDcJja2dLYh5aIcXyzYSlYco1QMKfIX5mFsRVuJ/vH1ccP/x0AAP//Jz7yjgciAAA=
 	},
 
 	"/img/webfriend-square.svg": {
+		name:    "webfriend-square.svg",
 		local:   "ui/img/webfriend-square.svg",
 		size:    8114,
 		modtime: 1500000000,
@@ -19131,6 +19183,7 @@ sh8AAA==
 	},
 
 	"/img/webfriend.svg": {
+		name:    "webfriend.svg",
 		local:   "ui/img/webfriend.svg",
 		size:    5850,
 		modtime: 1500000000,
@@ -19178,6 +19231,7 @@ BU09Z90Qm5eZ/Z9m8Ztyn22vD6jt+em0/fDuzp96H979dwAAAP//I62ZJdoWAAA=
 	},
 
 	"/index.html": {
+		name:    "index.html",
 		local:   "ui/index.html",
 		size:    899,
 		modtime: 1500000000,
@@ -19194,6 +19248,7 @@ kaj+Nvr6Df0NAAD//2YJE36DAwAA
 	},
 
 	"/js/bootstrap.bundle.min.js": {
+		name:    "bootstrap.bundle.min.js",
 		local:   "ui/js/bootstrap.bundle.min.js",
 		size:    69453,
 		modtime: 1500000000,
@@ -19525,6 +19580,7 @@ G/5xpW/FyRH/nKU3yaH4ITXZkhnjQP5YwX8Ek//z8uU/9Eq6LZboXbrZYHL74fIsudFzjm62JMtRdIdJ
 	},
 
 	"/js/bootstrap.bundle.min.js.map": {
+		name:    "bootstrap.bundle.min.js.map",
 		local:   "ui/js/bootstrap.bundle.min.js.map",
 		size:    271233,
 		modtime: 1500000000,
@@ -20694,6 +20750,7 @@ Cv6h+BT8AzgS/CXZD/ytOQ386zga4v8rZO7bt+nj09v/PwAA//+p2m3AgSMEAA==
 	},
 
 	"/js/codemirror.js": {
+		name:    "codemirror.js",
 		local:   "ui/js/codemirror.js",
 		size:    368733,
 		modtime: 1500000000,
@@ -22402,6 +22459,7 @@ d6NiZblSZEVIgPwIdLqHPQ/KYCHoVA2+H3/3p/FksLVFg+5THWxt3SVJcvD/BgAA//8eKy7wXaAFAA==
 	},
 
 	"/js/codemirror/addons/active-line.js": {
+		name:    "active-line.js",
 		local:   "ui/js/codemirror/addons/active-line.js",
 		size:    2773,
 		modtime: 1500000000,
@@ -22426,6 +22484,7 @@ BgAA//8zvjlI1QoAAA==
 	},
 
 	"/js/codemirror/addons/closebrackets.js": {
+		name:    "closebrackets.js",
 		local:   "ui/js/codemirror/addons/closebrackets.js",
 		size:    5652,
 		modtime: 1500000000,
@@ -22461,6 +22520,7 @@ AP//mgKOPRQWAAA=
 	},
 
 	"/js/codemirror/addons/matchbrackets.js": {
+		name:    "matchbrackets.js",
 		local:   "ui/js/codemirror/addons/matchbrackets.js",
 		size:    6258,
 		modtime: 1500000000,
@@ -22506,6 +22566,7 @@ kR4bcpz/A8fFo7bYvxWI4VP8IAZH3uPPoSZ7L/lAiSM3Z14j+++/AQAA//9+aHsDchgAAA==
 	},
 
 	"/js/codemirror/addons/show-hint.js": {
+		name:    "show-hint.js",
 		local:   "ui/js/codemirror/addons/show-hint.js",
 		size:    15925,
 		modtime: 1500000000,
@@ -22591,6 +22652,7 @@ JP3j5o/bx8N89lN2Ow0AfY0ckRhry8QA9nrVXKfbQf/6LBz1z5DM4PFfjRrRGP+2Yppk7rZeKeH/AgAA
 	},
 
 	"/js/codemirror/hints/friendscript-hint.js": {
+		name:    "friendscript-hint.js",
 		local:   "ui/js/codemirror/hints/friendscript-hint.js",
 		size:    4289,
 		modtime: 1500000000,
@@ -22621,6 +22683,7 @@ eW8MU+lHfXvjJ32MxhW1LZDQsqQ4p21djF+qykT9m4ZEvhz97/AkrbTTeR4ewf7JSzH6W/Kr1IuuQUWY
 	},
 
 	"/js/codemirror/modes/friendscript.js": {
+		name:    "friendscript.js",
 		local:   "ui/js/codemirror/modes/friendscript.js",
 		size:    5734,
 		modtime: 1500000000,
@@ -22650,6 +22713,7 @@ ly75DdV2MP0nAAD//9p7NDNmFgAA
 	},
 
 	"/js/d3.min.js": {
+		name:    "d3.min.js",
 		local:   "ui/js/d3.min.js",
 		size:    235672,
 		modtime: 1500000000,
@@ -23959,6 +24023,7 @@ CsfiEv2WqlNmV6NyA3KjwNlWvGS5sPjtMF6vxdtTsX3fizF8yn9KRuHJP/n3/wcAAP//WVXC7ZiYAwA=
 	},
 
 	"/js/jquery.json-browse.js": {
+		name:    "jquery.json-browse.js",
 		local:   "ui/js/jquery.json-browse.js",
 		size:    4400,
 		modtime: 1500000000,
@@ -23991,6 +24056,7 @@ Ur54MUqr4s337mSwDvxG7ILJ4J8AAAD//92xoHMwEQAA
 	},
 
 	"/js/jquery.min.js": {
+		name:    "jquery.min.js",
 		local:   "ui/js/jquery.min.js",
 		size:    86709,
 		modtime: 1500000000,
@@ -24504,6 +24570,7 @@ tVIBAA==
 	},
 
 	"/js/jquery.simple.websocket.js": {
+		name:    "jquery.simple.websocket.js",
 		local:   "ui/js/jquery.simple.websocket.js",
 		size:    12189,
 		modtime: 1500000000,
@@ -24557,6 +24624,7 @@ jGr3zBoS56NH3Rf+JwAA//9qDHednS8AAA==
 	},
 
 	"/js/mrdoob-stats.min.js": {
+		name:    "mrdoob-stats.min.js",
 		local:   "ui/js/mrdoob-stats.min.js",
 		size:    1965,
 		modtime: 1500000000,
@@ -24583,6 +24651,7 @@ EuP5tJqtyaQhZBiGw0+pGIg4+icAAP//OjGLoq0HAAA=
 	},
 
 	"/js/stapes.min.js": {
+		name:    "stapes.min.js",
 		local:   "ui/js/stapes.min.js",
 		size:    6397,
 		modtime: 1500000000,
@@ -24628,6 +24697,7 @@ XBnfzMjiFu0TEP9z3V5705lcZmH1dSfdT2t8aM/29oMPbFLUw1fetEVdhaS3L8/85VQ3sp3fHGxsH7XQ
 	},
 
 	"/js/webfriend-editor.js": {
+		name:    "webfriend-editor.js",
 		local:   "ui/js/webfriend-editor.js",
 		size:    19468,
 		modtime: 1500000000,
@@ -24706,6 +24776,7 @@ kVW8KO6Y5O8pHBLPMMWmgx9a1RbFPYK9Hj2PmfVdapCptSAfR1f/HwAA///jBE7JDEwAAA==
 	},
 
 	"/js/webfriend.js": {
+		name:    "webfriend.js",
 		local:   "ui/js/webfriend.js",
 		size:    17984,
 		modtime: 1500000000,
@@ -24784,62 +24855,176 @@ VVor8MRq74y59XV/qIf/FwAA//+q8fzfQEYAAA==
 	},
 
 	"/": {
+		name:  "/",
+		local: `ui`,
 		isDir: true,
-		local: "ui",
 	},
 
 	"/_includes": {
+		name:  "_includes",
+		local: `ui/_includes`,
 		isDir: true,
-		local: "ui/_includes",
 	},
 
 	"/_layouts": {
+		name:  "_layouts",
+		local: `ui/_layouts`,
 		isDir: true,
-		local: "ui/_layouts",
 	},
 
 	"/css": {
+		name:  "css",
+		local: `ui/css`,
 		isDir: true,
-		local: "ui/css",
 	},
 
 	"/css/editor": {
+		name:  "editor",
+		local: `ui/css/editor`,
 		isDir: true,
-		local: "ui/css/editor",
 	},
 
 	"/fonts": {
+		name:  "fonts",
+		local: `ui/fonts`,
 		isDir: true,
-		local: "ui/fonts",
 	},
 
 	"/img": {
+		name:  "img",
+		local: `ui/img`,
 		isDir: true,
-		local: "ui/img",
 	},
 
 	"/js": {
+		name:  "js",
+		local: `ui/js`,
 		isDir: true,
-		local: "ui/js",
 	},
 
 	"/js/codemirror": {
+		name:  "codemirror",
+		local: `ui/js/codemirror`,
 		isDir: true,
-		local: "ui/js/codemirror",
 	},
 
 	"/js/codemirror/addons": {
+		name:  "addons",
+		local: `ui/js/codemirror/addons`,
 		isDir: true,
-		local: "ui/js/codemirror/addons",
 	},
 
 	"/js/codemirror/hints": {
+		name:  "hints",
+		local: `ui/js/codemirror/hints`,
 		isDir: true,
-		local: "ui/js/codemirror/hints",
 	},
 
 	"/js/codemirror/modes": {
+		name:  "modes",
+		local: `ui/js/codemirror/modes`,
 		isDir: true,
-		local: "ui/js/codemirror/modes",
+	},
+}
+
+var _escDirs = map[string][]os.FileInfo{
+
+	"ui": {
+		_escData["/_includes"],
+		_escData["/_layouts"],
+		_escData["/css"],
+		_escData["/docs.html"],
+		_escData["/documentation.json"],
+		_escData["/fonts"],
+		_escData["/home.html"],
+		_escData["/img"],
+		_escData["/index.html"],
+		_escData["/js"],
+	},
+
+	"ui/_includes": {
+		_escData["/_includes/head.html"],
+	},
+
+	"ui/_layouts": {
+		_escData["/_layouts/basic.html"],
+		_escData["/_layouts/default.html"],
+	},
+
+	"ui/css": {
+		_escData["/css/bootstrap.min.css"],
+		_escData["/css/bootstrap.min.css.map"],
+		_escData["/css/codemirror.css"],
+		_escData["/css/editor"],
+		_escData["/css/font-awesome.min.css"],
+		_escData["/css/font-hind.css"],
+		_escData["/css/jquery.json-browse.css"],
+		_escData["/css/webfriend.css"],
+	},
+
+	"ui/css/editor": {
+		_escData["/css/editor/show-hint.css"],
+		_escData["/css/editor/webfriend.css"],
+	},
+
+	"ui/fonts": {
+		_escData["/fonts/FontAwesome.otf"],
+		_escData["/fonts/Hind-Bold.woff2"],
+		_escData["/fonts/Hind-Light.woff2"],
+		_escData["/fonts/Hind-Medium.woff2"],
+		_escData["/fonts/Hind-Regular.woff2"],
+		_escData["/fonts/Hind-SemiBold.woff2"],
+		_escData["/fonts/fontawesome-webfont.eot"],
+		_escData["/fonts/fontawesome-webfont.svg"],
+		_escData["/fonts/fontawesome-webfont.ttf"],
+		_escData["/fonts/fontawesome-webfont.woff"],
+		_escData["/fonts/fontawesome-webfont.woff2"],
+	},
+
+	"ui/img": {
+		_escData["/img/logo-text-darkbg.svg"],
+		_escData["/img/logo-text.svg"],
+		_escData["/img/stars.png"],
+		_escData["/img/twinkling.png"],
+		_escData["/img/webfriend-48.png"],
+		_escData["/img/webfriend-full.svg"],
+		_escData["/img/webfriend-square.svg"],
+		_escData["/img/webfriend.svg"],
+	},
+
+	"ui/js": {
+		_escData["/js/bootstrap.bundle.min.js"],
+		_escData["/js/bootstrap.bundle.min.js.map"],
+		_escData["/js/codemirror"],
+		_escData["/js/codemirror.js"],
+		_escData["/js/d3.min.js"],
+		_escData["/js/jquery.json-browse.js"],
+		_escData["/js/jquery.min.js"],
+		_escData["/js/jquery.simple.websocket.js"],
+		_escData["/js/mrdoob-stats.min.js"],
+		_escData["/js/stapes.min.js"],
+		_escData["/js/webfriend-editor.js"],
+		_escData["/js/webfriend.js"],
+	},
+
+	"ui/js/codemirror": {
+		_escData["/js/codemirror/addons"],
+		_escData["/js/codemirror/hints"],
+		_escData["/js/codemirror/modes"],
+	},
+
+	"ui/js/codemirror/addons": {
+		_escData["/js/codemirror/addons/active-line.js"],
+		_escData["/js/codemirror/addons/closebrackets.js"],
+		_escData["/js/codemirror/addons/matchbrackets.js"],
+		_escData["/js/codemirror/addons/show-hint.js"],
+	},
+
+	"ui/js/codemirror/hints": {
+		_escData["/js/codemirror/hints/friendscript-hint.js"],
+	},
+
+	"ui/js/codemirror/modes": {
+		_escData["/js/codemirror/modes/friendscript.js"],
 	},
 }
