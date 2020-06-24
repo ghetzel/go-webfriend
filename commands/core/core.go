@@ -14,8 +14,14 @@ type Commands struct {
 }
 
 func New(browser *browser.Browser, env utils.Scopeable) *Commands {
-	cmd := &Commands{
-		Commands: core.New(env),
+	var runnable utils.Runnable
+
+	if r, ok := env.(utils.Runnable); ok {
+		runnable = r
+	}
+
+	var cmd = &Commands{
+		Commands: core.New(env, runnable),
 		browser:  browser,
 		exported: make([]string, 0),
 	}

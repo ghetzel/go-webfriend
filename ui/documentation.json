@@ -939,6 +939,35 @@
         }
       },
       {
+        "name": "run",
+        "description": "Evaluates another Friendscript loaded from another file. The filename is the\nabsolute path or basename of the file to search for in the FRIENDSCRIPT_PATH\nenvironment variable to load and evaluate. The FRIENDSCRIPT_PATH variable\nbehaves like the the traditional *nix PATH variable, wherein multiple paths\ncan be specified as a colon-separated (:) list. The directory of the calling\nscript (if available) will always be checked first.\n\nReturns: The value of the variable named by result_key at the end of the\nevaluated script's execution.",
+        "argument": {
+          "name": "filename",
+          "types": "string"
+        },
+        "options": [
+          {
+            "name": "result_key",
+            "types": "string",
+            "description": "Specifies a key in the scope of the evaluate script that will be used as the result value of this command."
+          },
+          {
+            "name": "data",
+            "types": "map",
+            "description": "Provides a set of initial variables to the script."
+          },
+          {
+            "name": "isolated",
+            "types": "bool",
+            "description": "If true, the scope of the running script will not be able to modify data in the parent scope.",
+            "default": true
+          }
+        ],
+        "return": {
+          "types": "any"
+        }
+      },
+      {
         "name": "scroll_to",
         "description": "Scroll the viewport to the location of the first element matched by selector.",
         "argument": {

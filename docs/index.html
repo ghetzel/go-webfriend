@@ -2404,6 +2404,84 @@ emulation will be enabled and configured using the following keys:</p>
                     </tbody>
                 </table>
             </div>
+            <div class="fs-command" id="fs-core::run">
+                <h3>
+                    <a href="#fs-core::run"><b>run</b></a>
+                        <span class="fs-type-text fs-type-string">FILENAME</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>result_key:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>data:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>isolated:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool">true</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Evaluates another Friendscript loaded from another file. The filename is the
+absolute path or basename of the file to search for in the FRIENDSCRIPT_PATH
+environment variable to load and evaluate. The FRIENDSCRIPT_PATH variable
+behaves like the the traditional *nix PATH variable, wherein multiple paths
+can be specified as a colon-separated (:) list. The directory of the calling
+script (if available) will always be checked first.</p>
+<p>Returns: The value of the variable named by result_key at the end of the
+evaluated script’s execution.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>result_key</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specifies a key in the scope of the evaluate script that will be used as the result value of this command.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>data</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Provides a set of initial variables to the script.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>isolated</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>true</pre></td>
+                        <td><p>If true, the scope of the running script will not be able to modify data in the parent scope.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
             <div class="fs-command" id="fs-core::scroll_to">
                 <h3>
                     <a href="#fs-core::scroll_to"><b>scroll_to</b></a>

@@ -8,14 +8,14 @@ require (
 	github.com/docker/docker v1.13.1
 	github.com/docker/go-connections v0.4.0
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/dustin/go-humanize v0.0.0-20180713052910-9f541cc9db5d
+	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.7.0
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.17.0
-	github.com/ghetzel/diecast v1.17.15
-	github.com/ghetzel/friendscript v0.6.6
+	github.com/ghetzel/diecast v1.18.3
+	github.com/ghetzel/friendscript v0.7.2
 	github.com/ghetzel/go-defaults v1.2.0
-	github.com/ghetzel/go-stockutil v1.8.68
+	github.com/ghetzel/go-stockutil v1.8.72
 	github.com/ghetzel/testify v1.4.1
 	github.com/gobwas/glob v0.2.3
 	github.com/gorilla/websocket v1.4.2
@@ -26,7 +26,6 @@ require (
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/urfave/negroni v1.0.1-0.20191011213438-f4316798d5d3
-	golang.org/x/sys v0.0.0-20200121082415-34d275377bf9 // indirect
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
 	k8s.io/api v0.17.0
 	k8s.io/apimachinery v0.17.0
