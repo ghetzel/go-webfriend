@@ -2,8 +2,6 @@
   {
     "display_name": "assert",
     "name": "assert",
-    "summary": "Suite of testing-oriented commands that will trigger errors or failures if they aren't satistifed.",
-    "description": "The Assert module is aimed at making it easier to write scripts that perform test validation,\nas is frequently done during automated acceptance testing of web applications.",
     "commands": [
       {
         "name": "compare",

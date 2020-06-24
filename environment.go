@@ -2,14 +2,14 @@ package webfriend
 
 import (
 	"fmt"
-	"github.com/ghetzel/go-stockutil/typeutil"
 	"time"
+
+	"github.com/ghetzel/go-stockutil/typeutil"
 
 	"github.com/fatih/color"
 	"github.com/ghetzel/friendscript"
 	"github.com/ghetzel/friendscript/scripting"
 	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/commands/assert"
 	"github.com/ghetzel/go-webfriend/commands/cookies"
 	"github.com/ghetzel/go-webfriend/commands/core"
 	"github.com/ghetzel/go-webfriend/commands/file"
@@ -20,7 +20,6 @@ var MaxReaderWait = time.Duration(5) * time.Second
 
 type Environment struct {
 	*friendscript.Environment
-	Assert  *assert.Commands
 	Cookies *cookies.Commands
 	Core    *core.Commands
 	Page    *page.Commands
@@ -43,13 +42,11 @@ func NewEnvironment(browser *browser.Browser) *Environment {
 
 	// add in our custom modules and module overrides
 	environment.Core = core.New(browser, environment)
-	environment.Assert = assert.New(browser, environment)
 	environment.Cookies = cookies.New(browser, environment)
 	environment.Page = page.New(browser, environment)
 	environment.File = file.New(browser, environment)
 
 	environment.RegisterModule(``, environment.Core)
-	environment.RegisterModule(`assert`, environment.Assert)
 	environment.RegisterModule(`cookies`, environment.Cookies)
 	environment.RegisterModule(`page`, environment.Page)
 	environment.RegisterModule(`file`, environment.File)

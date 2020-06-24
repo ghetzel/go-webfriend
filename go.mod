@@ -13,7 +13,7 @@ require (
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.17.0
 	github.com/ghetzel/diecast v1.18.3
-	github.com/ghetzel/friendscript v0.7.2
+	github.com/ghetzel/friendscript v0.7.4
 	github.com/ghetzel/go-defaults v1.2.0
 	github.com/ghetzel/go-stockutil v1.8.72
 	github.com/ghetzel/testify v1.4.1
@@ -31,3 +31,5 @@ require (
 	k8s.io/apimachinery v0.17.0
 	k8s.io/client-go v0.17.0
 )
+
+// replace github.com/ghetzel/friendscript v0.7.3 => ../friendscript
