@@ -314,6 +314,74 @@
         ]
       },
       {
+        "name": "get",
+        "description": "Get a cookie by its name.",
+        "argument": {
+          "name": "name",
+          "types": "string"
+        },
+        "return": {
+          "types": "Cookie",
+          "parameters": [
+            {
+              "name": "name",
+              "types": "string",
+              "description": "The name of the cookie."
+            },
+            {
+              "name": "value",
+              "types": "string",
+              "description": "The cookie's value."
+            },
+            {
+              "name": "domain",
+              "types": "string",
+              "description": "The applicable domain for the cookie."
+            },
+            {
+              "name": "path",
+              "types": "string",
+              "description": "The cookie's path."
+            },
+            {
+              "name": "size",
+              "types": "int",
+              "description": "The size of the cookie."
+            },
+            {
+              "name": "expires",
+              "types": "Time",
+              "description": "The cookie's expiration date."
+            },
+            {
+              "name": "http_only",
+              "types": "bool",
+              "description": "The cookie is flagged as being inaccessible to client-side scripts."
+            },
+            {
+              "name": "secure",
+              "types": "bool",
+              "description": "The cookie is flagged as \"secure\""
+            },
+            {
+              "name": "session",
+              "types": "bool",
+              "description": "This is a session cookie."
+            },
+            {
+              "name": "same_site",
+              "types": "string",
+              "description": "The same site value of the cookie (\"Strict\" or \"Lax\")"
+            },
+            {
+              "name": "url",
+              "types": "string",
+              "description": "The URL the cookie should refer to (when setting)"
+            }
+          ]
+        }
+      },
+      {
         "name": "list",
         "description": "List all cookies, either for the given set of URLs or for the current tab (if omitted).",
         "options": [
@@ -321,10 +389,34 @@
             "name": "urls",
             "types": "[]string",
             "description": "an array of strings representing the URLs to retrieve cookies for.  If omitted, the\nURL of the current browser tab will be used"
+          },
+          {
+            "name": "names",
+            "types": "[]string",
+            "description": "A list of cookie names to include in the output.  If non-empty, only these cookies will appear (if present)."
           }
         ],
         "return": {
           "types": "[]Cookie"
+        }
+      },
+      {
+        "name": "map",
+        "description": "A variant of cookies::list that returns matching cookies as a map of name=value pairs.",
+        "options": [
+          {
+            "name": "urls",
+            "types": "[]string",
+            "description": "an array of strings representing the URLs to retrieve cookies for.  If omitted, the\nURL of the current browser tab will be used"
+          },
+          {
+            "name": "names",
+            "types": "[]string",
+            "description": "A list of cookie names to include in the output.  If non-empty, only these cookies will appear (if present)."
+          }
+        ],
+        "return": {
+          "types": "map"
         }
       },
       {
@@ -1407,6 +1499,11 @@
             "description": "Query string parameters to add to the request."
           },
           {
+            "name": "cookies",
+            "types": "map",
+            "description": "A map of cookie key=value pairs to include in the request."
+          },
+          {
             "name": "timeout",
             "types": "Duration",
             "description": "The amount of time to wait for the request to complete.",
@@ -1468,6 +1565,11 @@
             "name": "params",
             "types": "map",
             "description": "Query string parameters to add to the request."
+          },
+          {
+            "name": "cookies",
+            "types": "map",
+            "description": "A map of cookie key=value pairs to include in the request."
           },
           {
             "name": "timeout",
@@ -1578,6 +1680,11 @@
             "description": "Query string parameters to add to the request."
           },
           {
+            "name": "cookies",
+            "types": "map",
+            "description": "A map of cookie key=value pairs to include in the request."
+          },
+          {
             "name": "timeout",
             "types": "Duration",
             "description": "The amount of time to wait for the request to complete.",
@@ -1684,6 +1791,11 @@
             "name": "params",
             "types": "map",
             "description": "Query string parameters to add to the request."
+          },
+          {
+            "name": "cookies",
+            "types": "map",
+            "description": "A map of cookie key=value pairs to include in the request."
           },
           {
             "name": "timeout",
@@ -1794,6 +1906,11 @@
             "description": "Query string parameters to add to the request."
           },
           {
+            "name": "cookies",
+            "types": "map",
+            "description": "A map of cookie key=value pairs to include in the request."
+          },
+          {
             "name": "timeout",
             "types": "Duration",
             "description": "The amount of time to wait for the request to complete.",
@@ -1902,6 +2019,11 @@
             "description": "Query string parameters to add to the request."
           },
           {
+            "name": "cookies",
+            "types": "map",
+            "description": "A map of cookie key=value pairs to include in the request."
+          },
+          {
             "name": "timeout",
             "types": "Duration",
             "description": "The amount of time to wait for the request to complete.",
@@ -2008,6 +2130,11 @@
             "name": "params",
             "types": "map",
             "description": "Query string parameters to add to the request."
+          },
+          {
+            "name": "cookies",
+            "types": "map",
+            "description": "A map of cookie key=value pairs to include in the request."
           },
           {
             "name": "timeout",

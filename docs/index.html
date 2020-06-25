@@ -790,6 +790,116 @@
                     </tbody>
                 </table>
             </div>
+            <div class="fs-command" id="fs-cookies::get">
+                <h3>
+                    <a href="#fs-cookies::get"><b>cookies::get</b></a>
+                        <span class="fs-type-text fs-type-string">NAME</span>
+                    -> <span class="fs-type-text fs-type-cookie pr-3">cookie</span>
+                </h3>
+                <br />
+                <div><p>Get a cookie by its name.</p>
+</div>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>name</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The name of the cookie.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The cookie’s value.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>domain</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The applicable domain for the cookie.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>path</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The cookie’s path.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>size</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The size of the cookie.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>expires</th>
+                        <td>
+                            <span class="fs-type fs-type-time">time</span>
+                        </td>
+                        <td><p>The cookie’s expiration date.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>http_only</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>The cookie is flagged as being inaccessible to client-side scripts.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>secure</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>The cookie is flagged as “secure”</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>session</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>This is a session cookie.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>same_site</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The same site value of the cookie (“Strict” or “Lax”)</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>url</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The URL the cookie should refer to (when setting)</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
             <div class="fs-command" id="fs-cookies::list">
                 <h3>
                     <a href="#fs-cookies::list"><b>cookies::list</b></a>
@@ -798,6 +908,11 @@
                         <tbody>
                             <tr class="fs-command-opt">
                                 <th>urls:</th>
+                                <td class="fs-type-text fs-type-[]string pr-3">[]string</td>
+                                <td class="fs-type-text fs-type-[]string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>names:</th>
                                 <td class="fs-type-text fs-type-[]string pr-3">[]string</td>
                                 <td class="fs-type-text fs-type-[]string"></td>
                             </tr>
@@ -828,6 +943,72 @@
                         <td><pre>-</pre></td>
                         <td><p>an array of strings representing the URLs to retrieve cookies for.  If omitted, the
 URL of the current browser tab will be used</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>names</th>
+                        <td>
+                            <span class="fs-type fs-type-[]string">[]string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A list of cookie names to include in the output.  If non-empty, only these cookies will appear (if present).</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-cookies::map">
+                <h3>
+                    <a href="#fs-cookies::map"><b>cookies::map</b></a>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>urls:</th>
+                                <td class="fs-type-text fs-type-[]string pr-3">[]string</td>
+                                <td class="fs-type-text fs-type-[]string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>names:</th>
+                                <td class="fs-type-text fs-type-[]string pr-3">[]string</td>
+                                <td class="fs-type-text fs-type-[]string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-map pr-3">map</span>
+                </h3>
+                <br />
+                <div><p>A variant of cookies::list that returns matching cookies as a map of name=value pairs.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>urls</th>
+                        <td>
+                            <span class="fs-type fs-type-[]string">[]string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>an array of strings representing the URLs to retrieve cookies for.  If omitted, the
+URL of the current browser tab will be used</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>names</th>
+                        <td>
+                            <span class="fs-type fs-type-[]string">[]string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A list of cookie names to include in the output.  If non-empty, only these cookies will appear (if present).</p>
 </td>
                     </tr>
                     </tbody>
@@ -3348,6 +3529,11 @@ Exact matches will be replaced up to a certain number of times, or all occurrenc
                                 <td class="fs-type-text fs-type-map"></td>
                             </tr>
                             <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
                                 <th>timeout:</th>
                                 <td class="fs-type-text fs-type-duration pr-3">duration</td>
                                 <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
@@ -3421,6 +3607,15 @@ Exact matches will be replaced up to a certain number of times, or all occurrenc
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
 </td>
                     </tr>
                     <tr>
@@ -3517,6 +3712,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-map"></td>
                             </tr>
                             <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
                                 <th>timeout:</th>
                                 <td class="fs-type-text fs-type-duration pr-3">duration</td>
                                 <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
@@ -3591,6 +3791,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
 </td>
                     </tr>
                     <tr>
@@ -3763,6 +3972,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-map"></td>
                             </tr>
                             <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
                                 <th>timeout:</th>
                                 <td class="fs-type-text fs-type-duration pr-3">duration</td>
                                 <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
@@ -3837,6 +4051,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
 </td>
                     </tr>
                     <tr>
@@ -4009,6 +4232,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-map"></td>
                             </tr>
                             <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
                                 <th>timeout:</th>
                                 <td class="fs-type-text fs-type-duration pr-3">duration</td>
                                 <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
@@ -4083,6 +4311,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
 </td>
                     </tr>
                     <tr>
@@ -4255,6 +4492,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-map"></td>
                             </tr>
                             <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
                                 <th>timeout:</th>
                                 <td class="fs-type-text fs-type-duration pr-3">duration</td>
                                 <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
@@ -4329,6 +4571,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
 </td>
                     </tr>
                     <tr>
@@ -4501,6 +4752,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-map"></td>
                             </tr>
                             <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
                                 <th>timeout:</th>
                                 <td class="fs-type-text fs-type-duration pr-3">duration</td>
                                 <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
@@ -4575,6 +4831,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
 </td>
                     </tr>
                     <tr>
@@ -4747,6 +5012,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-map"></td>
                             </tr>
                             <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
                                 <th>timeout:</th>
                                 <td class="fs-type-text fs-type-duration pr-3">duration</td>
                                 <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
@@ -4821,6 +5091,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
 </td>
                     </tr>
                     <tr>

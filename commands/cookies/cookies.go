@@ -9,6 +9,7 @@ import (
 	"github.com/ghetzel/friendscript/utils"
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-webfriend/browser"
 )
 
@@ -47,6 +48,7 @@ type Cookie struct {
 	URL string `json:"url,omitempty"`
 }
 
+// Returns the cookie serialized the way CDP expects it.
 func (self *Cookie) native() map[string]interface{} {
 	params := make(map[string]interface{})
 
@@ -102,6 +104,9 @@ type ListArgs struct {
 	// an array of strings representing the URLs to retrieve cookies for.  If omitted, the
 	// URL of the current browser tab will be used
 	Urls []string `json:"urls"`
+
+	// A list of cookie names to include in the output.  If non-empty, only these cookies will appear (if present).
+	Names []string `json:"names"`
 }
 
 // List all cookies, either for the given set of URLs or for the current tab (if omitted).
@@ -112,7 +117,7 @@ func (self *Commands) List(args *ListArgs) ([]*Cookie, error) {
 
 	defaults.SetDefaults(args)
 
-	params := make(map[string]interface{})
+	var params = make(map[string]interface{})
 
 	if len(args.Urls) > 0 {
 		params[`urls`] = args.Urls
@@ -135,6 +140,13 @@ func (self *Commands) List(args *ListArgs) ([]*Cookie, error) {
 				Session:  cookie.Bool(`session`),
 			}
 
+			// if we're filtering on cookie name, skip cookies that aren't in the list
+			if len(args.Names) > 0 {
+				if !sliceutil.ContainsString(args.Names, c.Name) {
+					continue
+				}
+			}
+
 			if expiresAt := cookie.Int(`expires`); expiresAt > 0 {
 				expiry := time.Unix(expiresAt, 0)
 				c.Expires = &expiry
@@ -144,6 +156,36 @@ func (self *Commands) List(args *ListArgs) ([]*Cookie, error) {
 		}
 
 		return cookies, nil
+	} else {
+		return nil, err
+	}
+}
+
+// A variant of cookies::list that returns matching cookies as a map of name=value pairs.
+func (self *Commands) Map(args *ListArgs) (map[string]string, error) {
+	var data = make(map[string]string)
+
+	if cookies, err := self.List(args); err == nil {
+		for _, cookie := range cookies {
+			data[cookie.Name] = cookie.Value
+		}
+	} else {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+// Get a cookie by its name.
+func (self *Commands) Get(name string) (*Cookie, error) {
+	if cookies, err := self.List(nil); err == nil {
+		for _, cookie := range cookies {
+			if cookie.Name == name {
+				return cookie, nil
+			}
+		}
+
+		return nil, fmt.Errorf("no such cookie %q", name)
 	} else {
 		return nil, err
 	}
