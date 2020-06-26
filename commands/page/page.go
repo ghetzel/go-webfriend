@@ -3,7 +3,6 @@ package page
 
 import (
 	"github.com/ghetzel/friendscript"
-	"github.com/ghetzel/friendscript/utils"
 	"github.com/ghetzel/go-webfriend/browser"
 )
 
@@ -12,7 +11,7 @@ type Commands struct {
 	browser *browser.Browser
 }
 
-func New(browser *browser.Browser, scopeable utils.Scopeable) *Commands {
+func New(browser *browser.Browser) *Commands {
 	cmd := &Commands{}
 
 	cmd.browser = browser

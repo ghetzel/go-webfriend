@@ -12,8 +12,8 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.17.0
-	github.com/ghetzel/diecast v1.18.3
-	github.com/ghetzel/friendscript v0.7.7
+	github.com/ghetzel/diecast v1.18.4
+	github.com/ghetzel/friendscript v0.8.0
 	github.com/ghetzel/go-defaults v1.2.0
 	github.com/ghetzel/go-stockutil v1.8.72
 	github.com/ghetzel/testify v1.4.1

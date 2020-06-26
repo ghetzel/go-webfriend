@@ -32,7 +32,7 @@ func (self *Commands) Pdf(destination interface{}, args *PdfArgs) error {
 	case string:
 		filename := destination.(string)
 
-		if _, w, ok := self.browser.GetWriterForPath(filename); ok {
+		if _, w, err := self.browser.GetWriterForPath(filename); err == nil {
 			dest = w
 		} else if d, err := os.Create(filename); err == nil {
 			dest = d

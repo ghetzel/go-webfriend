@@ -1219,7 +1219,6 @@
   {
     "display_name": "file",
     "name": "file",
-    "summary": "File IO commands",
     "commands": [
       {
         "name": "write",
@@ -1232,7 +1231,7 @@
           {
             "name": "data",
             "types": "stream",
-            "description": "The data to write as a stream."
+            "description": "The data to write to the destination."
           },
           {
             "name": "value",

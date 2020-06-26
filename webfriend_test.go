@@ -21,12 +21,12 @@ func TestPathHandlers(t *testing.T) {
 	env := NewEnvironment(chrome)
 	sawPath := ``
 
-	chrome.RegisterPathHandler(func(path string) (string, io.Writer, bool) {
+	chrome.RegisterPathWriter(func(path string) (string, io.Writer, error) {
 		if sawPath == `` {
 			sawPath = path
-			return ``, ioutil.Discard, true
+			return ``, ioutil.Discard, nil
 		} else {
-			return ``, nil, false
+			return ``, nil, nil
 		}
 	})
 

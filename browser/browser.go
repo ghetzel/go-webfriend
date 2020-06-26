@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -47,9 +46,6 @@ var rpcGlobalTimeout = (60 * time.Second)
 var rpcConnectTimeout = (60 * time.Second)
 var rpcConnectRetryInterval = (250 * time.Millisecond)
 
-type PathHandlerFunc = func(string) (string, io.Writer, bool)
-type PathReaderFunc = func(string) (io.ReadCloser, bool)
-
 var activeBrowserInstances sync.Map
 var globalSignal = make(chan os.Signal, 1)
 var globalStopping bool
@@ -85,6 +81,7 @@ func StopAllActiveBrowsers() {
 }
 
 type Browser struct {
+	utils.Runtime
 	Command                     argonaut.CommandName   `argonaut:",joiner=[=]"`
 	App                         string                 `argonaut:"app,long"`
 	DisableGPU                  bool                   `argonaut:"disable-gpu,long"`
@@ -121,9 +118,6 @@ type Browser struct {
 	activeTabId                 string
 	tabs                        map[string]*Tab
 	tabLock                     sync.Mutex
-	scopeable                   utils.Scopeable
-	pathWriters                 []PathHandlerFunc
-	pathReaders                 []PathReaderFunc
 	stopped                     bool
 	stopping                    bool
 	connected                   bool
@@ -141,8 +135,6 @@ func NewBrowser() *Browser {
 		StartWait:           DefaultStartWait,
 		exitchan:            make(chan error),
 		tabs:                make(map[string]*Tab),
-		pathWriters:         make([]PathHandlerFunc, 0),
-		pathReaders:         make([]PathReaderFunc, 0),
 	}
 }
 
@@ -151,36 +143,8 @@ func Start() (*Browser, error) {
 	return browser, browser.Launch()
 }
 
-func (self *Browser) RegisterPathHandler(handler PathHandlerFunc) {
-	self.pathWriters = append(self.pathWriters, handler)
-}
-
-func (self *Browser) RegisterPathReader(handler PathReaderFunc) {
-	self.pathReaders = append(self.pathReaders, handler)
-}
-
-func (self *Browser) GetWriterForPath(path string) (string, io.Writer, bool) {
-	for _, handler := range self.pathWriters {
-		if p, w, ok := handler(path); ok {
-			return p, w, true
-		}
-	}
-
-	return ``, nil, false
-}
-
-func (self *Browser) GetReaderForPath(path string) (io.ReadCloser, error) {
-	for _, handler := range self.pathReaders {
-		if r, ok := handler(path); ok {
-			return r, nil
-		}
-	}
-
-	return os.Open(path)
-}
-
-func (self *Browser) SetScope(scopeable utils.Scopeable) {
-	self.scopeable = scopeable
+func (self *Browser) SetScope(fsenv utils.Runtime) {
+	self.Runtime = fsenv
 }
 
 func (self *Browser) Launch() error {

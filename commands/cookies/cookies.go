@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/ghetzel/friendscript"
-	"github.com/ghetzel/friendscript/utils"
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
@@ -91,7 +90,7 @@ type Commands struct {
 	browser *browser.Browser
 }
 
-func New(browser *browser.Browser, scopeable utils.Scopeable) *Commands {
+func New(browser *browser.Browser) *Commands {
 	cmd := &Commands{}
 
 	cmd.browser = browser

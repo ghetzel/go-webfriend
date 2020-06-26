@@ -3,7 +3,6 @@ package core
 
 import (
 	"github.com/ghetzel/friendscript/commands/core"
-	"github.com/ghetzel/friendscript/utils"
 	"github.com/ghetzel/go-webfriend/browser"
 )
 
@@ -13,15 +12,9 @@ type Commands struct {
 	exported []string
 }
 
-func New(browser *browser.Browser, env utils.Scopeable) *Commands {
-	var runnable utils.Runnable
-
-	if r, ok := env.(utils.Runnable); ok {
-		runnable = r
-	}
-
+func New(browser *browser.Browser) *Commands {
 	var cmd = &Commands{
-		Commands: core.New(env, runnable),
+		Commands: core.New(browser),
 		browser:  browser,
 		exported: make([]string, 0),
 	}

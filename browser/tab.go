@@ -916,26 +916,24 @@ func (self *Tab) evaluate(remoteObjectId string, stmt string, exposed []string) 
 }
 
 func (self *Tab) getEvalPrescript(exposed []string) string {
-	if scopeable := self.browser.scopeable; scopeable != nil {
-		if scope := scopeable.Scope(); scope != nil {
-			out := `var webfriend = `
-			jsData := make(map[string]interface{})
+	if scope := self.browser.Scope(); scope != nil {
+		out := `var webfriend = `
+		jsData := make(map[string]interface{})
 
-			maputil.Walk(scope.Data(), func(value interface{}, path []string, isLeaf bool) error {
-				key := strings.Join(path, `.`)
+		maputil.Walk(scope.Data(), func(value interface{}, path []string, isLeaf bool) error {
+			key := strings.Join(path, `.`)
 
-				if sliceutil.ContainsString(exposed, key) {
-					maputil.DeepSet(jsData, path, value)
-					return maputil.SkipDescendants
-				} else {
-					return nil
-				}
-			})
-
-			if data, err := json.Marshal(jsData); err == nil {
-				out += string(data)
-				return out
+			if sliceutil.ContainsString(exposed, key) {
+				maputil.DeepSet(jsData, path, value)
+				return maputil.SkipDescendants
+			} else {
+				return nil
 			}
+		})
+
+		if data, err := json.Marshal(jsData); err == nil {
+			out += string(data)
+			return out
 		}
 	}
 

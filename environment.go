@@ -8,11 +8,11 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/ghetzel/friendscript"
+	"github.com/ghetzel/friendscript/commands/file"
 	"github.com/ghetzel/friendscript/scripting"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/commands/cookies"
 	"github.com/ghetzel/go-webfriend/commands/core"
-	"github.com/ghetzel/go-webfriend/commands/file"
 	"github.com/ghetzel/go-webfriend/commands/page"
 )
 
@@ -41,15 +41,13 @@ func NewEnvironment(browser *browser.Browser) *Environment {
 	}
 
 	// add in our custom modules and module overrides
-	environment.Core = core.New(browser, environment)
-	environment.Cookies = cookies.New(browser, environment)
-	environment.Page = page.New(browser, environment)
-	environment.File = file.New(browser, environment)
+	environment.Core = core.New(browser)
+	environment.Cookies = cookies.New(browser)
+	environment.Page = page.New(browser)
 
 	environment.RegisterModule(``, environment.Core)
 	environment.RegisterModule(`cookies`, environment.Cookies)
 	environment.RegisterModule(`page`, environment.Page)
-	environment.RegisterModule(`file`, environment.File)
 
 	// add our custom REPL commands
 	environment.RegisterCommandHandler(`help`, environment.handleReplHelp)
