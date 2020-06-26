@@ -1257,6 +1257,11 @@
               "name": "size",
               "types": "int",
               "description": "The size of the data (in bytes)."
+            },
+            {
+              "name": "took",
+              "types": "Duration",
+              "description": "The amount of time it took to complete writing the data."
             }
           ]
         }
@@ -1544,6 +1549,11 @@
             "name": "continue_on_error",
             "types": "bool",
             "description": "Whether to continue execution if an error status is encountered."
+          },
+          {
+            "name": "raw_body",
+            "types": "bool",
+            "description": "Specify that absolutely no processing should be done on the response body."
           }
         ]
       },
@@ -1612,6 +1622,11 @@
             "name": "continue_on_error",
             "types": "bool",
             "description": "Whether to continue execution if an error status is encountered."
+          },
+          {
+            "name": "raw_body",
+            "types": "bool",
+            "description": "Specify that absolutely no processing should be done on the response body."
           }
         ],
         "return": {
@@ -1725,6 +1740,11 @@
             "name": "continue_on_error",
             "types": "bool",
             "description": "Whether to continue execution if an error status is encountered."
+          },
+          {
+            "name": "raw_body",
+            "types": "bool",
+            "description": "Specify that absolutely no processing should be done on the response body."
           }
         ],
         "return": {
@@ -1838,6 +1858,11 @@
             "name": "continue_on_error",
             "types": "bool",
             "description": "Whether to continue execution if an error status is encountered."
+          },
+          {
+            "name": "raw_body",
+            "types": "bool",
+            "description": "Specify that absolutely no processing should be done on the response body."
           }
         ],
         "return": {
@@ -1951,6 +1976,11 @@
             "name": "continue_on_error",
             "types": "bool",
             "description": "Whether to continue execution if an error status is encountered."
+          },
+          {
+            "name": "raw_body",
+            "types": "bool",
+            "description": "Specify that absolutely no processing should be done on the response body."
           }
         ],
         "return": {
@@ -2064,6 +2094,11 @@
             "name": "continue_on_error",
             "types": "bool",
             "description": "Whether to continue execution if an error status is encountered."
+          },
+          {
+            "name": "raw_body",
+            "types": "bool",
+            "description": "Specify that absolutely no processing should be done on the response body."
           }
         ],
         "return": {
@@ -2177,6 +2212,11 @@
             "name": "continue_on_error",
             "types": "bool",
             "description": "Whether to continue execution if an error status is encountered."
+          },
+          {
+            "name": "raw_body",
+            "types": "bool",
+            "description": "Specify that absolutely no processing should be done on the response body."
           }
         ],
         "return": {
@@ -2466,6 +2506,34 @@
         },
         "return": {
           "types": "string"
+        }
+      }
+    ]
+  },
+  {
+    "display_name": "parse",
+    "name": "parse",
+    "commands": [
+      {
+        "name": "json",
+        "description": "Parses the given file as a JSON document and returns the resulting value.",
+        "argument": {
+          "name": "fileOrReader",
+          "types": "any"
+        },
+        "return": {
+          "types": "any"
+        }
+      },
+      {
+        "name": "yaml",
+        "description": "Parses the given file as a YAML document and returns the resulting value.",
+        "argument": {
+          "name": "fileOrReader",
+          "types": "any"
+        },
+        "return": {
+          "types": "any"
         }
       }
     ]

@@ -4,8 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/signal"
+	"strings"
+	"time"
 
 	"github.com/ghetzel/cli"
 	"github.com/ghetzel/go-stockutil/executil"
@@ -126,6 +129,11 @@ func main() {
 			Name:  `container-port`,
 			Usage: `Provide additional ports to expose from the container; specified as: --container-port=OUTERPORT:INNERPORT`,
 		},
+		cli.DurationFlag{
+			Name:  `retrieve-timeout`,
+			Usage: `Specifies the timeout for retrieving runnable scripts from remote sources (e.g.: HTTP)`,
+			Value: 30 * time.Second,
+		},
 	}
 
 	var chrome *browser.Browser
@@ -199,13 +207,30 @@ func main() {
 					if e := c.String(`execute`); e != `` {
 						input = bytes.NewBufferString(e)
 					} else if c.NArg() > 0 {
-						var filename = c.Args().First()
+						var scriptpath = c.Args().First()
+						var scheme, _ = stringutil.SplitPair(scriptpath, `:`)
+						scheme = strings.ToLower(scheme)
 
-						switch filename {
+						switch scheme {
 						case `-`:
 							input = os.Stdin
+						case `http`, `https`:
+							http.DefaultClient.Timeout = c.Duration(`retrieve-timeout`)
+
+							if res, err := http.DefaultClient.Get(scriptpath); err == nil {
+								if res.StatusCode < 300 {
+									defer res.Body.Close()
+									input = res.Body
+								} else {
+									wferr = fmt.Errorf("remote error: request failed with HTTP %s", res.Status)
+									break
+								}
+							} else {
+								wferr = fmt.Errorf("remote error: %v", err)
+								break
+							}
 						default:
-							if file, err := os.Open(c.Args().First()); err == nil {
+							if file, err := os.Open(scriptpath); err == nil {
 								log.Debugf("Friendscript being read from file %s", file.Name())
 								input = file
 							} else {

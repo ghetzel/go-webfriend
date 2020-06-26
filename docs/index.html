@@ -60,6 +60,7 @@
                             <a class="nav-link" href="#fmt">fmt</a>
                             <a class="nav-link" href="#http">http</a>
                             <a class="nav-link" href="#page">page</a>
+                            <a class="nav-link" href="#parse">parse</a>
                             <a class="nav-link" href="#utils">utils</a>
                             <a class="nav-link" href="#vars">vars</a>
                         </nav>
@@ -3147,6 +3148,14 @@ filesystem path, a URI that uses a custom scheme registered outside of the appli
                         <td><p>The size of the data (in bytes).</p>
 </td>
                     </tr>
+                    <tr>
+                        <th>took</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><p>The amount of time it took to complete writing the data.</p>
+</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -3571,6 +3580,11 @@ Exact matches will be replaced up to a certain number of times, or all occurrenc
                                 <td class="fs-type-text fs-type-bool pr-3">bool</td>
                                 <td class="fs-type-text fs-type-bool"></td>
                             </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
                         </tbody>
                     </table>
                     }
@@ -3689,6 +3703,15 @@ expected and non-erroneous.</p>
                         <td><p>Whether to continue execution if an error status is encountered.</p>
 </td>
                     </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
+</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -3751,6 +3774,11 @@ expected and non-erroneous.</p>
                             </tr>
                             <tr class="fs-command-opt">
                                 <th>continue_on_error:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
                                 <td class="fs-type-text fs-type-bool pr-3">bool</td>
                                 <td class="fs-type-text fs-type-bool"></td>
                             </tr>
@@ -3871,6 +3899,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
 </td>
                     </tr>
                     </tbody>
@@ -4014,6 +4051,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-bool pr-3">bool</td>
                                 <td class="fs-type-text fs-type-bool"></td>
                             </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
                         </tbody>
                     </table>
                     }
@@ -4131,6 +4173,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
 </td>
                     </tr>
                     </tbody>
@@ -4274,6 +4325,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-bool pr-3">bool</td>
                                 <td class="fs-type-text fs-type-bool"></td>
                             </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
                         </tbody>
                     </table>
                     }
@@ -4391,6 +4447,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
 </td>
                     </tr>
                     </tbody>
@@ -4534,6 +4599,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-bool pr-3">bool</td>
                                 <td class="fs-type-text fs-type-bool"></td>
                             </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
                         </tbody>
                     </table>
                     }
@@ -4651,6 +4721,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
 </td>
                     </tr>
                     </tbody>
@@ -4794,6 +4873,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-bool pr-3">bool</td>
                                 <td class="fs-type-text fs-type-bool"></td>
                             </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
                         </tbody>
                     </table>
                     }
@@ -4911,6 +4995,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
 </td>
                     </tr>
                     </tbody>
@@ -5054,6 +5147,11 @@ expected and non-erroneous.</p>
                                 <td class="fs-type-text fs-type-bool pr-3">bool</td>
                                 <td class="fs-type-text fs-type-bool"></td>
                             </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
                         </tbody>
                     </table>
                     }
@@ -5171,6 +5269,15 @@ expected and non-erroneous.</p>
                         </td>
                         <td><pre>-</pre></td>
                         <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
 </td>
                     </tr>
                     </tbody>
@@ -5825,6 +5932,31 @@ screenshot is written.</p>
                 </h3>
                 <br />
                 <div><p>Return the text content for the given element, or for the whole page.</p>
+</div>
+            </div>
+        </div>
+    </div>
+    <div class="fs-module" data-fs-module="parse" id="fs-parse">
+        <h2><a href="#fs-parse">Parse Module</a></h2>
+        <div class="fs-module-commands">
+            <div class="fs-command" id="fs-parse::json">
+                <h3>
+                    <a href="#fs-parse::json"><b>parse::json</b></a>
+                        <span class="fs-type-text fs-type-any">FILEORREADER</span>
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Parses the given file as a JSON document and returns the resulting value.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-parse::yaml">
+                <h3>
+                    <a href="#fs-parse::yaml"><b>parse::yaml</b></a>
+                        <span class="fs-type-text fs-type-any">FILEORREADER</span>
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Parses the given file as a YAML document and returns the resulting value.</p>
 </div>
             </div>
         </div>

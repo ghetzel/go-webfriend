@@ -3,6 +3,7 @@
 PKGS           := $(shell go list ./... 2> /dev/null | grep -v '/vendor')
 LOCALS         := $(shell find . -type f -name '*.go' -not -path "./vendor*/*")
 WEBFRIEND_BIN  ?= webfriend-$(shell go env GOOS)-$(shell go env GOARCH)
+BIN_VERSION     = $(shell ./bin/$(WEBFRIEND_BIN) --version | cut -d' ' -f3)
 CGO_ENABLED    ?= 0
 
 .EXPORT_ALL_VARIABLES:
@@ -36,3 +37,11 @@ $(WEBFRIEND_BIN):
 	which webfriend && cp -v bin/$(WEBFRIEND_BIN) `which webfriend` || true
 
 build: $(WEBFRIEND_BIN)
+
+docker:
+	docker build -t ghetzel/webfriend:$(BIN_VERSION) .
+
+docker-push:
+	docker tag ghetzel/webfriend:$(BIN_VERSION) ghetzel/webfriend:latest
+	docker push ghetzel/webfriend:$(BIN_VERSION)
+	docker push ghetzel/webfriend:latest
