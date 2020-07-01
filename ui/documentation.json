@@ -45,7 +45,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "equal",
@@ -71,7 +81,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "false",
@@ -79,7 +99,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "gt",
@@ -123,7 +153,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "is_boolean",
@@ -131,7 +171,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "is_duration",
@@ -139,7 +189,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "is_numeric",
@@ -147,7 +207,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "is_object",
@@ -155,7 +225,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "is_scalar",
@@ -163,7 +243,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "is_string",
@@ -171,7 +261,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "is_time",
@@ -179,7 +279,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "lt",
@@ -259,7 +369,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "null",
@@ -267,7 +387,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       },
       {
         "name": "true",
@@ -275,7 +405,17 @@
         "argument": {
           "name": "value",
           "types": "any"
-        }
+        },
+        "options": [
+          {
+            "name": "message",
+            "types": "string"
+          },
+          {
+            "name": "snippet",
+            "types": "string"
+          }
+        ]
       }
     ]
   },
@@ -2534,6 +2674,98 @@
         },
         "return": {
           "types": "any"
+        }
+      }
+    ]
+  },
+  {
+    "display_name": "url",
+    "name": "url",
+    "commands": [
+      {
+        "name": "encode_query",
+        "description": "Take a map or previous URL response structure and encode the values into a string\nthat can be used in another URL or form post data.  This command does not automaticlly\nprepend a \"?\" character to the output.",
+        "argument": {
+          "name": "querymap",
+          "types": "any"
+        },
+        "return": {
+          "types": "string"
+        }
+      },
+      {
+        "name": "escape",
+        "description": "Escapes the string so it can be safely placed inside a URL path segment, replacing special characters (including /) with %XX sequences as needed.",
+        "argument": {
+          "name": "stringOrStruct",
+          "types": "any"
+        },
+        "return": {
+          "types": "string"
+        }
+      },
+      {
+        "name": "parse",
+        "description": "Parse the given URL string or structure, and return a structured representation of the various parts of a URL.",
+        "argument": {
+          "name": "u",
+          "types": "any"
+        },
+        "return": {
+          "types": "URL",
+          "parameters": [
+            {
+              "name": "scheme",
+              "types": "string"
+            },
+            {
+              "name": "host",
+              "types": "string"
+            },
+            {
+              "name": "domain",
+              "types": "string"
+            },
+            {
+              "name": "port",
+              "types": "int"
+            },
+            {
+              "name": "path",
+              "types": "string"
+            },
+            {
+              "name": "raw_query",
+              "types": "string"
+            },
+            {
+              "name": "fragment",
+              "types": "string"
+            },
+            {
+              "name": "query",
+              "types": "map"
+            },
+            {
+              "name": "full",
+              "types": "string"
+            },
+            {
+              "name": "url",
+              "types": "URL"
+            }
+          ]
+        }
+      },
+      {
+        "name": "parse_query",
+        "description": "Take a URL or map of query string key=value pairs and return a map of values.",
+        "argument": {
+          "name": "urlOrQueryString",
+          "types": "any"
+        },
+        "return": {
+          "types": "map"
         }
       }
     ]

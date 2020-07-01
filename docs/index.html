@@ -61,6 +61,7 @@
                             <a class="nav-link" href="#http">http</a>
                             <a class="nav-link" href="#page">page</a>
                             <a class="nav-link" href="#parse">parse</a>
+                            <a class="nav-link" href="#url">url</a>
                             <a class="nav-link" href="#utils">utils</a>
                             <a class="nav-link" href="#vars">vars</a>
                         </nav>
@@ -206,10 +207,55 @@
                 <h3>
                     <a href="#fs-assert::empty"><b>assert::empty</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value not empty.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::equal">
                 <h3>
@@ -269,19 +315,109 @@
                 <h3>
                     <a href="#fs-assert::exists"><b>assert::exists</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is null or zero-length.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::false">
                 <h3>
                     <a href="#fs-assert::false"><b>assert::false</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not false.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::gt">
                 <h3>
@@ -395,73 +531,433 @@
                 <h3>
                     <a href="#fs-assert::is_array"><b>assert::is_array</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not an array.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::is_boolean">
                 <h3>
                     <a href="#fs-assert::is_boolean"><b>assert::is_boolean</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not a boolean value.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::is_duration">
                 <h3>
                     <a href="#fs-assert::is_duration"><b>assert::is_duration</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not parsable as a duration.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::is_numeric">
                 <h3>
                     <a href="#fs-assert::is_numeric"><b>assert::is_numeric</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not a numeric value.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::is_object">
                 <h3>
                     <a href="#fs-assert::is_object"><b>assert::is_object</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not an object.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::is_scalar">
                 <h3>
                     <a href="#fs-assert::is_scalar"><b>assert::is_scalar</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not a scalar value.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::is_string">
                 <h3>
                     <a href="#fs-assert::is_string"><b>assert::is_string</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not a string.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::is_time">
                 <h3>
                     <a href="#fs-assert::is_time"><b>assert::is_time</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not parsable as a time.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::lt">
                 <h3>
@@ -683,28 +1179,163 @@
                 <h3>
                     <a href="#fs-assert::not_null"><b>assert::not_null</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is null.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::null">
                 <h3>
                     <a href="#fs-assert::null"><b>assert::null</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not null.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
             <div class="fs-command" id="fs-assert::true">
                 <h3>
                     <a href="#fs-assert::true"><b>assert::true</b></a>
                         <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
                 </h3>
                 <br />
                 <div><p>Return an error if the given value is not true.</p>
 </div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -5957,6 +6588,135 @@ screenshot is written.</p>
                 </h3>
                 <br />
                 <div><p>Parses the given file as a YAML document and returns the resulting value.</p>
+</div>
+            </div>
+        </div>
+    </div>
+    <div class="fs-module" data-fs-module="url" id="fs-url">
+        <h2><a href="#fs-url">Url Module</a></h2>
+        <div class="fs-module-commands">
+            <div class="fs-command" id="fs-url::encode_query">
+                <h3>
+                    <a href="#fs-url::encode_query"><b>url::encode_query</b></a>
+                        <span class="fs-type-text fs-type-any">QUERYMAP</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Take a map or previous URL response structure and encode the values into a string
+that can be used in another URL or form post data.  This command does not automaticlly
+prepend a “?” character to the output.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-url::escape">
+                <h3>
+                    <a href="#fs-url::escape"><b>url::escape</b></a>
+                        <span class="fs-type-text fs-type-any">STRINGORSTRUCT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Escapes the string so it can be safely placed inside a URL path segment, replacing special characters (including /) with %XX sequences as needed.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-url::parse">
+                <h3>
+                    <a href="#fs-url::parse"><b>url::parse</b></a>
+                        <span class="fs-type-text fs-type-any">U</span>
+                    -> <span class="fs-type-text fs-type-url pr-3">url</span>
+                </h3>
+                <br />
+                <div><p>Parse the given URL string or structure, and return a structured representation of the various parts of a URL.</p>
+</div>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>scheme</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>host</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>domain</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>port</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>path</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>raw_query</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>fragment</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>query</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>full</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>url</th>
+                        <td>
+                            <span class="fs-type fs-type-url">url</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-url::parse_query">
+                <h3>
+                    <a href="#fs-url::parse_query"><b>url::parse_query</b></a>
+                        <span class="fs-type-text fs-type-any">URLORQUERYSTRING</span>
+                    -> <span class="fs-type-text fs-type-map pr-3">map</span>
+                </h3>
+                <br />
+                <div><p>Take a URL or map of query string key=value pairs and return a map of values.</p>
 </div>
             </div>
         </div>
