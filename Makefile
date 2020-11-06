@@ -26,7 +26,7 @@ test: fmt deps
 	go test $(PKGS)
 
 autodoc:
-	go build -i -o bin/webfriend-autodoc cmd/webfriend-autodoc/*.go
+	go build -o bin/webfriend-autodoc cmd/webfriend-autodoc/*.go
 	go generate -x ./...
 
 docs: fmt

@@ -12,10 +12,10 @@ require (
 	github.com/fatih/color v1.7.0
 	github.com/ghetzel/argonaut v0.0.0-20180428155514-51604c68ce30
 	github.com/ghetzel/cli v1.17.0
-	github.com/ghetzel/diecast v1.18.4
-	github.com/ghetzel/friendscript v0.8.3
+	github.com/ghetzel/diecast v1.19.4
+	github.com/ghetzel/friendscript v0.8.4
 	github.com/ghetzel/go-defaults v1.2.0
-	github.com/ghetzel/go-stockutil v1.8.72
+	github.com/ghetzel/go-stockutil v1.8.82
 	github.com/ghetzel/testify v1.4.1
 	github.com/gobwas/glob v0.2.3
 	github.com/gorilla/websocket v1.4.2
@@ -27,9 +27,9 @@ require (
 	github.com/phayes/freeport v0.0.0-20180830031419-95f893ade6f2
 	github.com/urfave/negroni v1.0.1-0.20191011213438-f4316798d5d3
 	golang.org/x/time v0.0.0-20200416051211-89c76fbcd5d1 // indirect
-	k8s.io/api v0.17.0
-	k8s.io/apimachinery v0.17.0
-	k8s.io/client-go v0.17.0
+	k8s.io/api v0.19.0
+	k8s.io/apimachinery v0.19.0
+	k8s.io/client-go v0.19.0
 )
 
 // replace github.com/ghetzel/friendscript v0.8.0 => ../friendscript
