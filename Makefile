@@ -1,7 +1,7 @@
 .PHONY: build ui docs
 
 LOCALS         := $(shell find . -type f -name '*.go' -not -path "./vendor*/*")
-WEBFRIEND_BIN  ?= webfriend-$(shell go env GOOS)-$(shell go env GOARCH)
+WEBFRIEND_BIN   = webfriend-$(shell go env GOOS)-$(shell go env GOARCH)
 BIN_VERSION     = $(shell ./bin/$(WEBFRIEND_BIN) --version | cut -d' ' -f3)
 CGO_ENABLED    ?= 0
 
@@ -33,6 +33,7 @@ docs: fmt
 
 $(WEBFRIEND_BIN):
 	go build -tags nocgo --ldflags '-extldflags "-static"' -ldflags '-s' -o bin/$(WEBFRIEND_BIN) cmd/webfriend/*.go
+	GOARCH=amd64 go build -tags nocgo --ldflags '-extldflags "-static"' -ldflags '-s' -o bin/webfriend-$(shell go env GOOS)-amd64 cmd/webfriend/*.go
 	which webfriend && cp -v bin/$(WEBFRIEND_BIN) `which webfriend` || true
 
 build: $(WEBFRIEND_BIN)

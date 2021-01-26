@@ -617,6 +617,11 @@ URL of the current browser tab will be used</p>
                                 <td class="fs-type-text fs-type-duration pr-3">duration</td>
                                 <td class="fs-type-text fs-type-duration">&#34;20ms&#34;</td>
                             </tr>
+                            <tr class="fs-command-opt">
+                                <th>match_text:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
                         </tbody>
                     </table>
                     }
@@ -664,6 +669,15 @@ Otherwise, an error is returned unless selector matches exactly one element.</p>
                         </td>
                         <td><pre>&#34;20ms&#34;</pre></td>
                         <td><p>If Multiple clicks are permitted, what is the delay between each click.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>match_text</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>If provided, this represents a regular expression that the text value of matching elements must match to be clicked.</p>
 </td>
                     </tr>
                     </tbody>
@@ -2037,9 +2051,9 @@ TimeoutError will be returned.</p>
 page element.  The input text contains raw unicode characters that will be typed
 literally, as well as key names (in accordance with the DOM pre-defined keynames
 described at <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values)" rel="nofollow">https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values)</a>.
-These sequences appear between curly braces “{” “}”.</p>
+These sequences appear between square brackets “[” “]”.</p>
 <p>Example: Type in the Konami code</p>
-<p>type “{ArrowUp}{ArrowUp}{ArrowDown}{ArrowDown}{ArrowLeft}{ArrowRight}{ArrowLeft}{ArrowRight}BA”</p>
+<p>type “[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA”</p>
 </div>
                 <h4>Parameters</h4>
                 <table class="table table-sm">
