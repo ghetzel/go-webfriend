@@ -750,7 +750,7 @@
       },
       {
         "name": "type",
-        "description": "Input the given textual data as keyboard input into the currently focused\npage element.",
+        "description": "Input the given textual data as keyboard input into the currently focused\npage element.  The input text contains raw unicode characters that will be typed\nliterally, as well as key names (in accordance with the DOM pre-defined keynames\ndescribed at https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values).\nThese sequences appear between curly braces \"{\" \"}\".\n\nExample: Type in the Konami code\n\n type \"{ArrowUp}{ArrowUp}{ArrowDown}{ArrowDown}{ArrowLeft}{ArrowRight}{ArrowLeft}{ArrowRight}BA\"",
         "argument": {
           "name": "input",
           "types": "any"

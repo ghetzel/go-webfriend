@@ -560,6 +560,13 @@ func (self *Tab) registerInternalEvents() {
 			}
 		}
 	})
+
+	// TODO: do something about dialogs, but for now, we're going to auto-cancel them.
+	self.RegisterEventHandler(`Page.javascriptDialogOpening`, func(event *Event) {
+		self.RPC(`Page`, `handleJavaScriptDialog`, map[string]interface{}{
+			`accept`: false,
+		})
+	})
 }
 
 func (self *Tab) AddNetworkIntercept(urlPattern string, waitForHeaders bool, fn NetworkInterceptFunc) error {
