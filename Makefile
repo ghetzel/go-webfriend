@@ -1,6 +1,5 @@
 .PHONY: build ui docs
 
-PKGS           := $(shell go list ./... 2> /dev/null | grep -v '/vendor')
 LOCALS         := $(shell find . -type f -name '*.go' -not -path "./vendor*/*")
 WEBFRIEND_BIN  ?= webfriend-$(shell go env GOOS)-$(shell go env GOARCH)
 BIN_VERSION     = $(shell ./bin/$(WEBFRIEND_BIN) --version | cut -d' ' -f3)
@@ -23,7 +22,7 @@ deps:
 	go get ./...
 
 test: fmt deps
-	go test $(PKGS)
+	go test ./...
 
 autodoc:
 	go build -o bin/webfriend-autodoc cmd/webfriend-autodoc/*.go
