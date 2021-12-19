@@ -193,6 +193,8 @@ type Tab struct {
 	castlock             sync.Mutex
 	mostRecentInfo       *PageInfo
 	netIntercepts        sync.Map
+	castSinks            []*maputil.Map
+	castLastError        string
 }
 
 func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
@@ -251,6 +253,16 @@ func (self *Tab) Navigate(url string) (*RpcMessage, error) {
 	}
 
 	return result, err
+}
+
+func (self *Tab) CastSinks() []map[string]interface{} {
+	var sinks = make([]map[string]interface{}, 0)
+
+	for _, sink := range self.castSinks {
+		sinks = append(sinks, sink.MapNative())
+	}
+
+	return sinks
 }
 
 func (self *Tab) StartScreencast(quality int, width int, height int) error {
@@ -566,6 +578,31 @@ func (self *Tab) registerInternalEvents() {
 		self.RPC(`Page`, `handleJavaScriptDialog`, map[string]interface{}{
 			`accept`: false,
 		})
+	})
+
+	// update a local list of sinks whenever they are updated
+	self.RegisterEventHandler(`Cast.sinksUpdated`, func(event *Event) {
+		log.Dump(event)
+		self.castSinks = make([]*maputil.Map, 0)
+
+		if sinks := event.Params.Slice(`sinks`); len(sinks) > 0 {
+			log.Debugf("[cast] devices updated: ")
+
+			for _, sink := range typeutil.Slice(self.castSinks) {
+				var m = maputil.M(sink.Value)
+				self.castSinks = append(self.castSinks, m)
+				log.Debugf("[cast]   <%v> %s (%v)", m.String(`id`), m.String(`name`), m.String(`session`, `ready`))
+			}
+		}
+	})
+
+	// update last error message from the Cast domain
+	self.RegisterEventHandler(`Cast.issueUpdated`, func(event *Event) {
+		self.castLastError = event.Params.String(`issueMessage`)
+
+		if m := self.castLastError; m != `` {
+			log.Warningf("[cast] error: %s", m)
+		}
 	})
 }
 

@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -98,29 +99,33 @@ func (self *KubernetesContainer) Start() error {
 	// 	resources.Limits[v1.ResourceMemory] = self.memory
 	// }
 
-	if pod, err := self.podapi().Create(&v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      self.Name,
-			Namespace: self.Namespace,
-			Labels:    self.Labels,
-		},
-		Spec: v1.PodSpec{
-			RestartPolicy: v1.RestartPolicyNever,
-			Hostname:      self.Hostname,
-			Containers: []v1.Container{
-				{
-					Name:            KubeContainerInstanceName,
-					Image:           self.ImageName,
-					ImagePullPolicy: v1.PullAlways,
-					Command:         self.Cmd,
-					WorkingDir:      self.WorkingDir,
-					Ports:           self.containerPorts(),
-					Env:             self.envVars(),
-					Resources:       resources,
+	if pod, err := self.podapi().Create(
+		context.Background(),
+		&v1.Pod{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      self.Name,
+				Namespace: self.Namespace,
+				Labels:    self.Labels,
+			},
+			Spec: v1.PodSpec{
+				RestartPolicy: v1.RestartPolicyNever,
+				Hostname:      self.Hostname,
+				Containers: []v1.Container{
+					{
+						Name:            KubeContainerInstanceName,
+						Image:           self.ImageName,
+						ImagePullPolicy: v1.PullAlways,
+						Command:         self.Cmd,
+						WorkingDir:      self.WorkingDir,
+						Ports:           self.containerPorts(),
+						Env:             self.envVars(),
+						Resources:       resources,
+					},
 				},
 			},
 		},
-	}); err == nil {
+		metav1.CreateOptions{},
+	); err == nil {
 		self.pod = pod
 		self.id = pod.Name
 		self.stopped = false
@@ -194,6 +199,7 @@ func (self *KubernetesContainer) IsRunning() bool {
 	}
 
 	if p, err := self.podapi().Get(
+		context.Background(),
 		self.pod.Name,
 		metav1.GetOptions{},
 	); err == nil {
@@ -240,7 +246,7 @@ func (self *KubernetesContainer) Stop() error {
 		self.pod = nil
 		self.stopped = true
 
-		return self.podapi().Delete(podname, &metav1.DeleteOptions{})
+		return self.podapi().Delete(context.Background(), podname, metav1.DeleteOptions{})
 	} else {
 		return nil
 	}
