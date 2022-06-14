@@ -158,8 +158,8 @@ func main() {
 			switch rt := c.String(`container-engine`); rt {
 			case `docker`:
 				chrome.Container = browser.NewDockerContainer(``)
-			case `kubernetes`:
-				chrome.Container = browser.NewKubernetesContainer()
+			// case `kubernetes`:
+			// 	chrome.Container = browser.NewKubernetesContainer()
 			default:
 				log.Fatalf("invalid container engine %q", rt)
 				return

@@ -12,7 +12,7 @@ header:
 
 mounts:
   - mount: /api/documentation
-    to: ../ui/documentation.json
+    to: ../server/ui/documentation.json
 
 start:
   - command: 'bash -c "curl -o index.html $DIECAST_ADDRESS/"'

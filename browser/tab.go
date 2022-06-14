@@ -445,6 +445,11 @@ func (self *Tab) registerInternalEvents() {
 		}
 	})
 
+	// ruh roh
+	self.RegisterEventHandler(`Inspector.detached`, func(event *Event) {
+		self.browser.stopWithError(event.Error)
+	})
+
 	self.RegisterEventHandler(netTrackingEvents, func(event *Event) {
 		requestId := event.P().String(`requestId`)
 

@@ -11,8 +11,6 @@ GO111MODULE  = on
 all: fmt deps autodoc build docs
 
 fmt:
-	@go list github.com/mjibson/esc || go get github.com/mjibson/esc/...
-	@go list golang.org/x/tools/cmd/goimports || go get golang.org/x/tools/cmd/goimports
 	gofmt -w $(LOCALS)
 	go vet ./...
 	go mod tidy

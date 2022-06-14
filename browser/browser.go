@@ -122,6 +122,7 @@ type Browser struct {
 	stopping                    bool
 	connected                   bool
 	dockerClient                *docker.Client
+	lastConnectAddress          string
 }
 
 func NewBrowser() *Browser {

@@ -95,6 +95,1248 @@
     <div class="fs-module" data-fs-module="assert" id="fs-assert">
         <h2><a href="#fs-assert">Assert Module</a></h2>
         <div class="fs-module-commands">
+            <div class="fs-command" id="fs-assert::compare">
+                <h3>
+                    <a href="#fs-assert::compare"><b>assert::compare</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not equal to the other value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::contains">
+                <h3>
+                    <a href="#fs-assert::contains"><b>assert::contains</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value does not contain another value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::empty">
+                <h3>
+                    <a href="#fs-assert::empty"><b>assert::empty</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value not empty.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::equal">
+                <h3>
+                    <a href="#fs-assert::equal"><b>assert::equal</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not equal to the other value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::exists">
+                <h3>
+                    <a href="#fs-assert::exists"><b>assert::exists</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is null or zero-length.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::false">
+                <h3>
+                    <a href="#fs-assert::false"><b>assert::false</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not false.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::gt">
+                <h3>
+                    <a href="#fs-assert::gt"><b>assert::gt</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not numerically greater than the second value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::gte">
+                <h3>
+                    <a href="#fs-assert::gte"><b>assert::gte</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not numerically greater than or equal to the second value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::is_array">
+                <h3>
+                    <a href="#fs-assert::is_array"><b>assert::is_array</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not an array.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::is_boolean">
+                <h3>
+                    <a href="#fs-assert::is_boolean"><b>assert::is_boolean</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not a boolean value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::is_duration">
+                <h3>
+                    <a href="#fs-assert::is_duration"><b>assert::is_duration</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not parsable as a duration.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::is_numeric">
+                <h3>
+                    <a href="#fs-assert::is_numeric"><b>assert::is_numeric</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not a numeric value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::is_object">
+                <h3>
+                    <a href="#fs-assert::is_object"><b>assert::is_object</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not an object.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::is_scalar">
+                <h3>
+                    <a href="#fs-assert::is_scalar"><b>assert::is_scalar</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not a scalar value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::is_string">
+                <h3>
+                    <a href="#fs-assert::is_string"><b>assert::is_string</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not a string.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::is_time">
+                <h3>
+                    <a href="#fs-assert::is_time"><b>assert::is_time</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not parsable as a time.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::lt">
+                <h3>
+                    <a href="#fs-assert::lt"><b>assert::lt</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not numerically less than the second value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::lte">
+                <h3>
+                    <a href="#fs-assert::lte"><b>assert::lte</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not numerically less than or equal to the second value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::not_contains">
+                <h3>
+                    <a href="#fs-assert::not_contains"><b>assert::not_contains</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value contains another value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::not_equal">
+                <h3>
+                    <a href="#fs-assert::not_equal"><b>assert::not_equal</b></a>
+                        <span class="fs-type-text fs-type-any">HAVE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>test:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is equal to the other value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>test</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::not_null">
+                <h3>
+                    <a href="#fs-assert::not_null"><b>assert::not_null</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is null.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::null">
+                <h3>
+                    <a href="#fs-assert::null"><b>assert::null</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not null.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-assert::true">
+                <h3>
+                    <a href="#fs-assert::true"><b>assert::true</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>snippet:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Return an error if the given value is not true.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>snippet</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div class="fs-module" data-fs-module="cookies" id="fs-cookies">
@@ -879,6 +2121,104 @@ environment setup.</p>
                     </tbody>
                 </table>
             </div>
+            <div class="fs-command" id="fs-core::env">
+                <h3>
+                    <a href="#fs-core::env"><b>env</b></a>
+                        <span class="fs-type-text fs-type-string">NAME</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>fallback:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>required:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool">false</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>detect_type:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool">true</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>joiner:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Retrieves a system environment variable and returns the value of it, or a
+fallback value if the variable does not exist or (optionally) is empty.</p>
+<h4>Examples</h4>
+<h5>Get the value of the <code>USER</code> environment variable and store it</h5>
+<pre><code>env &#39;USER&#39; -&gt; $user
+</code></pre>
+<h5>Require the <code>LANG</code>, <code>USER</code>, and <code>CI</code> environment variables; and fail they are not set.</h5>
+<pre><code>env &#39;LANG&#39; { required: true }
+env &#39;USER&#39; { required: true }
+env &#39;CI&#39;   { required: true }
+</code></pre>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>fallback</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The value to return if the environment variable does not exist, or
+(optionally) is empty.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>required</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>false</pre></td>
+                        <td><p>Whether empty values should be ignored or not.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>detect_type</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>true</pre></td>
+                        <td><p>Whether automatic type detection should be performed or not.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>joiner</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>If specified, this string will be used to split matching values into a
+list of values. This is useful for environment variables that contain
+multiple values joined by a separator (e.g: the PATH variable.)</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
             <div class="fs-command" id="fs-core::exit">
                 <h3>
                     <a href="#fs-core::exit"><b>exit</b></a>
@@ -894,6 +2234,15 @@ environment setup.</p>
                 </h3>
                 <br />
                 <div><p>Specify a variable that should be exported to external Javascripts.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-core::fail">
+                <h3>
+                    <a href="#fs-core::fail"><b>fail</b></a>
+                        <span class="fs-type-text fs-type-string">MESSAGE</span>
+                </h3>
+                <br />
+                <div><p>Immediately exit the script in an error-like fashion with a specific message.</p>
 </div>
             </div>
             <div class="fs-command" id="fs-core::field">
@@ -1549,6 +2898,15 @@ end -&gt; $result
 </code></pre>
 </div>
             </div>
+            <div class="fs-command" id="fs-core::log">
+                <h3>
+                    <a href="#fs-core::log"><b>log</b></a>
+                        <span class="fs-type-text fs-type-any">MESSAGE</span>
+                </h3>
+                <br />
+                <div><p>Outputs a line to the log.</p>
+</div>
+            </div>
             <div class="fs-command" id="fs-core::netrc">
                 <h3>
                     <a href="#fs-core::netrc"><b>netrc</b></a>
@@ -1657,6 +3015,17 @@ end -&gt; $result
                     </tr>
                     </tbody>
                 </table>
+            </div>
+            <div class="fs-command" id="fs-core::put">
+                <h3>
+                    <a href="#fs-core::put"><b>put</b></a>
+                        <span class="fs-type-text fs-type-any">VALUE</span>
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Store a value in the current scope. Strings will be automatically converted
+into the appropriate data types (float, int, bool) if possible.</p>
+</div>
             </div>
             <div class="fs-command" id="fs-core::reload">
                 <h3>
@@ -1852,6 +3221,84 @@ emulation will be enabled and configured using the following keys:</p>
                             <span class="fs-type fs-type-int">int</span>
                         </td>
                         <td><p>The final height of the page after resize.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-core::run">
+                <h3>
+                    <a href="#fs-core::run"><b>run</b></a>
+                        <span class="fs-type-text fs-type-string">FILENAME</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>result_key:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>data:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>isolated:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool">true</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Evaluates another Friendscript loaded from another file. The filename is the
+absolute path or basename of the file to search for in the FRIENDSCRIPT_PATH
+environment variable to load and evaluate. The FRIENDSCRIPT_PATH variable
+behaves like the the traditional *nix PATH variable, wherein multiple paths
+can be specified as a colon-separated (:) list. The directory of the calling
+script (if available) will always be checked first.</p>
+<p>Returns: The value of the variable named by result_key at the end of the
+evaluated script’s execution.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>result_key</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specifies a key in the scope of the evaluate script that will be used as the result value of this command.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>data</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Provides a set of initial variables to the script.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>isolated</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>true</pre></td>
+                        <td><p>If true, the scope of the running script will not be able to modify data in the parent scope.</p>
 </td>
                     </tr>
                     </tbody>
@@ -2155,6 +3602,15 @@ These sequences appear between square brackets “[” “]”.</p>
                 <div><p>Specify a variable that should be unexported.</p>
 </div>
             </div>
+            <div class="fs-command" id="fs-core::wait">
+                <h3>
+                    <a href="#fs-core::wait"><b>wait</b></a>
+                        <span class="fs-type-text fs-type-any">DELAY</span>
+                </h3>
+                <br />
+                <div><p>Pauses execution of the current script for the given duration.</p>
+</div>
+            </div>
             <div class="fs-command" id="fs-core::wait_for">
                 <h3>
                     <a href="#fs-core::wait_for"><b>wait_for</b></a>
@@ -2244,16 +3700,2315 @@ optional Timeout duration.</p>
     <div class="fs-module" data-fs-module="file" id="fs-file">
         <h2><a href="#fs-file">File Module</a></h2>
         <div class="fs-module-commands">
+            <div class="fs-command" id="fs-file::write">
+                <h3>
+                    <a href="#fs-file::write"><b>file::write</b></a>
+                        <span class="fs-type-text fs-type-any">DESTINATION</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>data:</th>
+                                <td class="fs-type-text fs-type-stream pr-3">stream</td>
+                                <td class="fs-type-text fs-type-stream"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>autoclose:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool">true</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                </h3>
+                <br />
+                <div><p>Write a value or a stream of data to a file at the given path.  The destination path can be a local
+filesystem path, a URI that uses a custom scheme registered outside of the application, or the string
+“temporary”, which will write to a temporary file whose path will be returned in the response.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>data</th>
+                        <td>
+                            <span class="fs-type fs-type-stream">stream</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The data to write to the destination.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The data to write as a discrete value.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>autoclose</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>true</pre></td>
+                        <td><p>Whether to attempt to close the destination (if possible) after reading/writing.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>path</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The filesystem path that the data was written to.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>size</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The size of the data (in bytes).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>took</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><p>The amount of time it took to complete writing the data.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div class="fs-module" data-fs-module="fmt" id="fs-fmt">
         <h2><a href="#fs-fmt">Format Module</a></h2>
         <div class="fs-module-commands">
+            <div class="fs-command" id="fs-fmt::autotype">
+                <h3>
+                    <a href="#fs-fmt::autotype"><b>fmt::autotype</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Takes an input value and returns that value as the most appropriate data type based on its contents.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::camelize">
+                <h3>
+                    <a href="#fs-fmt::camelize"><b>fmt::camelize</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Return the given string converted to camelCase.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::codepoints">
+                <h3>
+                    <a href="#fs-fmt::codepoints"><b>fmt::codepoints</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-[]int pr-3">[]int</span>
+                </h3>
+                <br />
+                <div><p>Return an array of Unicode codepoints for each character in the given string.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::format">
+                <h3>
+                    <a href="#fs-fmt::format"><b>fmt::format</b></a>
+                        <span class="fs-type-text fs-type-string">PATTERN</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>data:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Format the given string according to the given pattern and values.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>data</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-fmt::join">
+                <h3>
+                    <a href="#fs-fmt::join"><b>fmt::join</b></a>
+                        <span class="fs-type-text fs-type-any">INPUTS</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>joiner:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;,&#34;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Join an array of inputs into a single string, with each item separated by a given joiner string.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>joiner</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;,&#34;</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-fmt::lcp">
+                <h3>
+                    <a href="#fs-fmt::lcp"><b>fmt::lcp</b></a>
+                        <span class="fs-type-text fs-type-any">INPUTS</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Returns the longest common prefix among an array of input strings.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::lower">
+                <h3>
+                    <a href="#fs-fmt::lower"><b>fmt::lower</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Return the given string converted to lowercase.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::pascalize">
+                <h3>
+                    <a href="#fs-fmt::pascalize"><b>fmt::pascalize</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Return the given string converted to PascalCase.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::replace">
+                <h3>
+                    <a href="#fs-fmt::replace"><b>fmt::replace</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>find:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>replace:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>count:</th>
+                                <td class="fs-type-text fs-type-int pr-3">int</td>
+                                <td class="fs-type-text fs-type-int">-1</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Replaces values in an input string (exact matches or regular expressions) with a replacement value.
+Exact matches will be replaced up to a certain number of times, or all occurrences of count is -1 (default).</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>find</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>replace</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>count</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><pre>-1</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-fmt::split">
+                <h3>
+                    <a href="#fs-fmt::split"><b>fmt::split</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>on:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;,&#34;</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-[]string pr-3">[]string</span>
+                </h3>
+                <br />
+                <div><p>Split a given string by a given delimiter.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>on</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;,&#34;</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-fmt::strip">
+                <h3>
+                    <a href="#fs-fmt::strip"><b>fmt::strip</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Strip leading and trailing whitespace from the given string.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::title">
+                <h3>
+                    <a href="#fs-fmt::title"><b>fmt::title</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Return the given string converted to Title Case.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::trim">
+                <h3>
+                    <a href="#fs-fmt::trim"><b>fmt::trim</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>prefix:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>suffix:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Remove a leading and/org trailing string value from the given string.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>prefix</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>suffix</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-fmt::underscore">
+                <h3>
+                    <a href="#fs-fmt::underscore"><b>fmt::underscore</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Return the given string converted to underscore_case.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-fmt::upper">
+                <h3>
+                    <a href="#fs-fmt::upper"><b>fmt::upper</b></a>
+                        <span class="fs-type-text fs-type-any">INPUT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Return the given string converted to UPPERCASE.</p>
+</div>
+            </div>
         </div>
     </div>
     <div class="fs-module" data-fs-module="http" id="fs-http">
         <h2><a href="#fs-http">Http Module</a></h2>
         <div class="fs-module-commands">
+            <div class="fs-command" id="fs-http::defaults">
+                <h3>
+                    <a href="#fs-http::defaults"><b>http::defaults</b></a>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>headers:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>params:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>timeout:</th>
+                                <td class="fs-type-text fs-type-duration pr-3">duration</td>
+                                <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>body:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>request_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;json&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>response_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>disable_verify_ssl:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>certificate_bundle:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>statuses:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;200-299&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>continue_on_error:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Set default options that apply to all subsequent HTTP requests.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The headers to send with the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>params</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>timeout</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><pre>&#34;30s&#34;</pre></td>
+                        <td><p>The amount of time to wait for the request to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The body of the request. This is processed according to what is specified in RequestType.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>request_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;json&#34;</pre></td>
+                        <td><p>The type of data in Body, specifying how it should be encoded.  Valid values are “raw”, “form”, and “json”</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>response_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify how the response body should be decoded.  Can be “raw”, or a MIME type that overrides the Content-Type response header.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>disable_verify_ssl</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to disable TLS peer verification.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>certificate_bundle</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The path to the root TLS CA bundle to use for verifying peer certificates.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>statuses</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;200-299&#34;</pre></td>
+                        <td><p>A comma-separated list of numbers (e.g.: 200) or inclusive number ranges (e.g. 200-399) specifying HTTP statuses that are
+expected and non-erroneous.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>continue_on_error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-http::delete">
+                <h3>
+                    <a href="#fs-http::delete"><b>http::delete</b></a>
+                        <span class="fs-type-text fs-type-string">URL</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>headers:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>params:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>timeout:</th>
+                                <td class="fs-type-text fs-type-duration pr-3">duration</td>
+                                <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>body:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>request_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;json&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>response_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>disable_verify_ssl:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>certificate_bundle:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>statuses:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;200-299&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>continue_on_error:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                </h3>
+                <br />
+                <div><p>Perform an HTTP DELETE request.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The headers to send with the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>params</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>timeout</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><pre>&#34;30s&#34;</pre></td>
+                        <td><p>The amount of time to wait for the request to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The body of the request. This is processed according to what is specified in RequestType.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>request_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;json&#34;</pre></td>
+                        <td><p>The type of data in Body, specifying how it should be encoded.  Valid values are “raw”, “form”, and “json”</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>response_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify how the response body should be decoded.  Can be “raw”, or a MIME type that overrides the Content-Type response header.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>disable_verify_ssl</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to disable TLS peer verification.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>certificate_bundle</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The path to the root TLS CA bundle to use for verifying peer certificates.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>statuses</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;200-299&#34;</pre></td>
+                        <td><p>A comma-separated list of numbers (e.g.: 200) or inclusive number ranges (e.g. 200-399) specifying HTTP statuses that are
+expected and non-erroneous.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>continue_on_error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>status</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The numeric HTTP status code of the response.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>status_text</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>A textual description of the HTTP response code.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>took</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The time (in millisecond) that the request took to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><p>Response headers sent back from the server.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>content_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The MIME type of the response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>length</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The length of the response body in bytes.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><p>The decoded response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>If the response status is considered an error, and errors aren’t fatal, this will be true.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-http::get">
+                <h3>
+                    <a href="#fs-http::get"><b>http::get</b></a>
+                        <span class="fs-type-text fs-type-string">URL</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>headers:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>params:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>timeout:</th>
+                                <td class="fs-type-text fs-type-duration pr-3">duration</td>
+                                <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>body:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>request_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;json&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>response_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>disable_verify_ssl:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>certificate_bundle:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>statuses:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;200-299&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>continue_on_error:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                </h3>
+                <br />
+                <div><p>Perform an HTTP GET request.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The headers to send with the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>params</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>timeout</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><pre>&#34;30s&#34;</pre></td>
+                        <td><p>The amount of time to wait for the request to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The body of the request. This is processed according to what is specified in RequestType.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>request_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;json&#34;</pre></td>
+                        <td><p>The type of data in Body, specifying how it should be encoded.  Valid values are “raw”, “form”, and “json”</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>response_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify how the response body should be decoded.  Can be “raw”, or a MIME type that overrides the Content-Type response header.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>disable_verify_ssl</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to disable TLS peer verification.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>certificate_bundle</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The path to the root TLS CA bundle to use for verifying peer certificates.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>statuses</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;200-299&#34;</pre></td>
+                        <td><p>A comma-separated list of numbers (e.g.: 200) or inclusive number ranges (e.g. 200-399) specifying HTTP statuses that are
+expected and non-erroneous.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>continue_on_error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>status</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The numeric HTTP status code of the response.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>status_text</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>A textual description of the HTTP response code.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>took</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The time (in millisecond) that the request took to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><p>Response headers sent back from the server.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>content_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The MIME type of the response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>length</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The length of the response body in bytes.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><p>The decoded response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>If the response status is considered an error, and errors aren’t fatal, this will be true.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-http::head">
+                <h3>
+                    <a href="#fs-http::head"><b>http::head</b></a>
+                        <span class="fs-type-text fs-type-string">URL</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>headers:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>params:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>timeout:</th>
+                                <td class="fs-type-text fs-type-duration pr-3">duration</td>
+                                <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>body:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>request_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;json&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>response_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>disable_verify_ssl:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>certificate_bundle:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>statuses:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;200-299&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>continue_on_error:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                </h3>
+                <br />
+                <div><p>Perform an HTTP HEAD request.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The headers to send with the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>params</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>timeout</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><pre>&#34;30s&#34;</pre></td>
+                        <td><p>The amount of time to wait for the request to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The body of the request. This is processed according to what is specified in RequestType.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>request_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;json&#34;</pre></td>
+                        <td><p>The type of data in Body, specifying how it should be encoded.  Valid values are “raw”, “form”, and “json”</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>response_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify how the response body should be decoded.  Can be “raw”, or a MIME type that overrides the Content-Type response header.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>disable_verify_ssl</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to disable TLS peer verification.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>certificate_bundle</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The path to the root TLS CA bundle to use for verifying peer certificates.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>statuses</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;200-299&#34;</pre></td>
+                        <td><p>A comma-separated list of numbers (e.g.: 200) or inclusive number ranges (e.g. 200-399) specifying HTTP statuses that are
+expected and non-erroneous.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>continue_on_error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>status</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The numeric HTTP status code of the response.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>status_text</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>A textual description of the HTTP response code.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>took</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The time (in millisecond) that the request took to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><p>Response headers sent back from the server.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>content_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The MIME type of the response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>length</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The length of the response body in bytes.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><p>The decoded response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>If the response status is considered an error, and errors aren’t fatal, this will be true.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-http::options">
+                <h3>
+                    <a href="#fs-http::options"><b>http::options</b></a>
+                        <span class="fs-type-text fs-type-string">URL</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>headers:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>params:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>timeout:</th>
+                                <td class="fs-type-text fs-type-duration pr-3">duration</td>
+                                <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>body:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>request_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;json&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>response_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>disable_verify_ssl:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>certificate_bundle:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>statuses:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;200-299&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>continue_on_error:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                </h3>
+                <br />
+                <div><p>Perform an HTTP OPTIONS request.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The headers to send with the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>params</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>timeout</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><pre>&#34;30s&#34;</pre></td>
+                        <td><p>The amount of time to wait for the request to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The body of the request. This is processed according to what is specified in RequestType.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>request_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;json&#34;</pre></td>
+                        <td><p>The type of data in Body, specifying how it should be encoded.  Valid values are “raw”, “form”, and “json”</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>response_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify how the response body should be decoded.  Can be “raw”, or a MIME type that overrides the Content-Type response header.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>disable_verify_ssl</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to disable TLS peer verification.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>certificate_bundle</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The path to the root TLS CA bundle to use for verifying peer certificates.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>statuses</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;200-299&#34;</pre></td>
+                        <td><p>A comma-separated list of numbers (e.g.: 200) or inclusive number ranges (e.g. 200-399) specifying HTTP statuses that are
+expected and non-erroneous.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>continue_on_error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>status</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The numeric HTTP status code of the response.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>status_text</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>A textual description of the HTTP response code.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>took</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The time (in millisecond) that the request took to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><p>Response headers sent back from the server.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>content_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The MIME type of the response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>length</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The length of the response body in bytes.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><p>The decoded response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>If the response status is considered an error, and errors aren’t fatal, this will be true.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-http::post">
+                <h3>
+                    <a href="#fs-http::post"><b>http::post</b></a>
+                        <span class="fs-type-text fs-type-string">URL</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>headers:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>params:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>timeout:</th>
+                                <td class="fs-type-text fs-type-duration pr-3">duration</td>
+                                <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>body:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>request_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;json&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>response_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>disable_verify_ssl:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>certificate_bundle:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>statuses:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;200-299&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>continue_on_error:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                </h3>
+                <br />
+                <div><p>Perform an HTTP POST request.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The headers to send with the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>params</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>timeout</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><pre>&#34;30s&#34;</pre></td>
+                        <td><p>The amount of time to wait for the request to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The body of the request. This is processed according to what is specified in RequestType.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>request_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;json&#34;</pre></td>
+                        <td><p>The type of data in Body, specifying how it should be encoded.  Valid values are “raw”, “form”, and “json”</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>response_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify how the response body should be decoded.  Can be “raw”, or a MIME type that overrides the Content-Type response header.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>disable_verify_ssl</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to disable TLS peer verification.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>certificate_bundle</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The path to the root TLS CA bundle to use for verifying peer certificates.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>statuses</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;200-299&#34;</pre></td>
+                        <td><p>A comma-separated list of numbers (e.g.: 200) or inclusive number ranges (e.g. 200-399) specifying HTTP statuses that are
+expected and non-erroneous.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>continue_on_error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>status</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The numeric HTTP status code of the response.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>status_text</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>A textual description of the HTTP response code.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>took</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The time (in millisecond) that the request took to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><p>Response headers sent back from the server.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>content_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The MIME type of the response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>length</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The length of the response body in bytes.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><p>The decoded response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>If the response status is considered an error, and errors aren’t fatal, this will be true.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-http::put">
+                <h3>
+                    <a href="#fs-http::put"><b>http::put</b></a>
+                        <span class="fs-type-text fs-type-string">URL</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>headers:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>params:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>cookies:</th>
+                                <td class="fs-type-text fs-type-map pr-3">map</td>
+                                <td class="fs-type-text fs-type-map"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>timeout:</th>
+                                <td class="fs-type-text fs-type-duration pr-3">duration</td>
+                                <td class="fs-type-text fs-type-duration">&#34;30s&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>body:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>request_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;json&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>response_type:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>disable_verify_ssl:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>certificate_bundle:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>statuses:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string">&#34;200-299&#34;</td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>continue_on_error:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>raw_body:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-object pr-3">object</span>
+                </h3>
+                <br />
+                <div><p>Perform an HTTP PUT request.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The headers to send with the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>params</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Query string parameters to add to the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>cookies</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>A map of cookie key=value pairs to include in the request.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>timeout</th>
+                        <td>
+                            <span class="fs-type fs-type-duration">duration</span>
+                        </td>
+                        <td><pre>&#34;30s&#34;</pre></td>
+                        <td><p>The amount of time to wait for the request to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The body of the request. This is processed according to what is specified in RequestType.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>request_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;json&#34;</pre></td>
+                        <td><p>The type of data in Body, specifying how it should be encoded.  Valid values are “raw”, “form”, and “json”</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>response_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify how the response body should be decoded.  Can be “raw”, or a MIME type that overrides the Content-Type response header.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>disable_verify_ssl</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to disable TLS peer verification.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>certificate_bundle</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>The path to the root TLS CA bundle to use for verifying peer certificates.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>statuses</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>&#34;200-299&#34;</pre></td>
+                        <td><p>A comma-separated list of numbers (e.g.: 200) or inclusive number ranges (e.g. 200-399) specifying HTTP statuses that are
+expected and non-erroneous.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>continue_on_error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Whether to continue execution if an error status is encountered.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>raw_body</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td><p>Specify that absolutely no processing should be done on the response body.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>status</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The numeric HTTP status code of the response.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>status_text</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>A textual description of the HTTP response code.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>took</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The time (in millisecond) that the request took to complete.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>headers</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td><p>Response headers sent back from the server.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>content_type</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><p>The MIME type of the response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>length</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td><p>The length of the response body in bytes.</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>body</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><p>The decoded response body (if any).</p>
+</td>
+                    </tr>
+                    <tr>
+                        <th>error</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><p>If the response status is considered an error, and errors aren’t fatal, this will be true.</p>
+</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <div class="fs-module" data-fs-module="page" id="fs-page">
@@ -2834,11 +6589,155 @@ screenshot is written.</p>
     <div class="fs-module" data-fs-module="parse" id="fs-parse">
         <h2><a href="#fs-parse">Parse Module</a></h2>
         <div class="fs-module-commands">
+            <div class="fs-command" id="fs-parse::json">
+                <h3>
+                    <a href="#fs-parse::json"><b>parse::json</b></a>
+                        <span class="fs-type-text fs-type-any">FILEORREADER</span>
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Parses the given file as a JSON document and returns the resulting value.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-parse::yaml">
+                <h3>
+                    <a href="#fs-parse::yaml"><b>parse::yaml</b></a>
+                        <span class="fs-type-text fs-type-any">FILEORREADER</span>
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Parses the given file as a YAML document and returns the resulting value.</p>
+</div>
+            </div>
         </div>
     </div>
     <div class="fs-module" data-fs-module="url" id="fs-url">
         <h2><a href="#fs-url">Url Module</a></h2>
         <div class="fs-module-commands">
+            <div class="fs-command" id="fs-url::encode_query">
+                <h3>
+                    <a href="#fs-url::encode_query"><b>url::encode_query</b></a>
+                        <span class="fs-type-text fs-type-any">QUERYMAP</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Take a map or previous URL response structure and encode the values into a string
+that can be used in another URL or form post data.  This command does not automaticlly
+prepend a “?” character to the output.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-url::escape">
+                <h3>
+                    <a href="#fs-url::escape"><b>url::escape</b></a>
+                        <span class="fs-type-text fs-type-any">STRINGORSTRUCT</span>
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Escapes the string so it can be safely placed inside a URL path segment, replacing special characters (including /) with %XX sequences as needed.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-url::parse">
+                <h3>
+                    <a href="#fs-url::parse"><b>url::parse</b></a>
+                        <span class="fs-type-text fs-type-any">U</span>
+                    -> <span class="fs-type-text fs-type-url pr-3">url</span>
+                </h3>
+                <br />
+                <div><p>Parse the given URL string or structure, and return a structured representation of the various parts of a URL.</p>
+</div>
+                <h4>Return Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>scheme</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>host</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>domain</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>port</th>
+                        <td>
+                            <span class="fs-type fs-type-int">int</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>path</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>raw_query</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>fragment</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>query</th>
+                        <td>
+                            <span class="fs-type fs-type-map">map</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>full</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>url</th>
+                        <td>
+                            <span class="fs-type fs-type-url">url</span>
+                        </td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-url::parse_query">
+                <h3>
+                    <a href="#fs-url::parse_query"><b>url::parse_query</b></a>
+                        <span class="fs-type-text fs-type-any">URLORQUERYSTRING</span>
+                    -> <span class="fs-type-text fs-type-map pr-3">map</span>
+                </h3>
+                <br />
+                <div><p>Take a URL or map of query string key=value pairs and return a map of values.</p>
+</div>
+            </div>
         </div>
     </div>
     <div class="fs-module" data-fs-module="utils" id="fs-utils">
@@ -2849,6 +6748,259 @@ screenshot is written.</p>
     <div class="fs-module" data-fs-module="vars" id="fs-vars">
         <h2><a href="#fs-vars">Vars Module</a></h2>
         <div class="fs-module-commands">
+            <div class="fs-command" id="fs-vars::clear">
+                <h3>
+                    <a href="#fs-vars::clear"><b>vars::clear</b></a>
+                        <span class="fs-type-text fs-type-string">KEY</span>
+                </h3>
+                <br />
+                <div><p>Unset the value at the given key.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-vars::ensure">
+                <h3>
+                    <a href="#fs-vars::ensure"><b>vars::ensure</b></a>
+                        <span class="fs-type-text fs-type-string">KEY</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>message:</th>
+                                <td class="fs-type-text fs-type-string pr-3">string</td>
+                                <td class="fs-type-text fs-type-string"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Emit an error if the given key does not exist, optionally with a user-specified message.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>message</th>
+                        <td>
+                            <span class="fs-type fs-type-string">string</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-vars::get">
+                <h3>
+                    <a href="#fs-vars::get"><b>vars::get</b></a>
+                        <span class="fs-type-text fs-type-string">KEY</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>fallback:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Return the value of a specific variable defined in a scope.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>fallback</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-vars::interpolate">
+                <h3>
+                    <a href="#fs-vars::interpolate"><b>vars::interpolate</b></a>
+                        <span class="fs-type-text fs-type-string">FORMAT</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>values:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-string pr-3">string</span>
+                </h3>
+                <br />
+                <div><p>Return a value interpolated with values from a scope or ones that are explicitly provided.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>values</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-vars::keys">
+                <h3>
+                    <a href="#fs-vars::keys"><b>vars::keys</b></a>
+                    -> <span class="fs-type-text fs-type-[]string pr-3">[]string</span>
+                </h3>
+                <br />
+                <div><p>Return a sorted list of all variable names in the current scope.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-vars::pop">
+                <h3>
+                    <a href="#fs-vars::pop"><b>vars::pop</b></a>
+                        <span class="fs-type-text fs-type-string">KEY</span>
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Take the last value from the array at key.  If key is an array, the last value of
+that array will be returned and the remainder will be left at key.  Empty arrays will
+return nil and be unset.  Non-array values will be returned and the key will be unset.</p>
+</div>
+            </div>
+            <div class="fs-command" id="fs-vars::push">
+                <h3>
+                    <a href="#fs-vars::push"><b>vars::push</b></a>
+                        <span class="fs-type-text fs-type-string">KEY</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                </h3>
+                <br />
+                <div><p>Push the given value onto the array at the specified key, creating the array if not
+present, and converting the existing value into an array already set to non-array value.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="fs-command" id="fs-vars::set">
+                <h3>
+                    <a href="#fs-vars::set"><b>vars::set</b></a>
+                        <span class="fs-type-text fs-type-string">KEY</span>
+                    {<br />
+                    <table class="fs-command-options">
+                        <tbody>
+                            <tr class="fs-command-opt">
+                                <th>value:</th>
+                                <td class="fs-type-text fs-type-any pr-3">any</td>
+                                <td class="fs-type-text fs-type-any"></td>
+                            </tr>
+                            <tr class="fs-command-opt">
+                                <th>interpolate:</th>
+                                <td class="fs-type-text fs-type-bool pr-3">bool</td>
+                                <td class="fs-type-text fs-type-bool">true</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    }
+                    -> <span class="fs-type-text fs-type-any pr-3">any</span>
+                </h3>
+                <br />
+                <div><p>Set the named variable to the given value, optionally interpolating variables from the current
+scope into the variable.</p>
+</div>
+                <h4>Parameters</h4>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Data Type</th>
+                            <th>Default Value</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <th>value</th>
+                        <td>
+                            <span class="fs-type fs-type-any">any</span>
+                        </td>
+                        <td><pre>-</pre></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <th>interpolate</th>
+                        <td>
+                            <span class="fs-type fs-type-bool">bool</span>
+                        </td>
+                        <td><pre>true</pre></td>
+                        <td></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

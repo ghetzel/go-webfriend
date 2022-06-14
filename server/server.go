@@ -1,6 +1,7 @@
 package server
 
 import (
+	"embed"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -17,6 +18,11 @@ import (
 	"github.com/husobee/vestigo"
 	"github.com/urfave/negroni"
 )
+
+//go:embed ui/*
+//go:embed ui/_*
+//go:embed ui/**
+var embedded embed.FS
 
 type ClientSessionType int
 
@@ -220,7 +226,7 @@ func (self *Server) setupServer(address string) error {
 	ui.BindingPrefix = fmt.Sprintf("http://%s", address)
 
 	if uidir := os.Getenv(`UI`); uidir == `` {
-		ui.SetFileSystem(FS(false))
+		ui.SetFileSystem(http.FS(embedded))
 	} else {
 		ui.RootPath = uidir
 		log.Debugf("[ui] Static asset path is: %v", ui.RootPath)
@@ -256,7 +262,7 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 	})
 
 	router.Get(`/api/documentation`, func(w http.ResponseWriter, req *http.Request) {
-		if gen, err := FS(false).Open(`/documentation.json`); err == nil {
+		if gen, err := embedded.Open(`/documentation.json`); err == nil {
 			var docs []webfriend.ModuleDoc
 
 			if err := json.NewDecoder(gen).Decode(&docs); err == nil {

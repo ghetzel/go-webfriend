@@ -26,6 +26,7 @@ func (self *Browser) connectRPC(address string) error {
 			return fmt.Errorf("Browser process stopped before RPC connection could be established")
 		} else if version, err := self.devtools.Version(self.ctx()); err == nil {
 			self.connected = true
+			self.lastConnectAddress = address
 			log.Debugf("Connected to %v; protocol %v", version.Browser, version.Protocol)
 			break
 		} else {

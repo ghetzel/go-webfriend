@@ -15,7 +15,7 @@ all: $(UIFILES)
 $(UIFILES):
 	@echo "Copy $(@)"
 	@test -d "src/$(dir $(@))" || mkdir -p "src/$(dir $(@))"
-	@cp ../ui/$(subst assets/,,$(@)) src/$(@)
+	@cp ../server/ui/$(subst assets/,,$(@)) src/$(@)
 
 src/assets/img:
 	cd src/assets/img && make

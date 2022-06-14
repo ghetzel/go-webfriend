@@ -2,14 +2,14 @@ package webfriend
 
 import (
 	"fmt"
+	"os"
 	"time"
-
-	"github.com/ghetzel/go-stockutil/typeutil"
 
 	"github.com/fatih/color"
 	"github.com/ghetzel/friendscript"
 	"github.com/ghetzel/friendscript/commands/file"
 	"github.com/ghetzel/friendscript/scripting"
+	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/commands/cookies"
 	"github.com/ghetzel/go-webfriend/commands/core"
@@ -29,21 +29,26 @@ type Environment struct {
 	stack   []*scripting.Scope
 }
 
-func NewEnvironment(browser *browser.Browser) *Environment {
+func NewEnvironment(b *browser.Browser) *Environment {
 	environment := &Environment{
 		Environment: friendscript.NewEnvironment(),
-		browser:     browser,
+		browser:     b,
 		stack:       make([]*scripting.Scope, 0),
 	}
 
-	if environment.browser != nil {
-		environment.browser.SetScope(environment)
+	if b := environment.browser; b != nil {
+		b.SetScope(environment)
+
+		b.Tab().RegisterEventHandler(`Inspector.detached`, func(event *browser.Event) {
+			b.Stop()
+			os.Exit(0)
+		})
 	}
 
 	// add in our custom modules and module overrides
-	environment.Core = core.New(browser)
-	environment.Cookies = cookies.New(browser)
-	environment.Page = page.New(browser)
+	environment.Core = core.New(b)
+	environment.Cookies = cookies.New(b)
+	environment.Page = page.New(b)
 
 	environment.RegisterModule(``, environment.Core)
 	environment.RegisterModule(`cookies`, environment.Cookies)
