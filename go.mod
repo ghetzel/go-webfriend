@@ -1,7 +1,9 @@
 module github.com/ghetzel/go-webfriend
 
+go 1.18
+
 require (
-	github.com/docker/docker v20.10.17+incompatible
+	github.com/docker/docker v20.10.18+incompatible
 	github.com/docker/go-connections v0.4.0
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.13.0
@@ -13,7 +15,7 @@ require (
 	github.com/ghetzel/go-stockutil v1.10.12
 	github.com/ghetzel/testify v1.4.1
 	github.com/gobwas/glob v0.2.3
-	github.com/gorilla/websocket v1.4.2
+	github.com/gorilla/websocket v1.5.0
 	github.com/husobee/vestigo v1.1.1
 	github.com/jdxcode/netrc v0.0.0-20210204082910-926c7f70242a
 	github.com/mafredri/cdp v0.33.0
@@ -23,7 +25,7 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.65.0 // indirect
+	cloud.google.com/go v0.54.0 // indirect
 	github.com/Microsoft/go-winio v0.5.2 // indirect
 	github.com/PuerkitoBio/goquery v1.5.0 // indirect
 	github.com/alecthomas/chroma v0.7.3 // indirect
@@ -38,7 +40,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dlclark/regexp2 v1.2.0 // indirect
 	github.com/docker/distribution v2.8.1+incompatible // indirect
-	github.com/docker/go-units v0.4.0 // indirect
+	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
@@ -83,7 +85,7 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.16 // indirect
 	github.com/miekg/dns v1.1.48 // indirect
 	github.com/mitchellh/mapstructure v1.4.3 // indirect
-	github.com/moby/term v0.0.0-20210619224110-3f7ff695adc6 // indirect
+	github.com/moby/term v0.0.0-20220808134915-39b0c02b01ae // indirect
 	github.com/montanaflynn/stats v0.6.3 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/oliveagle/jsonpath v0.0.0-20180606110733-2e52cf6e6852 // indirect
@@ -91,13 +93,14 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.0.2 // indirect
 	github.com/opentracing/opentracing-go v1.1.0 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/sftp v1.13.4 // indirect
 	github.com/pkg/term v0.0.0-20180730021639-bffc007b7fd5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/signalsciences/tlstext v1.2.0 // indirect
-	github.com/sirupsen/logrus v1.7.0 // indirect
+	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/sj14/astral v0.1.1 // indirect
 	github.com/spaolacci/murmur3 v0.0.0-20170819071325-9f5d223c6079 // indirect
 	github.com/tg123/go-htpasswd v0.0.0-20190305225429-d38e564730bf // indirect
@@ -107,27 +110,20 @@ require (
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	go.uber.org/atomic v1.6.0 // indirect
 	golang.org/x/crypto v0.0.0-20220331220935-ae2d96664a29 // indirect
+	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b // indirect
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
+	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
-	google.golang.org/appengine v1.6.7 // indirect
+	golang.org/x/tools v0.1.10 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	google.golang.org/appengine v1.6.5 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/neurosnap/sentences.v1 v1.0.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gotest.tools/v3 v3.2.0 // indirect
+	gotest.tools/v3 v3.3.0 // indirect
 	k8s.io/apimachinery v0.24.1 // indirect
+	k8s.io/client-go v11.0.0+incompatible // indirect
 	sigs.k8s.io/json v0.0.0-20211208200746-9f7c6b3444d2 // indirect
 )
-
-require (
-	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
-	golang.org/x/sys v0.0.0-20220403205710-6acee93ad0eb // indirect
-	golang.org/x/tools v0.1.10 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
-	k8s.io/client-go v11.0.0+incompatible // indirect
-)
-
-go 1.18
