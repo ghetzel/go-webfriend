@@ -99,9 +99,6 @@ require (
 	github.com/pkg/sftp v1.13.4 // indirect
 	github.com/pkg/term v0.0.0-20180730021639-bffc007b7fd5 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/pointlander/compress v1.1.1-0.20190518213731-ff44bd196cc3 // indirect
-	github.com/pointlander/jetset v1.0.1-0.20190518214125-eee7eff80bd4 // indirect
-	github.com/pointlander/peg v1.0.1 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/signalsciences/tlstext v1.3.0 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
