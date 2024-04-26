@@ -141,7 +141,7 @@ var Webfriend = Stapes.subclass({
             this.command('javascript', [
                 'return document.elementFromPoint(' + relX.toString() + ',' + relY.toString() +');'
             ], null, false, 'inspect').done(function(reply){
-                console.log(reply)
+                // console.log(reply)
             }.bind(this));
         }.bind(this));
 
@@ -536,8 +536,6 @@ var Webfriend = Stapes.subclass({
                 if (reply.event) {
                     this.processRemoteEvent(reply.event, reply.params);
                 } else if (this.deferredReply) {
-                    console.log('REPLY', reply)
-
                     if (reply.success) {
                         this.deferredReply.resolve(reply);
                     } else {

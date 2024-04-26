@@ -35,12 +35,13 @@ type ClickArgs struct {
 //
 // ##### Click on all `<a>` elements on the page, waiting 150ms between each click.
 // ```
-// click "a" {
-//   multiple: true,
-//   delay:    "150ms",
-// }
-// ```
 //
+//	click "a" {
+//	  multiple: true,
+//	  delay:    "150ms",
+//	}
+//
+// ```
 func (self *Commands) Click(selector dom.Selector, args *ClickArgs) ([]*dom.Element, error) {
 	if args == nil {
 		args = &ClickArgs{}

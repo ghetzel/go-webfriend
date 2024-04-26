@@ -36,6 +36,7 @@ body {
     height: calc(100vh - 74px);
     display: flex;
     align-content: stretch;
+    overflow: hidden;
 }
 
 #arena {
@@ -286,6 +287,8 @@ body {
 #editor .logger .logger-logs {
     flex: 1;
     font-family: monospace;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 #editor .logger .logger-logs > div {

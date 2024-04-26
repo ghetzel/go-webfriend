@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/ghetzel/cli"
-	"github.com/ghetzel/go-stockutil/executil"
 	"github.com/ghetzel/go-stockutil/log"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
@@ -83,52 +82,6 @@ func main() {
 			Name:  `execute, e`,
 			Usage: `Execute the given argument as a Friendscript in the connected session, then exit.`,
 		},
-		cli.StringFlag{
-			Name:   `container, C`,
-			Usage:  `If provided, Webfriend will launch and monitor a Chrome session inside of this Docker container.`,
-			EnvVar: `WEBFRIEND_CONTAINER`,
-		},
-		cli.StringFlag{
-			Name:   `container-command`,
-			Usage:  `Overrides the command given to the container. Note: this will affect the efficacy of other command line flags that are used when generating the command to run.`,
-			EnvVar: `WEBFRIEND_CONTAINER_CMD`,
-		},
-		cli.StringFlag{
-			Name:   `container-engine, X`,
-			Usage:  `Specifies the container runtime to utilize: docker, kubernetes`,
-			Value:  browser.DefaultContainerRuntime,
-			EnvVar: `WEBFRIEND_CONTAINER_ENGINE`,
-		},
-		cli.StringFlag{
-			Name:   `container-memory`,
-			Usage:  `Specify the amount of memory allocated to the container.`,
-			Value:  browser.DefaultContainerMemory,
-			EnvVar: `WEBFRIEND_CONTAINER_MEMORY`,
-		},
-		cli.StringFlag{
-			Name:   `container-shm-size`,
-			Usage:  `Specify the amount of shared memory allocated to the container.`,
-			Value:  browser.DefaultContainerSharedMemory,
-			EnvVar: `WEBFRIEND_CONTAINER_SHMSIZE`,
-		},
-		cli.StringFlag{
-			Name:   `container-name`,
-			Usage:  `Explicitly provide the container name.`,
-			EnvVar: `WEBFRIEND_CONTAINER_NAME`,
-		},
-		cli.StringFlag{
-			Name:   `container-hostname`,
-			Usage:  `Explicitly set the hostname that will be visible inside the container.`,
-			EnvVar: `WEBFRIEND_CONTAINER_HOSTNAME`,
-		},
-		cli.StringSliceFlag{
-			Name:  `container-volume`,
-			Usage: `Provide additional volumes to expose to the container; specified as: --container-volume=/outer/path:/inner/path[:ro]`,
-		},
-		cli.StringSliceFlag{
-			Name:  `container-port`,
-			Usage: `Provide additional ports to expose from the container; specified as: --container-port=OUTERPORT:INNERPORT`,
-		},
 		cli.DurationFlag{
 			Name:  `retrieve-timeout`,
 			Usage: `Specifies the timeout for retrieving runnable scripts from remote sources (e.g.: HTTP)`,
@@ -144,41 +97,16 @@ func main() {
 	}
 
 	app.Action = func(c *cli.Context) {
+		go handleSignals(browser.StopAllActiveBrowsers)
 		defer browser.StopAllActiveBrowsers()
 
-		log.Debugf("Starting %s %s", c.App.Name, c.App.Version)
+		log.Infof("Starting %s %s...", c.App.Name, c.App.Version)
 		chrome = browser.NewBrowser()
 		chrome.Headless = !c.Bool(`debug`)
 		chrome.HideScrollbars = true
 		chrome.RemoteDebuggingPort = c.Int(`remote-debugging-port`)
 		chrome.RemoteAddress = c.String(`remote-debugging-address`)
 		chrome.StartWait = c.Duration(`start-wait-time`)
-
-		if i := c.String(`container`); i != `` {
-			switch rt := c.String(`container-engine`); rt {
-			case `docker`:
-				chrome.Container = browser.NewDockerContainer(``)
-			// case `kubernetes`:
-			// 	chrome.Container = browser.NewKubernetesContainer()
-			default:
-				log.Fatalf("invalid container engine %q", rt)
-				return
-			}
-
-			if cfg := chrome.Container.Config(); cfg != nil {
-				cfg.Name = c.String(`container-name`)
-				cfg.Hostname = c.String(`container-hostname`)
-				cfg.ImageName = i
-				cfg.Volumes = c.StringSlice(`container-volume`)
-				cfg.Memory = c.String(`container-memory`)
-				cfg.SharedMemory = c.String(`container-shm-size`)
-				cfg.Ports = c.StringSlice(`container-port`)
-
-				if cmd := c.String(`container-command`); cmd != `` {
-					cfg.Cmd = executil.MustSplit(cmd)
-				}
-			}
-		}
 
 		if err := chrome.Launch(); err == nil {
 			// evaluate Friendscript / run the REPL

@@ -28,16 +28,17 @@ type FieldArgs struct {
 //
 // ##### Type in a username and password, then hit Enter to submit.
 // ```
-// field '#username' {
-//   value: 'myuser',
-// }
 //
-// field '#password' {
-//   value: 'p@ssw0rd!',
-//   enter: true,
-// }
+//	field '#username' {
+//	  value: 'myuser',
+//	}
+//
+//	field '#password' {
+//	  value: 'p@ssw0rd!',
+//	  enter: true,
+//	}
+//
 // ```
-//
 func (self *Commands) Field(selector dom.Selector, args *FieldArgs) ([]*dom.Element, error) {
 	if args == nil {
 		args = &FieldArgs{}

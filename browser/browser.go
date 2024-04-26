@@ -14,7 +14,6 @@ import (
 	"syscall"
 	"time"
 
-	docker "github.com/docker/docker/client"
 	"github.com/ghetzel/argonaut"
 	"github.com/ghetzel/friendscript/utils"
 	"github.com/ghetzel/go-stockutil/executil"
@@ -38,9 +37,6 @@ var DefaultContainerMemory = `512m`
 var DefaultContainerSharedMemory = `256m`
 var DebuggerInnerPort = 9222
 var DefaultUserDirPath = `/var/tmp`
-var ContainerInspectTimeout = 3 * time.Second
-var DefaultContainerTargetAddr = `localhost`
-var DefaultContainerRuntime = `docker`
 
 var rpcGlobalTimeout = (60 * time.Second)
 var rpcConnectTimeout = (60 * time.Second)
@@ -107,7 +103,6 @@ type Browser struct {
 	Environment                 map[string]interface{} `argonaut:"-"`
 	Directory                   string                 `argonaut:"-"`
 	Preferences                 *Preferences           `argonaut:"-"`
-	Container                   Container              `argonaut:"-"`
 	ID                          string                 `argonaut:"-"`
 	RemoteAddress               string
 	cmd                         *exec.Cmd
@@ -121,7 +116,6 @@ type Browser struct {
 	stopped                     bool
 	stopping                    bool
 	connected                   bool
-	dockerClient                *docker.Client
 	lastConnectAddress          string
 }
 
@@ -182,18 +176,6 @@ func (self *Browser) Launch() error {
 			self.NoSandbox = true
 		}
 
-		// manipulate various settings we'll need because we're going to run inside of a container
-		// do this here because it'll be quite annoying to change them after argonaut.Command(self)
-		if self.Container != nil {
-			// disable sandboxing inside of container environment
-			self.NoSandbox = true
-			self.DisableSetuidSandbox = true
-			self.DisableGPU = true
-
-			// allow remote debugging (port forwarding into the container requires this)
-			self.RemoteDebuggingAddress = `0.0.0.0`
-		}
-
 		if cmd, err := argonaut.Command(self); err == nil {
 			if self.isTempUserDataDir {
 				if err := self.createFirstRunPreferences(); err != nil {
@@ -219,115 +201,37 @@ func (self *Browser) Launch() error {
 
 			self.cmd = cmd
 
-			// if requested, shove everything inside of a docker container
-			if container := self.Container; container != nil {
-				cfg := container.Config()
-				cfg.Name = fmt.Sprintf("webfriend-%s", self.ID)
-				cfg.Env = self.cmd.Env
+			self.cmd.Stdout = httputil.NewWritableLogger(httputil.Info, `[PROC] `)
+			self.cmd.Stderr = httputil.NewWritableLogger(httputil.Warning, `[PROC] `)
 
-				if len(cfg.Cmd) == 0 {
-					cfg.Cmd = append(self.cmd.Args)
-				} else {
-					// if there's already something in Cmd, then we're going to treat the auto-generated command
-					// as a list of arguments to append to that Cmd, but we should discard the first entry because
-					// that's going to be a path to a binary we're not calling.
-					cfg.Cmd = append(cfg.Cmd, self.cmd.Args[1:]...)
-				}
+			// launch the browser
+			go func() {
+				log.Debugf("[%s] Executing: %v (waiting up to %v)", self.ID, strings.Join(self.cmd.Args, ` `), self.StartWait)
+				self.stopped = false
+				self.exitchan <- self.cmd.Run()
+			}()
 
-				if err := cfg.Validate(); err != nil {
-					return fmt.Errorf("invalid container config: %v", err)
-				}
-
-				if err := container.Validate(); err != nil {
-					return fmt.Errorf("invalid container config: %v", err)
-				}
-
-				// rework the command we're running inside the container
-				for i, arg := range cfg.Cmd {
-					switch k, v := stringutil.SplitPair(arg, `=`); k {
-					case `--user-data-dir`:
-						cfg.Volumes = append(cfg.Volumes, fmt.Sprintf("%s:%s", v, cfg.UserDirPath))
-						cfg.Cmd[i] = k + `=` + cfg.UserDirPath
-
-					case `--remote-debugging-port`:
-						cfg.AddPort(self.RemoteDebuggingPort, DebuggerInnerPort, ``)
-						cfg.Cmd[i] = k + `=` + typeutil.String(DebuggerInnerPort)
-						cfg.SetTargetPort(self.RemoteDebuggingPort)
+			select {
+			case err := <-self.exitchan:
+				if err == nil {
+					if eerr, ok := err.(*exec.ExitError); ok {
+						if status, ok := eerr.Sys().(syscall.WaitStatus); ok {
+							err = fmt.Errorf("Process exited prematurely with status %d", status.ExitStatus())
+						} else if eerr.Success() {
+							err = fmt.Errorf("Process exited prematurely without error")
+						}
 					}
-				}
 
-				if err := container.Start(); err == nil {
-					self.stopped = false
-					log.Debugf("[%s] Container %v starting (waiting up to %v)...", self.ID, container, self.StartWait)
-
-					go func() {
-						for !container.IsRunning() {
-							time.Sleep(time.Second)
-						}
-					}()
-
-				startWaitSelect:
-					select {
-					case sig := <-globalSignal:
-						if err := container.Stop(); err == nil {
-							return fmt.Errorf("Container startup interrupted with signal %v", sig)
-						} else {
-							return err
-						}
-
-					default:
-						var start = time.Now()
-
-						for time.Since(start) < self.StartWait {
-							if container.IsRunning() {
-								if addr := container.Address(); addr != `` {
-									log.Debugf("[%s] Container stayed running for %v", self.ID, self.StartWait)
-									remoteAddr = addr
-									break startWaitSelect
-								}
-							}
-
-							time.Sleep(ProcessExitCheckInterval)
-						}
-
-						return fmt.Errorf("No debugger available after %v", self.StartWait)
-					}
-				} else {
-					return err
-				}
-			} else {
-				self.cmd.Stdout = httputil.NewWritableLogger(httputil.Info, `[PROC] `)
-				self.cmd.Stderr = httputil.NewWritableLogger(httputil.Warning, `[PROC] `)
-
-				// launch the browser
-				go func() {
-					log.Debugf("[%s] Executing: %v (waiting up to %v)", self.ID, strings.Join(self.cmd.Args, ` `), self.StartWait)
-					self.stopped = false
-					self.exitchan <- self.cmd.Run()
-				}()
-
-				select {
-				case err := <-self.exitchan:
 					if err == nil {
-						if eerr, ok := err.(*exec.ExitError); ok {
-							if status, ok := eerr.Sys().(syscall.WaitStatus); ok {
-								err = fmt.Errorf("Process exited prematurely with status %d", status.ExitStatus())
-							} else if eerr.Success() {
-								err = fmt.Errorf("Process exited prematurely without error")
-							}
-						}
-
-						if err == nil {
-							err = fmt.Errorf("Process exited prematurely with non-zero status")
-						}
+						err = fmt.Errorf("Process exited prematurely with non-zero status")
 					}
-
-					return err
-				case <-time.After(self.StartWait):
-					log.Debugf("[%s] Process stayed running for %v", self.ID, self.StartWait)
-					remoteAddr = `localhost:` + typeutil.String(self.RemoteDebuggingPort)
-					self.stopped = false
 				}
+
+				return err
+			case <-time.After(self.StartWait):
+				log.Debugf("[%s] Process stayed running for %v", self.ID, self.StartWait)
+				remoteAddr = `localhost:` + typeutil.String(self.RemoteDebuggingPort)
+				self.stopped = false
 			}
 		} else {
 			return err
@@ -394,45 +298,32 @@ func (self *Browser) stopWithError(xerr error) error {
 	for _, tab := range self.tabs {
 		tab.Disconnect()
 	}
+	if self.cmd == nil {
+		return xerr
+	}
 
-	// take different paths depending on whether we're containerized or not
-	if container := self.Container; container != nil {
-		log.Debugf("[%s] Stopping container %v", container.ID(), container)
-
-		if err := container.Stop(); err == nil {
-			return xerr
-		} else {
-			log.Error(err)
-			return err
-		}
+	if process := self.cmd.Process; process == nil {
+		return fmt.Errorf("Process not running")
 	} else {
-		if self.cmd == nil {
-			return xerr
-		}
+		log.Debugf("[%s] Killing browser process %d", self.ID, process.Pid)
 
-		if process := self.cmd.Process; process == nil {
-			return fmt.Errorf("Process not running")
-		} else {
-			log.Debugf("[%s] Killing browser process %d", self.ID, process.Pid)
+		if err := process.Kill(); err == nil {
+			var started = time.Now()
+			var deadline = started.Add(ProcessExitMaxWait)
 
-			if err := process.Kill(); err == nil {
-				var started = time.Now()
-				var deadline = started.Add(ProcessExitMaxWait)
-
-				for t := started; t.Before(deadline); t = time.Now() {
-					if proc, err := ps.FindProcess(process.Pid); err == nil && proc == nil {
-						log.Debugf("[%s] PID %d is gone", self.ID, process.Pid)
-						return xerr
-					}
-
-					log.Debugf("[%s] Polling for PID %d to disappear", self.ID, process.Pid)
-					time.Sleep(ProcessExitCheckInterval)
+			for t := started; t.Before(deadline); t = time.Now() {
+				if proc, err := ps.FindProcess(process.Pid); err == nil && proc == nil {
+					log.Debugf("[%s] PID %d is gone", self.ID, process.Pid)
+					return xerr
 				}
 
-				return fmt.Errorf("[%s] Could not confirm process %d exited", self.ID, process.Pid)
-			} else {
-				return err
+				log.Debugf("[%s] Polling for PID %d to disappear", self.ID, process.Pid)
+				time.Sleep(ProcessExitCheckInterval)
 			}
+
+			return fmt.Errorf("[%s] Could not confirm process %d exited", self.ID, process.Pid)
+		} else {
+			return err
 		}
 	}
 }

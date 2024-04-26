@@ -259,6 +259,16 @@ var Editor = Stapes.subclass({
     },
 
     log: function(severity, message, rightside) {
+        // apply regex exclusions for needlessly chatty messages
+        for(var rx of [
+            /^core::mouse /,
+            /^core::key /,
+        ]) {
+            if (message.match(rx)) {
+                return;
+            }
+        }
+
         if (this.features.logger) {
             var logs = $(this.logger + ' .logger-logs');
 

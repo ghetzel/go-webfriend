@@ -103,13 +103,14 @@ type GoResponse struct {
 //
 // ##### Go to www.example.com, only wait for the first network response, and don't fail if the request times out.
 // ```
-// go "https://www.exmaple.com" {
-//   timeout:             '10s',
-//   continue_on_timeout: true,
-//   load_event_name:     'Network.responseReceived',
-// }
-// ```
 //
+//	go "https://www.exmaple.com" {
+//	  timeout:             '10s',
+//	  continue_on_timeout: true,
+//	  load_event_name:     'Network.responseReceived',
+//	}
+//
+// ```
 func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 	if args == nil {
 		args = &GoArgs{}

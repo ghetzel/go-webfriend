@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
 	"sync"
@@ -226,9 +227,13 @@ func (self *Server) setupServer(address string) error {
 	ui.BindingPrefix = fmt.Sprintf("http://%s", address)
 
 	if uidir := os.Getenv(`UI`); uidir == `` {
-		ui.SetFileSystem(http.FS(embedded))
+		if sub, err := fs.Sub(embedded, `ui`); err == nil {
+			ui.SetFileSystem(http.FS(sub))
+		} else {
+			return fmt.Errorf("embedded fs: %v", err)
+		}
 	} else {
-		ui.RootPath = uidir
+		ui.SetFileSystem(http.Dir(uidir))
 		log.Debugf("[ui] Static asset path is: %v", ui.RootPath)
 	}
 

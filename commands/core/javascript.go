@@ -25,24 +25,25 @@ import (
 // ##### Inject a script that will retrieve all `<a>` tags on a page and return their "href" attributes (if present).
 // ```
 // javascript begin
-//     var as = document.querySelectorAll('a');
-//     var hrefs = [];
 //
-//     for(var i = 0; i < as.length; i++) {
-//         var a = as[i];
-//         var href = a.getAttribute('href');
+//	var as = document.querySelectorAll('a');
+//	var hrefs = [];
 //
-//         if (href && href.length) {
-//             hrefs.push(href);
-//         }
-//     }
+//	for(var i = 0; i < as.length; i++) {
+//	    var a = as[i];
+//	    var href = a.getAttribute('href');
 //
-//     return hrefs;
+//	    if (href && href.length) {
+//	        hrefs.push(href);
+//	    }
+//	}
+//
+//	return hrefs;
+//
 // end -> $result
 //
 // # $result now contains an array of zero or more strings as returned from JavaScript.
 // ```
-//
 func (self *Commands) Javascript(script string) (interface{}, error) {
 	return self.browser.Tab().Evaluate(script, self.exported...)
 }

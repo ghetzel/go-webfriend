@@ -44,8 +44,7 @@ type TypeArgs struct {
 //
 // Example: Type in the Konami code
 //
-//   type "[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA"
-//
+//	type "[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA"
 func (self *Commands) Type(input interface{}, args *TypeArgs) (string, error) {
 	if typeutil.IsEmpty(input) {
 		return ``, nil

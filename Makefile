@@ -6,12 +6,11 @@ BIN_VERSION     = $(shell ./bin/$(WEBFRIEND_BIN) --version | cut -d' ' -f3)
 CGO_ENABLED    ?= 0
 
 .EXPORT_ALL_VARIABLES:
-GO111MODULE  = on
 
 all: fmt deps autodoc build docs
 
 fmt:
-	gofmt -w $(LOCALS)
+	gofmt -w .
 	go vet ./...
 	go mod tidy
 
@@ -27,7 +26,8 @@ autodoc:
 	go generate -x ./...
 
 docs: fmt
-	cd docs && make
+	test -d $(@) || mkdir $(@)
+	cd $(@) && make
 
 $(WEBFRIEND_BIN):
 	go build -tags nocgo --ldflags '-extldflags "-static"' -ldflags '-s' -o bin/$(WEBFRIEND_BIN) cmd/webfriend/*.go

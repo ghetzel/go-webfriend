@@ -1878,10 +1878,11 @@ Otherwise, an error is returned unless selector matches exactly one element.</p>
 <pre><code>click &#34;#login&#34;
 </code></pre>
 <h5>Click on all <code>&lt;a&gt;</code> elements on the page, waiting 150ms between each click.</h5>
-<pre><code>click &#34;a&#34; {
- multiple: true,
- delay:    &#34;150ms&#34;,
-}
+<pre><code>
+	click &#34;a&#34; {
+	  multiple: true,
+	  delay:    &#34;150ms&#34;,
+	}
 </code></pre>
 </div>
                 <h4>Parameters</h4>
@@ -2281,13 +2282,14 @@ multiple values joined by a separator (e.g: the PATH variable.)</p>
                 <div><p>Locate and enter data into a form input field.</p>
 <h4>Examples</h4>
 <h5>Type in a username and password, then hit Enter to submit.</h5>
-<pre><code>field &#39;#username&#39; {
- value: &#39;myuser&#39;,
-}
-field &#39;#password&#39; {
- value: &#39;p@ssw0rd!&#39;,
- enter: true,
-}
+<pre><code>
+	field &#39;#username&#39; {
+	  value: &#39;myuser&#39;,
+	}
+	field &#39;#password&#39; {
+	  value: &#39;p@ssw0rd!&#39;,
+	  enter: true,
+	}
 </code></pre>
 </div>
                 <h4>Parameters</h4>
@@ -2434,11 +2436,12 @@ field &#39;#password&#39; {
 <pre><code>go &#34;google.com&#34;
 </code></pre>
 <h5>Go to www.example.com, only wait for the first network response, and don’t fail if the request times out.</h5>
-<pre><code>go &#34;https://www.exmaple.com&#34; {
- timeout:             &#39;10s&#39;,
- continue_on_timeout: true,
- load_event_name:     &#39;Network.responseReceived&#39;,
-}
+<pre><code>
+	go &#34;https://www.exmaple.com&#34; {
+	  timeout:             &#39;10s&#39;,
+	  continue_on_timeout: true,
+	  load_event_name:     &#39;Network.responseReceived&#39;,
+	}
 </code></pre>
 </div>
                 <h4>Parameters</h4>
@@ -2883,16 +2886,16 @@ javascript &#34;return webfriend.pi + 0.14&#34; -&gt; $pi
 </code></pre>
 <h5>Inject a script that will retrieve all <code>&lt;a&gt;</code> tags on a page and return their “href” attributes (if present).</h5>
 <pre><code>javascript begin
-   var as = document.querySelectorAll(&#39;a&#39;);
-   var hrefs = [];
-   for(var i = 0; i &lt; as.length; i++) {
-       var a = as[i];
-       var href = a.getAttribute(&#39;href&#39;);
-       if (href &amp;&amp; href.length) {
-           hrefs.push(href);
-       }
-   }
-   return hrefs;
+	var as = document.querySelectorAll(&#39;a&#39;);
+	var hrefs = [];
+	for(var i = 0; i &lt; as.length; i++) {
+	    var a = as[i];
+	    var href = a.getAttribute(&#39;href&#39;);
+	    if (href &amp;&amp; href.length) {
+	        hrefs.push(href);
+	    }
+	}
+	return hrefs;
 end -&gt; $result
 # $result now contains an array of zero or more strings as returned from JavaScript.
 </code></pre>
@@ -3500,7 +3503,8 @@ literally, as well as key names (in accordance with the DOM pre-defined keynames
 described at <a href="https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values)" rel="nofollow">https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values)</a>.
 These sequences appear between square brackets “[” “]”.</p>
 <p>Example: Type in the Konami code</p>
-<p>type “[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA”</p>
+<pre><code>type &#34;[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA&#34;
+</code></pre>
 </div>
                 <h4>Parameters</h4>
                 <table class="table table-sm">
