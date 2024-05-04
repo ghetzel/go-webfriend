@@ -152,23 +152,16 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 			password := args.Password
 
 			if username != `` || password != `` {
-				if err := self.browser.Tab().AddNetworkIntercept(``, true, func(tab *browser.Tab, pattern *browser.NetworkRequestPattern, event *browser.Event) *browser.NetworkInterceptResponse {
-					response := &browser.NetworkInterceptResponse{}
+				if err := self.browser.Tab().AddAuthIntercept(func(tab *browser.Tab, event *browser.Event) *browser.AuthInterceptResponse {
+					var response = new(browser.AuthInterceptResponse)
+					var realm = event.P().String(`realm`)
 
-					if event.P().Bool(`isNavigationRequest`) {
-						if origin := event.P().String(`authChallenge.origin`); origin != `` {
-							if args.Realm == `` || args.Realm == event.P().String(`authChallenge.realm`) {
-								u := args.Username
-								p := args.Password
-
-								if u == `` && p == `` {
-									response.AuthResponse = `Cancel`
-								} else {
-									response.AuthResponse = `ProvideCredentials`
-									response.Username = username
-									response.Password = password
-								}
-							}
+					if args.Realm == `` || args.Realm == realm {
+						if username == `` && password == `` {
+							response.Cancel = true
+						} else {
+							response.Username = username
+							response.Password = password
 						}
 					}
 

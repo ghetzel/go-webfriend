@@ -100,11 +100,8 @@ func (self *RPC) startReading() {
 			if err := json.Unmarshal(data, message); err == nil {
 				waitingForId := atomic.LoadInt64(&self.waitingForMessageId)
 
-				// if we just read a message another
 				if waitingForId > 0 && int64(message.ID) == waitingForId {
 					// log.Debugf("[rpc] REPLY %d", message.ID)
-					// log.Dump(message.Result)
-
 					self.reply <- message
 				} else {
 					self.recv <- message
@@ -186,7 +183,7 @@ func (self *RPC) Send(message *RpcMessage, timeout time.Duration) (*RpcMessage, 
 	self.sendlock.Unlock()
 
 	if err == nil {
-		// log.Debugf("[rpc] REQUEST %d: %v", message.ID, message)
+		// log.Debugf("[rpc] REQUEST %d: %v", message.ID, typeutil.Dump(message))
 
 		if waitForReply {
 			select {

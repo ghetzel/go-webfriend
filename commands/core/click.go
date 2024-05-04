@@ -20,6 +20,9 @@ type ClickArgs struct {
 
 	// If provided, this represents a regular expression that the text value of matching elements must match to be clicked.
 	MatchText string `json:"match_text"`
+
+	// If true, only the first matching element will be clicked
+	FirstMatch bool `json:"first"`
 }
 
 // Click on HTML element(s) matches by selector.  If multiple is true, then all
@@ -67,12 +70,16 @@ func (self *Commands) Click(selector dom.Selector, args *ClickArgs) ([]*dom.Elem
 			}
 		}
 
-		if len(elements) == 1 || args.Multiple {
+		if len(elements) == 1 || args.Multiple || args.FirstMatch {
 			if _, err := self.browser.Tab().Evaluate(fmt.Sprintf(
 				"document.querySelectorAll(%q).forEach(function(i){ i.click() })",
 				selector,
 			)); err != nil {
 				return nil, err
+			}
+
+			if args.FirstMatch {
+				return elements[0:0], nil
 			}
 
 			return elements, nil

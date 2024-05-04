@@ -28,7 +28,7 @@ import (
 	"github.com/phayes/freeport"
 )
 
-var DefaultStartWait = 10 * time.Second
+var DefaultStartWait = 5 * time.Second
 var ProcessExitMaxWait = 10 * time.Second
 var ProcessExitCheckInterval = 125 * time.Millisecond
 var DefaultDebuggingPort = 0 // 0 = allocate an ephemeral port

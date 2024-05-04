@@ -82,7 +82,7 @@ func eventFromRpcResponse(resp *RpcMessage) *Event {
 
 	if len(resp.Error) > 0 {
 		eM := maputil.M(resp.Error)
-		err = fmt.Errorf("Code %d: %v", eM.Int(`code`), eM.String(`message`))
+		err = fmt.Errorf("[event %d] Code %d: %v", resp.ID, eM.Int(`code`), eM.String(`message`))
 	}
 
 	return &Event{

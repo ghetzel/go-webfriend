@@ -127,21 +127,6 @@ func (self *Commands) Intercept(match string, args *InterceptArgs) error {
 			if data := args.PostData; len(data) > 0 {
 				response.PostData = data
 			}
-
-			if origin := event.P().String(`authChallenge.origin`); origin != `` {
-				if args.Realm == `` || args.Realm == event.P().String(`authChallenge.realm`) {
-					u := args.Username
-					p := args.Password
-
-					if u == `` && p == `` {
-						response.AuthResponse = `Cancel`
-					} else {
-						response.AuthResponse = `ProvideCredentials`
-						response.Username = u
-						response.Password = p
-					}
-				}
-			}
 		}
 
 		return response

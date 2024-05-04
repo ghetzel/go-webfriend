@@ -58,21 +58,18 @@ func (self *NetworkRequestPattern) ToMap() map[string]interface{} {
 }
 
 type NetworkInterceptResponse struct {
-	URL          string
-	Method       string
-	Body         io.Reader
-	PostData     map[string]interface{}
-	Header       http.Header
-	Error        error
-	AuthResponse string
-	Username     string
-	Password     string
-	Autoremove   bool
+	URL        string
+	Method     string
+	Body       io.Reader
+	PostData   map[string]interface{}
+	Header     http.Header
+	Error      error
+	Autoremove bool
 }
 
 func (self *NetworkInterceptResponse) ToMap(id string) map[string]interface{} {
 	rv := map[string]interface{}{
-		`interceptionId`: id,
+		`requestId`: id,
 	}
 
 	if self.Error == nil {
@@ -115,20 +112,6 @@ func (self *NetworkInterceptResponse) ToMap(id string) map[string]interface{} {
 			log.Warningf("Failed to read intercept body: %v", err)
 			rv[`errorReason`] = `Failed`
 		}
-
-		switch self.AuthResponse {
-		case `Cancel`:
-			rv[`authChallengeResponse`] = map[string]interface{}{
-				`response`: `Cancel`,
-			}
-
-		case `ProvideCredentials`:
-			rv[`authChallengeResponse`] = map[string]interface{}{
-				`response`: `ProvideCredentials`,
-				`username`: self.Username,
-				`password`: self.Password,
-			}
-		}
 	} else {
 		rv[`errorReason`] = self.Error.Error()
 	}
@@ -136,7 +119,33 @@ func (self *NetworkInterceptResponse) ToMap(id string) map[string]interface{} {
 	return rv
 }
 
+type AuthInterceptResponse struct {
+	Username string
+	Password string
+	Cancel   bool
+}
+
+func (self *AuthInterceptResponse) ToMap(id string) map[string]interface{} {
+	var acr = make(map[string]interface{})
+	var rv = map[string]interface{}{
+		`requestId`: id,
+	}
+
+	if self.Cancel {
+		acr[`response`] = `CancelAuth`
+	} else {
+		acr[`response`] = `ProvideCredentials`
+		acr[`username`] = self.Username
+		acr[`password`] = self.Password
+	}
+
+	rv[`authChallengeResponse`] = acr
+
+	return rv
+}
+
 type NetworkInterceptFunc func(*Tab, *NetworkRequestPattern, *Event) *NetworkInterceptResponse
+type AuthInterceptFunc func(*Tab, *Event) *AuthInterceptResponse
 
 type NetworkRequest struct {
 	ID         string
@@ -185,6 +194,7 @@ type Tab struct {
 	events               chan *Event
 	waiters              sync.Map
 	networkRequests      sync.Map
+	authIntercepts       []AuthInterceptFunc
 	accumulators         sync.Map
 	mostRecentFrameId    int64
 	mostRecentFrame      []byte
@@ -197,9 +207,10 @@ type Tab struct {
 
 func newTabFromTarget(browser *Browser, target *devtool.Target) (*Tab, error) {
 	tab := &Tab{
-		browser: browser,
-		target:  target,
-		events:  make(chan *Event),
+		browser:        browser,
+		target:         target,
+		authIntercepts: make([]AuthInterceptFunc, 0),
+		events:         make(chan *Event),
 		mostRecentInfo: &PageInfo{
 			URL:   target.URL,
 			State: `initial`,
@@ -335,6 +346,10 @@ func (self *Tab) CreateAccumulator(filter string) (*eventAccumulator, error) {
 }
 
 func (self *Tab) AsyncRPC(module string, method string, args map[string]interface{}) error {
+	if len(args) == 0 {
+		args = make(map[string]interface{})
+	}
+
 	return self.rpc.CallAsync(
 		fmt.Sprintf("%s.%s", module, method),
 		args,
@@ -387,8 +402,12 @@ func (self *Tab) startEventReceiver() {
 	for message := range self.rpc.Messages() {
 		event := eventFromRpcResponse(message)
 
+		if err := event.Error; err != nil {
+			log.Fatal(err)
+		}
+
 		if name := event.Name; name != `` {
-			log.Debugf("[event] %v", name)
+			log.Debugf("<- %v", name)
 		}
 
 		// dispatch events to waiters
@@ -508,9 +527,9 @@ func (self *Tab) registerInternalEvents() {
 		}
 	})
 
-	self.RegisterEventHandler(`Network.requestIntercepted`, func(event *Event) {
+	self.RegisterEventHandler(`Fetch.requestPaused`, func(event *Event) {
 		url := event.P().String(`request.url`)
-		id := event.P().String(`interceptionId`)
+		id := event.P().String(`requestId`)
 		interceptResponse := &NetworkInterceptResponse{}
 
 		self.netIntercepts.Range(func(key interface{}, value interface{}) bool {
@@ -542,7 +561,27 @@ func (self *Tab) registerInternalEvents() {
 		})
 
 		// if we receive this event, we HAVE to respond to it
-		if err := self.AsyncRPC(`Network`, `continueInterceptedRequest`, interceptResponse.ToMap(id)); err != nil {
+		if err := self.AsyncRPC(`Fetch`, `continueRequest`, interceptResponse.ToMap(id)); err != nil {
+			log.Errorf("Failed to complete interception: %v", err)
+		}
+	})
+
+	self.RegisterEventHandler(`Fetch.authRequired`, func(event *Event) {
+		var interceptResponse = new(AuthInterceptResponse)
+		var id = event.P().String(`requestId`)
+		var url = event.P().String(`request.url`)
+
+		for _, fn := range self.authIntercepts {
+			if fn != nil {
+				log.Debugf("AuthIntercepted %v: %v", id, url)
+
+				if response := fn(self, event); response != nil {
+					interceptResponse = response
+				}
+			}
+		}
+
+		if err := self.AsyncRPC(`Fetch`, `continueWithAuth`, interceptResponse.ToMap(id)); err != nil {
 			log.Errorf("Failed to complete interception: %v", err)
 		}
 	})
@@ -601,8 +640,9 @@ func (self *Tab) AddNetworkIntercept(urlPattern string, waitForHeaders bool, fn 
 		return true
 	})
 
-	if err := self.AsyncRPC(`Network`, `setRequestInterception`, map[string]interface{}{
-		`patterns`: patterns,
+	if err := self.AsyncRPC(`Fetch`, `enable`, map[string]interface{}{
+		`patterns`:           patterns,
+		`handleAuthRequests`: true,
 	}); err == nil {
 		self.netIntercepts.Store(requestPattern, fn)
 		return nil
@@ -611,12 +651,22 @@ func (self *Tab) AddNetworkIntercept(urlPattern string, waitForHeaders bool, fn 
 	}
 }
 
+func (self *Tab) AddAuthIntercept(fn AuthInterceptFunc) error {
+	if err := self.AsyncRPC(`Fetch`, `enable`, map[string]interface{}{
+		`handleAuthRequests`: true,
+	}); err == nil {
+		self.authIntercepts = append(self.authIntercepts, fn)
+		return nil
+	} else {
+		return err
+	}
+}
+
 func (self *Tab) ClearNetworkIntercepts() error {
 	self.netIntercepts = sync.Map{}
+	self.authIntercepts = make([]AuthInterceptFunc, 0)
 
-	return self.AsyncRPC(`Network`, `setRequestInterception`, map[string]interface{}{
-		`patterns`: []interface{}{},
-	})
+	return self.AsyncRPC(`Fetch`, `disable`, nil)
 }
 
 func (self *Tab) ResetNetworkRequests() {
