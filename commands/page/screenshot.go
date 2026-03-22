@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 
 	defaults "github.com/ghetzel/go-defaults"
@@ -26,7 +25,7 @@ type ScreenshotArgs struct {
 	X      int `json:"x" default:"-1"`
 	Y      int `json:"y" default:"-1"`
 
-	// The output image format of the screenshot.  May be "png" or "jpeg".
+	// The output image format of the screenshot.  Valid options are "png" or "jpeg".
 	Format string `json:"format" default:"png"`
 
 	// The quality of the image used during encoding.  Only applies to "jpeg" format.
@@ -86,7 +85,7 @@ func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) 
 				writer = w
 				response.Path = newPath
 			} else if filename == `temporary` {
-				if temp, err := ioutil.TempFile(``, ``); err == nil {
+				if temp, err := os.CreateTemp(``, ``); err == nil {
 					writer = temp
 					response.Path = temp.Name()
 				} else {

@@ -633,7 +633,7 @@
       },
       {
         "name": "click",
-        "description": "Click on HTML element(s) matches by selector.  If multiple is true, then all\nelements matched by selector will be clicked in the order they are returned.\nOtherwise, an error is returned unless selector matches exactly one element.\n\n#### Examples\n\n##### Click on the element with id \"login\"\n```\nclick \"#login\"\n```\n\n##### Click on all `\u003ca\u003e` elements on the page, waiting 150ms between each click.\n```\nclick \"a\" {\n multiple: true,\n delay:    \"150ms\",\n}\n```",
+        "description": "Click on HTML element(s) matches by selector.  If multiple is true, then all\nelements matched by selector will be clicked in the order they are returned.\nOtherwise, an error is returned unless selector matches exactly one element.\n\n#### Examples\n\n##### Click on the element with id \"login\"\n```\nclick \"#login\"\n```\n\n##### Click on all `\u003ca\u003e` elements on the page, waiting 150ms between each click.\n```\n\n\tclick \"a\" {\n\t  multiple: true,\n\t  delay:    \"150ms\",\n\t}\n\n```",
         "argument": {
           "name": "selector",
           "types": "Selector"
@@ -654,6 +654,11 @@
             "name": "match_text",
             "types": "string",
             "description": "If provided, this represents a regular expression that the text value of matching elements must match to be clicked."
+          },
+          {
+            "name": "first_match",
+            "types": "bool",
+            "description": "If true, only the first matching element will be clicked"
           }
         ],
         "return": {
@@ -783,7 +788,7 @@
       },
       {
         "name": "field",
-        "description": "Locate and enter data into a form input field.\n\n#### Examples\n\n##### Type in a username and password, then hit Enter to submit.\n```\nfield '#username' {\n value: 'myuser',\n}\n\nfield '#password' {\n value: 'p@ssw0rd!',\n enter: true,\n}\n```",
+        "description": "Locate and enter data into a form input field.\n\n#### Examples\n\n##### Type in a username and password, then hit Enter to submit.\n```\n\n\tfield '#username' {\n\t  value: 'myuser',\n\t}\n\n\tfield '#password' {\n\t  value: 'p@ssw0rd!',\n\t  enter: true,\n\t}\n\n```",
         "argument": {
           "name": "selector",
           "types": "Selector"
@@ -828,7 +833,7 @@
       },
       {
         "name": "go",
-        "description": "Navigate to a URL.\n\n#### Examples\n\n##### Go to Google.\n```\ngo \"google.com\"\n```\n\n##### Go to www.example.com, only wait for the first network response, and don't fail if the request times out.\n```\ngo \"https://www.exmaple.com\" {\n timeout:             '10s',\n continue_on_timeout: true,\n load_event_name:     'Network.responseReceived',\n}\n```",
+        "description": "Navigate to a URL.\n\n#### Examples\n\n##### Go to Google.\n```\ngo \"google.com\"\n```\n\n##### Go to www.example.com, only wait for the first network response, and don't fail if the request times out.\n```\n\n\tgo \"https://www.exmaple.com\" {\n\t  timeout:             '10s',\n\t  continue_on_timeout: true,\n\t  load_event_name:     'Network.responseReceived',\n\t}\n\n```",
         "argument": {
           "name": "uri",
           "types": "string"
@@ -1033,7 +1038,7 @@
       },
       {
         "name": "javascript",
-        "description": "Inject Javascript into the current page, evaluate it, and return the results.\nThe script is wrapped in an anonymous function whose return value will be\nreturned from this command as a native data type.\n\nScripts will have access to all exported variables in the calling script (exported with the\n\"export\" command). They are available to injected script as a plain object accessible using\nthe \"webfriend\" variable.\n\n#### Examples\n\n##### Use the `webfriend` local variable to access Friendscript data from JavaScript, make a change, then pass it back.\n```\n$pi = 3.0\n\njavascript \"return webfriend.pi + 0.14\" -\u003e $pi\n# $pi is now 3.14\n```\n\n##### Inject a script that will retrieve all `\u003ca\u003e` tags on a page and return their \"href\" attributes (if present).\n```\njavascript begin\n   var as = document.querySelectorAll('a');\n   var hrefs = [];\n\n   for(var i = 0; i \u003c as.length; i++) {\n       var a = as[i];\n       var href = a.getAttribute('href');\n\n       if (href \u0026\u0026 href.length) {\n           hrefs.push(href);\n       }\n   }\n\n   return hrefs;\nend -\u003e $result\n\n# $result now contains an array of zero or more strings as returned from JavaScript.\n```",
+        "description": "Inject Javascript into the current page, evaluate it, and return the results.\nThe script is wrapped in an anonymous function whose return value will be\nreturned from this command as a native data type.\n\nScripts will have access to all exported variables in the calling script (exported with the\n\"export\" command). They are available to injected script as a plain object accessible using\nthe \"webfriend\" variable.\n\n#### Examples\n\n##### Use the `webfriend` local variable to access Friendscript data from JavaScript, make a change, then pass it back.\n```\n$pi = 3.0\n\njavascript \"return webfriend.pi + 0.14\" -\u003e $pi\n# $pi is now 3.14\n```\n\n##### Inject a script that will retrieve all `\u003ca\u003e` tags on a page and return their \"href\" attributes (if present).\n```\njavascript begin\n\n\tvar as = document.querySelectorAll('a');\n\tvar hrefs = [];\n\n\tfor(var i = 0; i \u003c as.length; i++) {\n\t    var a = as[i];\n\t    var href = a.getAttribute('href');\n\n\t    if (href \u0026\u0026 href.length) {\n\t        hrefs.push(href);\n\t    }\n\t}\n\n\treturn hrefs;\n\nend -\u003e $result\n\n# $result now contains an array of zero or more strings as returned from JavaScript.\n```",
         "argument": {
           "name": "script",
           "types": "string"
@@ -1261,7 +1266,7 @@
       },
       {
         "name": "type",
-        "description": "Input the given textual data as keyboard input into the currently focused\npage element.  The input text contains raw unicode characters that will be typed\nliterally, as well as key names (in accordance with the DOM pre-defined keynames\ndescribed at https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values).\nThese sequences appear between square brackets \"[\" \"]\".\n\nExample: Type in the Konami code\n\n type \"[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA\"",
+        "description": "Input the given textual data as keyboard input into the currently focused\npage element.  The input text contains raw unicode characters that will be typed\nliterally, as well as key names (in accordance with the DOM pre-defined keynames\ndescribed at https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values).\nThese sequences appear between square brackets \"[\" \"]\".\n\nExample: Type in the Konami code\n\n\ttype \"[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA\"",
         "argument": {
           "name": "input",
           "types": "any"

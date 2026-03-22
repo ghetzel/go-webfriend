@@ -1,9 +1,11 @@
 package server
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"net/http"
 	"os"
@@ -15,13 +17,15 @@ import (
 	"github.com/ghetzel/go-stockutil/log"
 	webfriend "github.com/ghetzel/go-webfriend"
 	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/ghetzel/go-webfriend/commands/core"
+	"github.com/ghetzel/go-webfriend/commands/page"
+	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/gorilla/websocket"
 	"github.com/husobee/vestigo"
 	"github.com/urfave/negroni"
 )
 
 //go:embed ui/*
-//go:embed ui/_*
 //go:embed ui/**
 var embedded embed.FS
 
@@ -180,7 +184,6 @@ func (self *Server) ListenAndServe(address string) error {
 							if width != session.lastFrameW || height != session.lastFrameH {
 								session.lastFrameW = width
 								session.lastFrameH = height
-
 								if err := session.Conn.WriteJSON(map[string]interface{}{
 									`width`:  width,
 									`height`: height,
@@ -333,6 +336,57 @@ func (self *Server) setupRoutes(router *vestigo.Router) {
 		}
 
 		httputil.RespondJSON(w, reqerr)
+	})
+
+	router.Get(`/api/tabs/current/screenshot`, func(wr http.ResponseWriter, req *http.Request) {
+		var buf bytes.Buffer
+
+		if self.env.Browser() != nil {
+			if tab := self.env.Browser().Tab(); tab != nil {
+				var w = int(httputil.QInt(req, `width`))
+				var h = int(httputil.QInt(req, `height`))
+
+				if w > 0 && h > 0 {
+					if _, err := self.env.Core.Resize(&core.ResizeArgs{
+						Width:     w,
+						Height:    h,
+						FitWindow: true,
+					}); err != nil {
+						httputil.RespondJSON(wr, err)
+						return
+					}
+				}
+
+				if url := httputil.Q(req, `url`); url != `` {
+					if _, err := self.env.Core.Go(url, &core.GoArgs{
+						ClearRequests: true,
+						WaitForLoad:   true,
+						Timeout:       httputil.QDuration(req, `timeout`),
+					}); err != nil {
+						httputil.RespondJSON(wr, err)
+						return
+					}
+				}
+
+				if _, err := self.env.Page.Screenshot(&buf, &page.ScreenshotArgs{
+					Selector:   dom.Selector(httputil.Q(req, `element`)),
+					Autoresize: true,
+					Autoclose:  true,
+					Format:     `png`,
+				}); err == nil {
+					wr.Header().Set(`Content-Type`, `image/png`)
+					io.Copy(wr, &buf)
+				} else {
+					httputil.RespondJSON(wr, err)
+				}
+
+			} else {
+				httputil.RespondJSON(wr, fmt.Errorf("Tab %v does not exist", tab))
+			}
+		} else {
+			httputil.RespondJSON(wr, fmt.Errorf("No browser session available"))
+		}
+
 	})
 
 	router.Get(`/api/tabs/current/screencast`, func(w http.ResponseWriter, req *http.Request) {
