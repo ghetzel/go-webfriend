@@ -3,6 +3,7 @@ module github.com/ghetzel/go-webfriend
 go 1.25.0
 
 require (
+	github.com/antchfx/xmlquery v1.5.1
 	github.com/fatih/color v1.16.0
 	github.com/ghetzel/cli v1.17.0
 	github.com/ghetzel/friendscript v0.8.4
@@ -14,6 +15,7 @@ require (
 )
 
 require (
+	github.com/antchfx/xpath v1.3.6 // indirect
 	github.com/c-bata/go-prompt v0.2.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
@@ -23,6 +25,7 @@ require (
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/h2non/filetype v1.1.3 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -48,8 +51,10 @@ require (
 	github.com/rogpeppe/go-internal v1.14.1 // indirect
 	github.com/urfave/negroni v1.0.1-0.20191011213438-f4316798d5d3 // indirect
 	golang.org/x/crypto v0.49.0 // indirect
+	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/term v0.41.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
 	gopkg.in/neurosnap/sentences.v1 v1.0.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/client-go v0.35.2 // indirect

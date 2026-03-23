@@ -17,7 +17,7 @@ type Commands struct {
 }
 
 func New(browser *browser.Browser) *Commands {
-	cmd := &Commands{}
+	var cmd = new(Commands)
 
 	cmd.browser = browser
 	cmd.Module = friendscript.CreateModule(cmd)

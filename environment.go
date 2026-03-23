@@ -13,6 +13,7 @@ import (
 	"github.com/ghetzel/go-webfriend/commands/cookies"
 	"github.com/ghetzel/go-webfriend/commands/core"
 	"github.com/ghetzel/go-webfriend/commands/page"
+	"github.com/ghetzel/go-webfriend/commands/xml"
 )
 
 var MaxReaderWait = time.Duration(5) * time.Second
@@ -23,6 +24,7 @@ type Environment struct {
 	Core    *core.Commands
 	Page    *page.Commands
 	File    *file.Commands
+	XML     *xml.Commands
 	browser *browser.Browser
 	script  *scripting.Friendscript
 	stack   []*scripting.Scope
@@ -43,10 +45,12 @@ func NewEnvironment(b *browser.Browser) *Environment {
 	environment.Core = core.New(b)
 	environment.Cookies = cookies.New(b)
 	environment.Page = page.New(b)
+	environment.XML = xml.New(b)
 
 	environment.RegisterModule(``, environment.Core)
 	environment.RegisterModule(`cookies`, environment.Cookies)
 	environment.RegisterModule(`page`, environment.Page)
+	environment.RegisterModule(`xml`, environment.XML)
 
 	// add our custom REPL commands
 	environment.RegisterCommandHandler(`help`, environment.handleReplHelp)
