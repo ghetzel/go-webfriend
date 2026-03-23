@@ -7,9 +7,9 @@ import (
 
 	"github.com/ghetzel/friendscript"
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/maputil"
 	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/playwright-community/playwright-go"
 )
 
 type Cookie struct {
@@ -48,8 +48,8 @@ type Cookie struct {
 }
 
 // Returns the cookie serialized the way CDP expects it.
-func (self *Cookie) native() map[string]interface{} {
-	params := make(map[string]interface{})
+func (self *Cookie) native() map[string]any {
+	params := make(map[string]any)
 
 	params[`name`] = self.Name
 	params[`value`] = self.Value
@@ -111,52 +111,47 @@ type ListArgs struct {
 // List all cookies, either for the given set of URLs or for the current tab (if omitted).
 func (self *Commands) List(args *ListArgs) ([]*Cookie, error) {
 	if args == nil {
-		args = &ListArgs{}
+		args = new(ListArgs)
 	}
 
 	defaults.SetDefaults(args)
 
-	var params = make(map[string]interface{})
+	var cookies = make([]*Cookie, 0)
 
-	if len(args.Urls) > 0 {
-		params[`urls`] = args.Urls
-	}
-
-	if response, err := self.browser.Tab().RPC(`Network`, `getCookies`, params); err == nil {
-		cookies := make([]*Cookie, 0)
-
-		for _, res := range response.R().Slice(`cookies`) {
-			cookie := maputil.M(res)
-
-			c := &Cookie{
-				Name:     cookie.String(`name`),
-				Value:    cookie.String(`value`),
-				Domain:   cookie.String(`domain`),
-				Path:     cookie.String(`path`),
-				Size:     int(cookie.Int(`size`)),
-				HttpOnly: cookie.Bool(`httpOnly`),
-				SameSite: cookie.String(`sameSite`),
-				Session:  cookie.Bool(`session`),
-			}
-
-			// if we're filtering on cookie name, skip cookies that aren't in the list
-			if len(args.Names) > 0 {
-				if !sliceutil.ContainsString(args.Names, c.Name) {
-					continue
+	if pg := self.browser.Page(); pg != nil {
+		if ckk, err := pg.Context().Cookies(args.Urls...); err == nil {
+			for _, ck := range ckk {
+				var cookie = &Cookie{
+					Name:     ck.Name,
+					Value:    ck.Value,
+					Domain:   ck.Domain,
+					Path:     ck.Path,
+					Size:     len(ck.Value),
+					HttpOnly: ck.HttpOnly,
+					SameSite: string(*ck.SameSite),
 				}
+
+				// if we're filtering on cookie name, skip cookies that aren't in the list
+				if len(args.Names) > 0 {
+					if !sliceutil.ContainsString(args.Names, ck.Name) {
+						continue
+					}
+				}
+
+				if expiresAt := ck.Expires; expiresAt > 0 {
+					var expiry = time.Unix(int64(expiresAt), 0)
+					cookie.Expires = &expiry
+				}
+
+				cookies = append(cookies, cookie)
 			}
 
-			if expiresAt := cookie.Int(`expires`); expiresAt > 0 {
-				expiry := time.Unix(expiresAt, 0)
-				c.Expires = &expiry
-			}
-
-			cookies = append(cookies, c)
+			return cookies, nil
+		} else {
+			return cookies, err
 		}
-
-		return cookies, nil
 	} else {
-		return nil, err
+		return cookies, browser.NoActivePage
 	}
 }
 
@@ -192,15 +187,7 @@ func (self *Commands) Get(name string) (*Cookie, error) {
 
 // Set a cookie.
 func (self *Commands) Set(cookie *Cookie) error {
-	if response, err := self.browser.Tab().RPC(`Network`, `setCookie`, cookie.native()); err == nil {
-		if response.R().Bool(`success`) {
-			return nil
-		} else {
-			return fmt.Errorf("Failed to set cookie")
-		}
-	} else {
-		return err
-	}
+	return browser.NotImplemented
 }
 
 type DeleteArgs struct {
@@ -217,35 +204,27 @@ type DeleteArgs struct {
 // Deletes a cookie by name, and optionally matching additional criteria.
 func (self *Commands) Delete(name string, args *DeleteArgs) error {
 	if args == nil {
-		args = &DeleteArgs{}
+		args = new(DeleteArgs)
 	}
 
 	defaults.SetDefaults(args)
 
-	params := make(map[string]interface{})
-
-	params[`name`] = name
-
-	if v := args.URL; v != `` {
-		params[`url`] = v
+	if pg := self.browser.Page(); pg != nil {
+		return pg.Context().ClearCookies(playwright.BrowserContextClearCookiesOptions{
+			Name:   name,
+			Domain: args.Domain,
+			Path:   args.Path,
+		})
+	} else {
+		return browser.NoActivePage
 	}
-
-	if v := args.URL; v != `` {
-		params[`url`] = v
-	}
-
-	if v := args.Domain; v != `` {
-		params[`domain`] = v
-	}
-
-	if v := args.Path; v != `` {
-		params[`path`] = v
-	}
-
-	return self.browser.Tab().AsyncRPC(`Network`, `deleteCookies`, params)
 }
 
 // Clears all browser cookies.
 func (self *Commands) Clear() error {
-	return self.browser.Tab().AsyncRPC(`Network`, `clearBrowserCookies`, nil)
+	if pg := self.browser.Page(); pg != nil {
+		return pg.Context().ClearCookies()
+	} else {
+		return browser.NoActivePage
+	}
 }

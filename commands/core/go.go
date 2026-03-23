@@ -2,16 +2,14 @@ package core
 
 import (
 	"fmt"
-	"net/url"
+	"slices"
 	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-stockutil/maputil"
-	"github.com/ghetzel/go-stockutil/sliceutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/utils"
+	"github.com/playwright-community/playwright-go"
 )
 
 var RandomReferrerPrefix = `https://github.com/ghetzel/go-webfriend`
@@ -33,9 +31,6 @@ type GoArgs struct {
 	// The amount of time to wait for the page to load.
 	Timeout time.Duration `json:"timeout" default:"30s"`
 
-	// The amount of time to poll for the originating network request.
-	RequestPollTimeout time.Duration `json:"request_poll_timeout" default:"5s"`
-
 	// Whether the resources stack that is queried in page::resources and
 	// page::resource is cleared before navigating. Set this to false to
 	// preserve the ability to retrieve data that was loaded on previous pages.
@@ -52,12 +47,8 @@ type GoArgs struct {
 	// These HTTP status codes are not considered errors.
 	ContinueStatuses []int `json:"continue_statuses"`
 
-	// Whether to continue execution if load_event_name is not seen before
-	// timeout elapses.
-	ContinueOnTimeout bool `json:"continue_on_timeout" default:"false"`
-
 	// The RPC event to wait for before proceeding to the next command.
-	LoadEventName string `json:"load_event_name" default:"Page.loadEventFired"`
+	LoadEventName string `json:"load_event_name" default:"load"`
 
 	// Provide a username if one is requested via HTTP Basic authentication.
 	Username string `json:"username"`
@@ -104,7 +95,7 @@ type GoResponse struct {
 // ##### Go to www.example.com, only wait for the first network response, and don't fail if the request times out.
 // ```
 //
-//	go "https://www.exmaple.com" {
+//	go "https://www.example.com" {
 //	  timeout:             '10s',
 //	  continue_on_timeout: true,
 //	  load_event_name:     'Network.responseReceived',
@@ -119,7 +110,6 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 	defaults.SetDefaults(args)
 
 	args.Timeout = utils.FudgeDuration(args.Timeout)
-	args.RequestPollTimeout = utils.FudgeDuration(args.RequestPollTimeout)
 
 	// if specified as random, generate a referrer with a UUID in the url
 	switch args.Referrer {
@@ -129,145 +119,71 @@ func (self *Commands) Go(uri string, args *GoArgs) (*GoResponse, error) {
 		args.Referrer = RandomReferrerPrefix
 	}
 
-	// clear our network requests accumulated so far
-	if args.ClearRequests {
-		self.browser.Tab().ResetNetworkRequests()
-	}
+	if pg := self.browser.Page(); pg != nil {
+		var pwWaitState *playwright.WaitUntilState
 
-	if u, err := url.Parse(uri); err == nil {
-		// register the waiter BEFORE making the Page.navigate call because some pages will load
-		// so fast that we get a race condition otherwise
-		if waiter, err := self.browser.Tab().CreateEventWaiter(args.LoadEventName); err == nil {
-			defer waiter.Remove()
-			var commandIssued = time.Now()
-			var totalTime time.Duration
+		if args.WaitForLoad {
+			switch args.LoadEventName {
+			case ``, `load`:
+				pwWaitState = playwright.WaitUntilStateLoad
+			case `content`:
+				pwWaitState = playwright.WaitUntilStateDomcontentloaded
+			case `idle`:
+				pwWaitState = playwright.WaitUntilStateNetworkidle
+			case `commit`:
+				pwWaitState = playwright.WaitUntilStateCommit
+			default:
+				return nil, fmt.Errorf("invalid load event name %q", args.LoadEventName)
+			}
+		}
 
-			// if a scheme wasn't given, prepend HTTPS
-			if u.Scheme == `` {
-				u.Scheme = `https`
+		if res, err := pg.Goto(uri, playwright.PageGotoOptions{
+			Referer:   playwright.String(args.Referrer),
+			WaitUntil: pwWaitState,
+			Timeout:   playwright.Float(float64(args.Timeout.Milliseconds())),
+		}); err == nil {
+			res.Finished()
+
+			var fsres = &GoResponse{
+				URL:    res.URL(),
+				Status: res.Status(),
 			}
 
-			// if basic auth credentials are specified, setup the request intercept to provide them
-			username := args.Username
-			password := args.Password
+			if timings := res.Request().Timing(); timings != nil {
+				fsres.TimingDetails = make(map[string]float64)
 
-			if username != `` || password != `` {
-				if err := self.browser.Tab().AddAuthIntercept(func(tab *browser.Tab, event *browser.Event) *browser.AuthInterceptResponse {
-					var response = new(browser.AuthInterceptResponse)
-					var realm = event.P().String(`realm`)
+				fsres.TimingDetails[`startTime`] = timings.StartTime
+				fsres.TimingDetails[`domainLookupStart`] = timings.DomainLookupStart
+				fsres.TimingDetails[`domainLookupEnd`] = timings.DomainLookupEnd
+				fsres.TimingDetails[`connectStart`] = timings.ConnectStart
+				fsres.TimingDetails[`secureConnectionStart`] = timings.SecureConnectionStart
+				fsres.TimingDetails[`connectEnd`] = timings.ConnectEnd
+				fsres.TimingDetails[`requestStart`] = timings.RequestStart
+				fsres.TimingDetails[`responseStart`] = timings.ResponseStart
+				fsres.TimingDetails[`responseEnd`] = timings.ResponseEnd
+			}
 
-					if args.Realm == `` || args.Realm == realm {
-						if username == `` && password == `` {
-							response.Cancel = true
-						} else {
-							response.Username = username
-							response.Password = password
-						}
-					}
+			if addr, err := res.ServerAddr(); err == nil {
+				fsres.RemoteAddress = fmt.Sprintf("%v:%d", addr.IpAddress, addr.Port)
+			}
 
-					return response
-				}); err != nil {
-					log.Warning(err)
-					return nil, fmt.Errorf("Failed to setup authentication intercept")
+			if hdr, err := res.AllHeaders(); err == nil {
+				fsres.Headers = hdr
+			}
+
+			if !res.Ok() {
+				if !args.ContinueOnError {
+					return fsres, fmt.Errorf("HTTP %d: %s", res.Status(), res.StatusText())
+				} else if !slices.Contains(args.ContinueStatuses, fsres.Status) {
+					return fsres, fmt.Errorf("HTTP %d: %s", res.Status(), res.StatusText())
 				}
 			}
 
-			if rv, err := self.browser.Tab().Navigate(u.String()); err == nil {
-				if args.WaitForLoad && args.Timeout > 0 {
-					// wait for the first event matching the given pattern
-					if event, err := waiter.Wait(args.Timeout); err != nil {
-						if utils.IsTimeoutErr(err) {
-							if !args.ContinueOnTimeout {
-								return nil, fmt.Errorf("timed out waiting for event %s", args.LoadEventName)
-							}
-						} else {
-							return nil, err
-						}
-					} else {
-						log.Debugf("core::go proceeding: got event %v", event.Name)
-					}
-				} else {
-					log.Debugf("core::go not waiting for navigation: WaitForLoad=%v Timeout=%v", args.WaitForLoad, args.Timeout)
-				}
-
-				totalTime = time.Since(commandIssued)
-				rvM := maputil.M(rv.Result)
-				netPollStart := time.Now()
-
-				var netreq *browser.NetworkRequest
-
-				// poll aggressively waiting to receive the network request that
-				// loaded the page
-				for time.Since(netPollStart) < args.RequestPollTimeout {
-					// locate the network request, response/error that resulted
-					// from the page navigation call
-					if req := self.browser.Tab().GetLoaderRequest(
-						rvM.String(`loaderId`, rvM.String(`frameId`)),
-					); req != nil && req.IsCompleted() {
-						netreq = req
-						break
-					}
-
-					time.Sleep(33 * time.Millisecond)
-				}
-
-				if netreq != nil {
-					if err := netreq.Error(); err == nil {
-						cmdresp := &GoResponse{}
-
-						if v := netreq.R().Int(`response.status`); v >= 0 {
-							if v >= 400 && !args.ContinueOnError {
-								// ContinueStatuses (if set) gives us one last chance to accept this response before erroring out
-								if len(args.ContinueStatuses) == 0 || !sliceutil.Contains(args.ContinueStatuses, v) {
-									return nil, fmt.Errorf("HTTP %v", v)
-								}
-							}
-
-							cmdresp.Status = int(v)
-							cmdresp.URL = netreq.R().String(`response.url`)
-							cmdresp.MimeType = netreq.R().String(`response.mimeType`)
-							cmdresp.Protocol = netreq.R().String(`response.protocol`)
-							cmdresp.RemoteAddress = fmt.Sprintf(
-								"%v:%v",
-								netreq.R().String(`response.remoteIPAddress`),
-								netreq.R().Int(`response.remotePort`, 80),
-							)
-							cmdresp.TimingDetails = make(map[string]float64)
-							cmdresp.Headers = make(map[string]string)
-
-							// build timing
-							for key, value := range netreq.R().Map(`response.timing`) {
-								cmdresp.TimingDetails[key.String()] = value.Float()
-							}
-
-							cmdresp.TimingDetails[`overallTimeMs`] = float64(totalTime.Nanoseconds()) / float64(1e6)
-
-							// build headers
-							for key, value := range netreq.R().Map(`response.headers`) {
-								cmdresp.Headers[key.String()] = value.String()
-							}
-
-							log.Debugf("Page loaded in %v: HTTP %d: %v", totalTime, cmdresp.Status, cmdresp.URL)
-
-							return cmdresp, nil
-						} else {
-							return nil, fmt.Errorf("Got invalid HTTP status")
-						}
-					} else {
-						return &GoResponse{}, fmt.Errorf("Request failed: %v", err)
-					}
-				} else if !args.RequireOriginatingRequest {
-					return &GoResponse{}, nil
-				} else {
-					return nil, fmt.Errorf("Failed to locate originating network request")
-				}
-			} else {
-				return nil, err
-			}
+			return fsres, nil
 		} else {
 			return nil, err
 		}
 	} else {
-		return nil, fmt.Errorf("invalid URL: %v", err)
+		return nil, browser.NoActivePage
 	}
 }

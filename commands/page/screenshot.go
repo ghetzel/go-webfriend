@@ -1,25 +1,15 @@
 package page
 
 import (
-	"bytes"
-	"encoding/base64"
-	"fmt"
 	"io"
-	"os"
 
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-webfriend/dom"
+	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/pkg/errors"
+	"github.com/playwright-community/playwright-go"
 )
 
 type ScreenshotArgs struct {
-	// If specified, the screenshot will attempt to capture just the matching element.
-	Selector dom.Selector `json:"selector,omitempty"`
-
-	// Determines how to handle multiple elements that are matched by Selector.
-	// May be "tallest" or "first".
-	Use string `json:"use,omitempty" default:"tallest"`
-
 	Width  int `json:"width"`
 	Height int `json:"height"`
 	X      int `json:"x" default:"-1"`
@@ -29,7 +19,7 @@ type ScreenshotArgs struct {
 	Format string `json:"format" default:"png"`
 
 	// The quality of the image used during encoding.  Only applies to "jpeg" format.
-	Quality int `json:"quality"`
+	Quality int `json:"quality" default:"100"`
 
 	// Whether the given destination should be automatically closed for writing after the
 	// screenshot is written.
@@ -37,12 +27,18 @@ type ScreenshotArgs struct {
 
 	// Automatically resize the screen to the width and height.
 	Autoresize bool `json:"autoresize" default:"true"`
+
+	// A stylesheet to apply while taking the screenshot.
+	Style string `json:"style"`
+
+	// Hide the default page background to produce transparent screenshots.
+	OmitBackground bool `json:"omitbackground"`
+
+	// Disable CSS animations and transitions when taking the screenshot.
+	AllowAnimations bool `json:"animations"`
 }
 
 type ScreenshotResponse struct {
-	// Details about the element that matched the given selector (if any).
-	Element *dom.Element `json:"element,omitempty"`
-
 	// The width of the screenshot (in pixels).
 	Width int `json:"width"`
 
@@ -69,193 +65,83 @@ type ScreenshotResponse struct {
 // temporary area (e.g.: `/tmp`) and the screenshot will be written there.  It is the caller's
 // responsibility to remove the temporary file if desired.  The temporary file path is available in
 // the return object's `path` parameter.
-func (self *Commands) Screenshot(destination interface{}, args *ScreenshotArgs) (*ScreenshotResponse, error) {
+func (self *Commands) Screenshot(destination any, args *ScreenshotArgs) (*ScreenshotResponse, error) {
 	if args == nil {
-		args = &ScreenshotArgs{}
+		args = new(ScreenshotArgs)
 	}
 
 	defaults.SetDefaults(args)
-	response := &ScreenshotResponse{}
-
+	var response = new(ScreenshotResponse)
 	var writer io.Writer
 
-	if destination != nil {
-		if filename, ok := destination.(string); ok {
-			if newPath, w, err := self.browser.GetWriterForPath(filename); err == nil {
-				writer = w
-				response.Path = newPath
-			} else if filename == `temporary` {
-				if temp, err := os.CreateTemp(``, ``); err == nil {
-					writer = temp
-					response.Path = temp.Name()
-				} else {
-					return nil, err
-				}
-			} else if file, err := os.Create(filename); err == nil {
-				writer = file
-				response.Path = filename
-			} else {
-				return nil, err
-			}
-		} else if w, ok := destination.(io.Writer); ok {
-			writer = w
-		} else {
-			return nil, fmt.Errorf("Unsupported destination %T; expected string or io.Writer", destination)
-		}
-	}
-
-	if writer == nil {
-		return response, fmt.Errorf("A destination for the screenshot must be specified")
-	}
-
-	// if one or both of the dimensions are not explicitly given, fill them in from the current
-	// page dimensions (scroll width/height)
-	if args.Width == 0 || args.Height == 0 {
-		if pageWidth, pageHeight, err := self.browser.Tab().PageSize(); err == nil {
-			if args.Width == 0 {
-				args.Width = int(pageWidth)
-			}
-
-			if args.Height == 0 {
-				args.Height = int(pageHeight)
-			}
-		}
-	}
-
-	if err := self.screenshotPopulateArgsFromElement(args, response); err != nil {
+	if w, f, err := getWritableDestination(self, destination); err == nil {
+		writer = w
+		response.Path = f
+	} else {
 		return response, err
 	}
 
-	// start building screenshot RPC request
-	screenshot := map[string]interface{}{
-		`format`:      args.Format,
-		`fromSurface`: false,
-	}
+	if pg := self.browser.Page(); pg != nil {
+		var opts playwright.PageScreenshotOptions
 
-	// set quality for format="jpeg"
-	if args.Format == `jpeg` && args.Quality > 0 {
-		screenshot[`quality`] = args.Quality
-	}
+		opts.FullPage = playwright.Bool(true)
 
-	// setup clipping region to the given X/Y if specified
-	if args.X > 0 || args.Y > 0 {
-		screenshot[`clip`] = map[string]interface{}{
-			`width`:  args.Width,
-			`height`: args.Height,
-			`x`:      args.X,
-			`y`:      args.Y,
-			`scale`:  1.0,
+		switch args.Format {
+		case `jpeg`:
+			opts.Type = playwright.ScreenshotTypeJpeg
+			opts.Quality = playwright.Int(args.Quality)
+		default:
+			opts.Type = playwright.ScreenshotTypePng
 		}
-	} else if args.Autoresize && args.Width > 0 && args.Height > 0 {
-		// resize viewport to given width and height
-		if _, err := self.browser.Tab().RPC(`Emulation`, `setDeviceMetricsOverride`, map[string]interface{}{
-			`width`:             args.Width,
-			`height`:            args.Height,
-			`deviceScaleFactor`: 1.0,
-			`mobile`:            false,
-		}); err != nil {
-			return response, fmt.Errorf("Failed to resize screen: %v", err)
+
+		if args.Width > 0 && args.Height > 0 {
+			if err := pg.SetViewportSize(args.Width, args.Height); err == nil {
+				response.Width = args.Width
+				response.Height = args.Height
+				response.X = args.X
+				response.Y = args.Y
+			} else {
+				return response, err
+			}
+
+			if args.X > 0 || args.Y > 0 {
+				opts.Clip = &playwright.Rect{
+					Width:  float64(args.Width),
+					Height: float64(args.Height),
+					X:      float64(args.X),
+					Y:      float64(args.Y),
+				}
+			}
 		}
-	}
 
-	// take the screenshot
-	if reply, err := self.browser.Tab().RPC(`Page`, `captureScreenshot`, screenshot); err == nil {
-		defer func() {
-			self.browser.Tab().RPC(`Emulation`, `clearDeviceMetricsOverride`, nil)
-			self.browser.Tab().RPC(`Emulation`, `resetPageScaleFactor`, nil)
-		}()
+		if args.Style != `` {
+			opts.Style = playwright.String(args.Style)
+		}
 
-		response.Width = args.Width
-		response.Height = args.Height
-		response.X = args.X
-		response.Y = args.Y
+		if args.AllowAnimations {
+			opts.Animations = playwright.ScreenshotAnimationsAllow
+		} else {
+			opts.Animations = playwright.ScreenshotAnimationsDisabled
+		}
 
-		// decode the response from base64, write the data to destination
-		if data := reply.R().String(`data`); data != `` {
-			decoder := base64.NewDecoder(base64.StdEncoding, bytes.NewBufferString(data))
+		if data, err := pg.Screenshot(opts); err == nil {
+			response.Size = int64(len(data))
 
-			if n, err := io.Copy(writer, decoder); err == nil {
-				response.Size = n
-
+			if _, err := writer.Write(data); err == nil {
 				if args.Autoclose {
 					if closer, ok := writer.(io.Closer); ok {
-						if err := closer.Close(); err == nil {
-							log.Debugf("Destination file closed.")
-						} else {
-							return response, err
-						}
+						return response, closer.Close()
 					}
 				}
 
 				return response, nil
 			} else {
-				return response, fmt.Errorf("Error decoding screenshot response: %v", err)
+				return response, errors.Wrap(err, "bad write")
 			}
 		} else {
-			return response, fmt.Errorf("Empty response received while capturing screenshot")
+			return response, err
 		}
 	} else {
-		return response, err
+		return nil, browser.NoActivePage
 	}
-}
-
-func (self *Commands) screenshotPopulateArgsFromElement(args *ScreenshotArgs, response *ScreenshotResponse) error {
-	// if screenshotting an element, find that element now
-	if args.Selector != `` {
-		if elements, err := self.browser.Tab().ElementQuery(args.Selector, nil); err == nil {
-			var winner *dom.Dimensions
-
-			for _, element := range elements {
-				if winner == nil {
-					if winnerD, err := self.browser.Tab().ElementPosition(element); err == nil {
-						winner = &winnerD
-						response.Element = element
-					} else {
-						return fmt.Errorf("Could not determine element dimensions: %v", err)
-					}
-				} else {
-					switch args.Use {
-					case `first`:
-						break
-					case `tallest`:
-						if elementD, err := self.browser.Tab().ElementPosition(element); err == nil {
-							if elementD.Height > winner.Height {
-								winner = &elementD
-								response.Element = element
-								continue
-							}
-						} else {
-							return fmt.Errorf("Could not determine element dimensions: %v", err)
-						}
-					default:
-						return fmt.Errorf("Unsupported argument for 'use': %q", args.Use)
-					}
-				}
-			}
-
-			if winner != nil {
-				if args.Width == 0 {
-					args.Width = winner.Width
-				}
-
-				if args.Height == 0 {
-					args.Height = winner.Height
-				}
-
-				if args.X < 0 {
-					args.X = winner.Left
-				}
-
-				if args.Y < 0 {
-					args.Y = winner.Top
-				}
-			} else {
-				return fmt.Errorf("No element found")
-			}
-		} else {
-			return fmt.Errorf("failed to take screenshot of element: %v", err)
-		}
-	}
-
-	return nil
 }

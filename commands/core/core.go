@@ -2,6 +2,8 @@
 package core
 
 import (
+	"fmt"
+
 	"github.com/ghetzel/friendscript/commands/core"
 	"github.com/ghetzel/go-webfriend/browser"
 )
@@ -22,4 +24,31 @@ func New(browser *browser.Browser) *Commands {
 	cmd.SetInstance(cmd)
 
 	return cmd
+}
+
+func normalizeKeyCodes(
+	keycodes string,
+	meta bool,
+	ctrl bool,
+	alt bool,
+	shift bool,
+) string {
+	if shift {
+		keycodes = fmt.Sprintf("Shift+%v", keycodes)
+	}
+	if alt {
+		keycodes = fmt.Sprintf("Alt+%v", keycodes)
+	}
+	if ctrl && meta {
+		keycodes = fmt.Sprintf("ControlOrMeta+%v", keycodes)
+	} else {
+		if ctrl {
+			keycodes = fmt.Sprintf("Control+%v", keycodes)
+		}
+		if meta {
+			keycodes = fmt.Sprintf("Meta+%v", keycodes)
+		}
+	}
+
+	return keycodes
 }

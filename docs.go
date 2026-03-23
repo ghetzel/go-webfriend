@@ -16,13 +16,13 @@ import (
 )
 
 type DocItem struct {
-	Name         string      `json:"name,omitempty"`
-	Type         string      `json:"types"`
-	Required     bool        `json:"required,omitempty"`
-	Description  string      `json:"description,omitempty"`
-	DefaultValue interface{} `json:"default,omitempty"`
-	Examples     []string    `json:"examples,omitempty"`
-	Parameters   []*DocItem  `json:"parameters,omitempty"`
+	Name         string     `json:"name,omitempty"`
+	Type         string     `json:"types"`
+	Required     bool       `json:"required,omitempty"`
+	Description  string     `json:"description,omitempty"`
+	DefaultValue any        `json:"default,omitempty"`
+	Examples     []string   `json:"examples,omitempty"`
+	Parameters   []*DocItem `json:"parameters,omitempty"`
 }
 type CallDoc struct {
 	Name        string     `json:"name"`

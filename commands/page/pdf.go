@@ -1,77 +1,88 @@
 package page
 
 import (
-	"encoding/base64"
-	"fmt"
 	"io"
-	"os"
 
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-stockutil/maputil"
+	"github.com/ghetzel/go-stockutil/mathutil"
+	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/pkg/errors"
+	"github.com/playwright-community/playwright-go"
 )
 
 type PdfArgs struct {
-	// Whether the given destination should be automatically closed for writing after the
-	// PDF is written.
+	// Whether the given destination should be automatically closed for writing after the PDF is written.
 	Autoclose bool `json:"autoclose" default:"true"`
+
+	// Paper format of the PDF pages
+	Format string `json:"format"`
+
+	// Orient the PDF in landscape.
+	Landscape bool `json:"landscape"`
+
+	// Scale of the rendered page. Between [0.1, 2.0], default is 1.
+	Scale float64 `json:"scale"`
+}
+
+type PdfResponse struct {
+	// The filesystem path that the screenshot was written to.
+	Path string `json:"path,omitempty"`
+
+	// The size of the screenshot (in bytes).
+	Size int64 `json:"size,omitempty"`
 }
 
 // Render the current page as a PDF document, writing it to the given filename or writable
 // destination object.
-func (self *Commands) Pdf(destination interface{}, args *PdfArgs) error {
-	var dest io.Writer
+func (self *Commands) Pdf(destination any, args *PdfArgs) (*PdfResponse, error) {
+	var response = new(PdfResponse)
+	var writer io.Writer
 
 	if args == nil {
-		args = &PdfArgs{}
+		args = new(PdfArgs)
 	}
 
 	defaults.SetDefaults(args)
 
-	switch destination.(type) {
-	case string:
-		filename := destination.(string)
+	if w, f, err := getWritableDestination(self, destination); err == nil {
+		writer = w
+		response.Path = f
+	} else {
+		return response, err
+	}
 
-		if _, w, err := self.browser.GetWriterForPath(filename); err == nil {
-			dest = w
-		} else if d, err := os.Create(filename); err == nil {
-			dest = d
-		} else {
-			return err
+	if pg := self.browser.Page(); pg != nil {
+		var opts playwright.PagePdfOptions
+
+		opts.Landscape = playwright.Bool(args.Landscape)
+
+		if f := args.Format; f != `` {
+			opts.Format = playwright.String(f)
 		}
-	case io.Writer:
-		dest = destination.(io.Writer)
-	default:
-		return fmt.Errorf("Must specify either a filename or io.Writer destination")
-	}
 
-	if dest == nil {
-		return fmt.Errorf("A destination for the PDF must be specified")
-	}
+		if s := args.Scale; s >= 0 {
+			s = mathutil.Clamp(s, 0.1, 2.0)
+			opts.Scale = playwright.Float(s)
+		}
 
-	if rv, err := self.browser.Tab().RPC(`Page`, `printToPDF`, map[string]interface{}{
-		`scale`: 1,
-	}); err == nil {
-		if dataS := maputil.M(rv.Result).String(`data`); len(dataS) > 0 {
-			if data, err := base64.StdEncoding.DecodeString(dataS); err == nil {
-				_, err := dest.Write(data)
+		if data, err := pg.PDF(opts); err == nil {
+			response.Size = int64(len(data))
 
-				if closer, ok := dest.(io.Closer); ok {
-					if err := closer.Close(); err == nil {
-						log.Debugf("Destination file closed.")
-					} else {
-						return err
+			if _, err := writer.Write(data); err == nil {
+				if args.Autoclose {
+					if closer, ok := writer.(io.Closer); ok {
+						return response, closer.Close()
 					}
 				}
 
-				return err
+				return response, nil
 			} else {
-				return fmt.Errorf("decode error: %v", err)
+				return response, errors.Wrap(err, "bad write")
 			}
 		} else {
-			return fmt.Errorf("Empty response")
+			return response, err
 		}
 	} else {
-		return err
+		return response, browser.NoActivePage
 	}
 }

@@ -1,7 +1,7 @@
 package core
 
 import (
-	"math/rand"
+	"math/rand/v2"
 	"regexp"
 	"time"
 
@@ -9,20 +9,13 @@ import (
 	"github.com/ghetzel/go-stockutil/rxutil"
 	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-stockutil/typeutil"
+	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/utils"
 )
 
 var rxKeyCodes = regexp.MustCompile(`(\[[^\]]*?\]|.)`)
 
 type TypeArgs struct {
-	Alt     bool `json:"alt"`
-	Control bool `json:"control"`
-	Shift   bool `json:"shift"`
-	Meta    bool `json:"meta"`
-
-	// Whether the text being input is issued via the numeric keypad or not.
-	IsKeypad bool `json:"is_keypad"`
-
 	// How long that each individual keystroke will remain down for.
 	KeyDownTime time.Duration `json:"key_down_time" default:"30ms"`
 
@@ -45,16 +38,15 @@ type TypeArgs struct {
 // Example: Type in the Konami code
 //
 //	type "[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA"
-func (self *Commands) Type(input interface{}, args *TypeArgs) (string, error) {
+func (self *Commands) Type(input any, args *TypeArgs) (string, error) {
 	if typeutil.IsEmpty(input) {
 		return ``, nil
 	}
 
 	if args == nil {
-		args = &TypeArgs{}
+		args = new(TypeArgs)
 	}
 
-	var modifiers int
 	var symbols = rxutil.Match(rxKeyCodes, typeutil.String(input)).AllCaptures()
 	var text string
 
@@ -65,58 +57,41 @@ func (self *Commands) Type(input interface{}, args *TypeArgs) (string, error) {
 	args.Delay = utils.FudgeDuration(args.Delay)
 	args.DelayJitter = utils.FudgeDuration(args.DelayJitter)
 
-	// modifiers: Bit field representing pressed modifier keys. Alt=1, Ctrl=2, Meta/Command=4, Shift=8 (default: 0)
-	if args.Alt {
-		modifiers |= 1
-	}
-	if args.Control {
-		modifiers |= 2
-	}
-	if args.Meta {
-		modifiers |= 4
-	}
-	if args.Shift {
-		modifiers |= 8
-	}
+	if pg := self.browser.Page(); pg != nil {
+		for _, symbol := range symbols {
+			if stringutil.IsSurroundedBy(symbol, `[`, `]`) {
+				symbol = stringutil.Unwrap(symbol, `[`, `]`)
+			} else {
+				text += string(symbol)
+			}
 
-	for _, symbol := range symbols {
-		var keyEvent = map[string]interface{}{
-			`type`:      `keyDown`,
-			`isKeypad`:  args.IsKeypad,
-			`modifiers`: modifiers,
-		}
-
-		if stringutil.IsSurroundedBy(symbol, `[`, `]`) {
-			keyEvent[`key`] = stringutil.Unwrap(symbol, `[`, `]`)
-		} else {
-			text += string(symbol)
-			keyEvent[`text`] = string(symbol)
-		}
-
-		// send the keyDown event
-		if _, err := self.browser.Tab().RPC(`Input`, `dispatchKeyEvent`, keyEvent); err == nil {
-			if args.KeyDownTime > 0 {
+			// simulate the time between key presses
+			if args.Delay > 0 {
 				time.Sleep(
-					args.KeyDownTime + (time.Duration(float64(args.KeyDownJitter)*rand.Float64()) * time.Millisecond),
+					args.Delay + (time.Duration(float64(args.DelayJitter)*rand.Float64()) * time.Millisecond),
 				)
 			}
-		} else {
-			return ``, err
-		}
 
-		// send the keyUp event
-		if _, err := self.browser.Tab().RPC(`Input`, `dispatchKeyEvent`, map[string]interface{}{
-			`type`: `keyUp`,
-		}); err != nil {
-			return ``, err
-		}
+			var keyboard = pg.Keyboard()
 
-		// simulate the time between key presses
-		if args.Delay > 0 {
-			time.Sleep(
-				args.Delay + (time.Duration(float64(args.DelayJitter)*rand.Float64()) * time.Millisecond),
-			)
+			// send the keyDown event
+			if err := keyboard.Down(symbol); err == nil {
+				if args.KeyDownTime > 0 {
+					time.Sleep(
+						args.KeyDownTime + (time.Duration(float64(args.KeyDownJitter)*rand.Float64()) * time.Millisecond),
+					)
+				}
+			} else {
+				return ``, err
+			}
+
+			// send the keyUp event
+			if err := keyboard.Up(symbol); err != nil {
+				return ``, err
+			}
 		}
+	} else {
+		return ``, browser.NoActivePage
 	}
 
 	return text, nil

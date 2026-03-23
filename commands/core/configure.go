@@ -1,10 +1,8 @@
 package core
 
 import (
-	"fmt"
-
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/colorutil"
+	"github.com/ghetzel/go-webfriend/browser"
 )
 
 type ConfigureArgs struct {
@@ -44,61 +42,61 @@ func (self *Commands) Configure(args *ConfigureArgs) error {
 
 	// Geolocation
 	// ---------------------------------------------------------------------------------------------
-	lat := args.Latitude
-	lon := args.Longitude
+	// lat := args.Latitude
+	// lon := args.Longitude
 
-	if lat != 0 && lon != 0 {
-		if _, err := self.browser.Tab().RPC(`Emulation`, `setGeolocationOverride`, map[string]interface{}{
-			`latitude`:  lat,
-			`longitude`: lon,
-			`accuracy`:  args.Accuracy,
-		}); err != nil {
-			return err
-		}
-	} else {
-		self.browser.Tab().RPC(`Emulation`, `clearGeolocationOverride`, nil)
-	}
+	// if lat != 0 && lon != 0 {
+	// 	if _, err := self.browser.Tab().RPC(`Emulation`, `setGeolocationOverride`, map[string]any{
+	// 		`latitude`:  lat,
+	// 		`longitude`: lon,
+	// 		`accuracy`:  args.Accuracy,
+	// 	}); err != nil {
+	// 		return err
+	// 	}
+	// } else {
+	// 	self.browser.Tab().RPC(`Emulation`, `clearGeolocationOverride`, nil)
+	// }
 
 	// User Agent
 	// ---------------------------------------------------------------------------------------------
 	if ua := args.UserAgent; ua != `` {
-		if _, err := self.browser.Tab().RPC(`Emulation`, `setUserAgentOverride`, map[string]interface{}{
-			`userAgent`: ua,
-		}); err != nil {
-			return err
-		}
+		// if _, err := self.browser.Tab().RPC(`Emulation`, `setUserAgentOverride`, map[string]any{
+		// 	`userAgent`: ua,
+		// }); err != nil {
+		// 	return err
+		// }
 	}
 
 	// Emulation Flags & Features
 	// ---------------------------------------------------------------------------------------------
-	self.browser.Tab().AsyncRPC(`Emulation`, `setScriptExecutionDisabled`, map[string]interface{}{
-		`value`: args.DisableScripts,
-	})
+	// self.browser.Tab().AsyncRPC(`Emulation`, `setScriptExecutionDisabled`, map[string]any{
+	// 	`value`: args.DisableScripts,
+	// })
 
-	self.browser.Tab().AsyncRPC(`Emulation`, `setTouchEmulationEnabled`, map[string]interface{}{
-		`value`: args.EmulateTouch,
-	})
+	// self.browser.Tab().AsyncRPC(`Emulation`, `setTouchEmulationEnabled`, map[string]any{
+	// 	`value`: args.EmulateTouch,
+	// })
 
-	self.browser.Tab().AsyncRPC(`Emulation`, `setScrollbarsHidden`, map[string]interface{}{
-		`hidden`: args.HideScrollbars,
-	})
+	// self.browser.Tab().AsyncRPC(`Emulation`, `setScrollbarsHidden`, map[string]any{
+	// 	`hidden`: args.HideScrollbars,
+	// })
 
-	if bgcolor := args.BackgroundColor; bgcolor != `` {
-		if col, err := colorutil.Parse(bgcolor); err == nil {
-			r, g, b, a := col.RGBA255()
+	// if bgcolor := args.BackgroundColor; bgcolor != `` {
+	// 	if col, err := colorutil.Parse(bgcolor); err == nil {
+	// 		r, g, b, a := col.RGBA255()
 
-			self.browser.Tab().AsyncRPC(`Emulation`, `setDefaultBackgroundColorOverride`, map[string]interface{}{
-				`r`: r,
-				`g`: g,
-				`b`: b,
-				`a`: a,
-			})
-		} else {
-			return fmt.Errorf("invalid background color: %v", err)
-		}
-	} else {
-		self.browser.Tab().AsyncRPC(`Emulation`, `setDefaultBackgroundColorOverride`, nil)
-	}
+	// 		self.browser.Tab().AsyncRPC(`Emulation`, `setDefaultBackgroundColorOverride`, map[string]any{
+	// 			`r`: r,
+	// 			`g`: g,
+	// 			`b`: b,
+	// 			`a`: a,
+	// 		})
+	// 	} else {
+	// 		return fmt.Errorf("invalid background color: %v", err)
+	// 	}
+	// } else {
+	// 	self.browser.Tab().AsyncRPC(`Emulation`, `setDefaultBackgroundColorOverride`, nil)
+	// }
 
-	return nil
+	return browser.NotImplemented
 }

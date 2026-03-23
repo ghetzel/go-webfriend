@@ -2,6 +2,7 @@ package page
 
 import (
 	defaults "github.com/ghetzel/go-defaults"
+	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/dom"
 )
 
@@ -20,19 +21,7 @@ func (self *Commands) Remove(selector dom.Selector, args *RemoveArgs) (int, erro
 	if !selector.IsNone() {
 		// query for the elements to remove from the found parent, or throughout the whole
 		// document if no parent was given.
-		if elements, err := self.browser.Tab().ElementQuery(selector, &args.Parent); err == nil {
-			n := 0
-
-			for _, element := range elements {
-				if _, err := self.browser.Tab().EvaluateOn(element, `this.remove()`); err == nil {
-					n += 1
-				}
-			}
-
-			return n, nil
-		} else {
-			return 0, err
-		}
+		return 0, browser.NotImplemented
 	} else {
 		return 0, nil
 	}

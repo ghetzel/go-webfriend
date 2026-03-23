@@ -2,6 +2,8 @@ package core
 
 import (
 	"github.com/ghetzel/go-stockutil/sliceutil"
+	"github.com/ghetzel/go-webfriend/browser"
+	"github.com/playwright-community/playwright-go"
 )
 
 // Inject Javascript into the current page, evaluate it, and return the results.
@@ -44,8 +46,12 @@ import (
 //
 // # $result now contains an array of zero or more strings as returned from JavaScript.
 // ```
-func (self *Commands) Javascript(script string) (interface{}, error) {
-	return self.browser.Tab().Evaluate(script, self.exported...)
+func (self *Commands) Javascript(script string) (any, error) {
+	if pg := self.browser.Page(); pg != nil {
+		return pg.Locator(`body`).Evaluate(script, nil, playwright.LocatorEvaluateOptions{})
+	} else {
+		return nil, browser.NoActivePage
+	}
 }
 
 // Specify a variable that should be exported to external Javascripts.

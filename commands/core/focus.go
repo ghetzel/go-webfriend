@@ -1,25 +1,32 @@
 package core
 
 import (
-	"fmt"
+	"time"
 
+	defaults "github.com/ghetzel/go-defaults"
+	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/dom"
+	"github.com/playwright-community/playwright-go"
 )
 
+type FocusArgs struct {
+	// The amount of time to wait for the element to focus.
+	Timeout time.Duration `json:"timeout" default:"30s"`
+}
+
 // Focuses the given HTML element described by selector. One and only one element may match the selector.
-func (self *Commands) Focus(selector dom.Selector) (*dom.Element, error) {
-	if elements, err := self.Select(selector, nil); err == nil && len(elements) == 1 {
-		if _, err := self.browser.Tab().Evaluate(fmt.Sprintf(
-			"document.querySelector(%q).focus()",
-			selector,
-		)); err == nil {
-			return elements[0], nil
-		} else {
-			return nil, err
-		}
-	} else if l := len(elements); l > 1 {
-		return nil, dom.TooManyMatchesErr(selector, 1, l)
+func (self *Commands) Focus(selector dom.Selector, args *FocusArgs) error {
+	if args == nil {
+		args = new(FocusArgs)
+	}
+
+	defaults.SetDefaults(args)
+
+	if pg := self.browser.Page(); pg != nil {
+		return pg.Locator(string(selector)).Focus(playwright.LocatorFocusOptions{
+			Timeout: playwright.Float(float64(args.Timeout.Milliseconds())),
+		})
 	} else {
-		return nil, err
+		return browser.NoActivePage
 	}
 }

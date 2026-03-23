@@ -1,28 +1,27 @@
 package core
 
 import (
-	"fmt"
-	"regexp"
 	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/ghetzel/go-webfriend/utils"
+	"github.com/playwright-community/playwright-go"
 )
 
 type ClickArgs struct {
-	// Permit multiple elements to be clicked.
-	Multiple bool `json:"value"`
+	// Number of clicks to perform.
+	Count int `json:"count" default:"1"`
 
-	// If Multiple clicks are permitted, what is the delay between each click.
+	// Time to waith between mousedown and mouseup events.
 	Delay time.Duration `json:"delay" default:"20ms"`
+
+	// Which mouse button to simulate during click. Values are "left", "right", "middle". Default "left".
+	Button string `json:"button" default:"left"`
 
 	// If provided, this represents a regular expression that the text value of matching elements must match to be clicked.
 	MatchText string `json:"match_text"`
-
-	// If true, only the first matching element will be clicked
-	FirstMatch bool `json:"first"`
 }
 
 // Click on HTML element(s) matches by selector.  If multiple is true, then all
@@ -45,49 +44,35 @@ type ClickArgs struct {
 //	}
 //
 // ```
-func (self *Commands) Click(selector dom.Selector, args *ClickArgs) ([]*dom.Element, error) {
+func (self *Commands) Click(selector dom.Selector, args *ClickArgs) error {
 	if args == nil {
-		args = &ClickArgs{}
+		args = new(ClickArgs)
 	}
 
 	defaults.SetDefaults(args)
 	args.Delay = utils.FudgeDuration(args.Delay)
 
-	if elements, err := self.Select(selector, nil); err == nil {
-		if mt := args.MatchText; mt != `` {
-			if rx, err := regexp.Compile(mt); err == nil {
-				var matches = make([]*dom.Element, 0)
+	var btn *playwright.MouseButton
 
-				for _, el := range elements {
-					if rx.MatchString(el.Text) {
-						matches = append(matches, el)
-					}
-				}
+	switch args.Button {
+	case `middle`:
+		btn = playwright.MouseButtonMiddle
+	case `right`:
+		btn = playwright.MouseButtonRight
+	default:
+		btn = playwright.MouseButtonLeft
+	}
 
-				elements = matches
-			} else {
-				return nil, fmt.Errorf("match_text: %v", err)
-			}
-		}
-
-		if len(elements) == 1 || args.Multiple || args.FirstMatch {
-			if _, err := self.browser.Tab().Evaluate(fmt.Sprintf(
-				"document.querySelectorAll(%q).forEach(function(i){ i.click() })",
-				selector,
-			)); err != nil {
-				return nil, err
-			}
-
-			if args.FirstMatch {
-				return elements[0:0], nil
-			}
-
-			return elements, nil
-		} else {
-			return nil, dom.TooManyMatchesErr(selector, 1, len(elements))
-		}
+	if pg := self.browser.Page(); pg != nil {
+		return pg.Locator(string(selector), playwright.PageLocatorOptions{
+			HasText: args.MatchText,
+		}).Click(playwright.LocatorClickOptions{
+			ClickCount: playwright.Int(args.Count),
+			Delay:      playwright.Float(float64(args.Delay.Milliseconds())),
+			Button:     btn,
+		})
 	} else {
-		return nil, err
+		return browser.NoActivePage
 	}
 }
 

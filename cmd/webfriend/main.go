@@ -62,22 +62,6 @@ func main() {
 			Name:  `var, V`,
 			Usage: `Set one or more variables ([deeply.nested.]key=value) before executing the script.`,
 		},
-		cli.DurationFlag{
-			Name:  `start-wait-time, W`,
-			Usage: `The amount of time that Webfriend should wait for the browser to startup before assuming it never will and killing it.`,
-			Value: browser.DefaultStartWait,
-		},
-		cli.IntFlag{
-			Name:   `remote-debugging-port, R`,
-			Usage:  `Explicitly provide the port number for the DevTools protocol.`,
-			EnvVar: `WEBFRIEND_REMOTE_DEBUG_PORT`,
-			Value:  browser.DefaultDebuggingPort,
-		},
-		cli.StringFlag{
-			Name:   `remote-debugging-address, r`,
-			Usage:  `If given, Webfriend will connect to an already-running DevTools instance instead of starting its own browser.`,
-			EnvVar: `WEBFRIEND_REMOTE_DEBUG_ADDR`,
-		},
 		cli.StringFlag{
 			Name:  `execute, e`,
 			Usage: `Execute the given argument as a Friendscript in the connected session, then exit.`,
@@ -89,7 +73,7 @@ func main() {
 		},
 	}
 
-	var chrome *browser.Browser
+	var instance *browser.Browser
 
 	app.Before = func(c *cli.Context) error {
 		log.SetLevelString(c.String(`log-level`))
@@ -101,16 +85,12 @@ func main() {
 		defer browser.StopAllActiveBrowsers()
 
 		log.Infof("Starting %s %s...", c.App.Name, c.App.Version)
-		chrome = browser.NewBrowser()
-		chrome.Headless = !c.Bool(`debug`)
-		chrome.HideScrollbars = true
-		chrome.RemoteDebuggingPort = c.Int(`remote-debugging-port`)
-		chrome.RemoteAddress = c.String(`remote-debugging-address`)
-		chrome.StartWait = c.Duration(`start-wait-time`)
+		instance = browser.NewBrowser()
+		instance.URL = `https://gary.cool`
 
-		if err := chrome.Launch(); err == nil {
+		if err := instance.Launch(); err == nil {
 			// evaluate Friendscript / run the REPL
-			var script = webfriend.NewEnvironment(chrome)
+			var script = webfriend.NewEnvironment(instance)
 			var wferr error
 
 			// pre-populate initial variables

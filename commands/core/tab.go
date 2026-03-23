@@ -1,53 +1,9 @@
 package core
 
 import (
-	"fmt"
-
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/maputil"
-	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
 )
-
-type NewTabArgs struct {
-	// The width and height (in pixels) that the tab should be created with.
-	Width int `json:"width"`
-
-	// The height and height (in pixels) that the tab should be created with.
-	Height int `json:"height"`
-
-	// Whether to automatically switch to the newly-created tab as the active
-	// tab for subsequent commands.
-	Autoswitch bool `json:"autoswitch" default:"true"`
-}
-
-// [SKIP]
-// Open a new tab and navigate to the given URL.
-func (self *Commands) NewTab(url string, args *NewTabArgs) (browser.TabID, error) {
-	return ``, fmt.Errorf(`NI`)
-}
-
-// [SKIP]
-// Close the tab identified by the given ID.
-func (self *Commands) CloseTab(id browser.TabID) error {
-	return fmt.Errorf(`NI`)
-}
-
-// [SKIP]
-// Switches the active tab to a given tab.
-func (self *Commands) SwitchTab(id browser.TabID) (*browser.Tab, error) {
-	return nil, fmt.Errorf(`NI`)
-}
-
-// Reload the currently active tab.
-func (self *Commands) Reload() error {
-	return self.browser.Tab().AsyncRPC(`Page`, `reload`, nil)
-}
-
-// Stop loading the currently active tab.
-func (self *Commands) Stop() error {
-	return self.browser.Tab().AsyncRPC(`Page`, `stopLoading`, nil)
-}
 
 type Orientation string
 
@@ -64,32 +20,6 @@ type ResizeArgs struct {
 
 	// The height of the screen.
 	Height int `json:"height"`
-
-	// The scaling factor of the content.
-	Scale float64 `json:"scale"`
-
-	// Whether to emulate a mobile device or not. If a map is provided, mobile
-	// emulation will be enabled and configured using the following keys:
-	//
-	// <br>
-	//
-	// Value    | Data Type     | Description
-	// ---------|---------------|-------------
-	// *width*  | int, optional | The width of the mobile screen to emulate.
-	// *height* | int, optional | The height of the mobile screen to emulate.
-	// *x*      | int, optional | The horizontal position of the currently viewable portion of the mobile screen.
-	// *y*      | int, optional | The vertical position of the currently viewable portion of the mobile screen.
-	//
-	Mobile interface{} `json:"mobile"`
-
-	// Whether to fit the viewport contents to the available area or not.
-	FitWindow bool `json:"fit_window"`
-
-	// Which screen orientation to emulate, if any.
-	Orientation string `json:"orientation" default:"landscapePrimary"`
-
-	// The angle of the screen to emulate (in degrees; 0-360).
-	Angle int `json:"angle"`
 }
 
 type ResizeResponse struct {
@@ -108,63 +38,41 @@ type ResizeResponse struct {
 // screenshots and screencasts, or for testing responsive design elements.
 func (self *Commands) Resize(args *ResizeArgs) (*ResizeResponse, error) {
 	if args == nil {
-		args = &ResizeArgs{}
+		args = new(ResizeArgs)
 	}
 
 	defaults.SetDefaults(args)
 
-	rpcArgs := map[string]interface{}{
-		`width`:             args.Width,
-		`height`:            args.Height,
-		`deviceScaleFactor`: args.Scale,
-		`mobile`:            typeutil.V(args.Mobile).Bool(),
-		`screenOrientation`: map[string]interface{}{
-			`type`:  string(args.Orientation),
-			`angle`: args.Angle,
-		},
-	}
-
-	if typeutil.IsMap(args.Mobile) {
-		mobile := maputil.M(args.Mobile)
-
-		if v := mobile.Int(`width`); v > 0 {
-			rpcArgs[`screenWidth`] = int(v)
+	if pg := self.browser.Page(); pg != nil {
+		if err := pg.SetViewportSize(args.Width, args.Height); err == nil {
+			return &ResizeResponse{
+				Width:  args.Width,
+				Height: args.Height,
+			}, nil
+		} else {
+			return nil, err
 		}
-
-		if v := mobile.Int(`height`); v > 0 {
-			rpcArgs[`screenHeight`] = int(v)
-		}
-
-		if v := mobile.Int(`x`); v > 0 {
-			rpcArgs[`positionX`] = int(v)
-		}
-
-		if v := mobile.Int(`y`); v > 0 {
-			rpcArgs[`positionY`] = int(v)
-		}
-	}
-
-	if _, err := self.browser.Tab().RPC(`Emulation`, `setDeviceMetricsOverride`, rpcArgs); err == nil {
-		return &ResizeResponse{
-			Width:  args.Width,
-			Height: args.Height,
-		}, nil
 	} else {
-		return nil, err
+		return nil, browser.NoActivePage
 	}
 }
 
-// [SKIP]
-// Return all currently open tabs.
-func (self *Commands) Tabs() ([]browser.Tab, error) {
-	return nil, fmt.Errorf(`NI`)
-}
-
-// Navigate back through the current tab's history.
+// Navigate back in the current tab's history.
 func (self *Commands) Back() error {
-	if _, err := self.browser.Tab().RPC(`Page`, `getNavigationHistory`, nil); err == nil {
-		return nil
-	} else {
+	if pg := self.browser.Page(); pg != nil {
+		var _, err = pg.GoBack()
 		return err
+	} else {
+		return browser.NoActivePage
+	}
+}
+
+// Navigate forward in the current tab's history.
+func (self *Commands) Forward() error {
+	if pg := self.browser.Page(); pg != nil {
+		var _, err = pg.GoForward()
+		return err
+	} else {
+		return browser.NoActivePage
 	}
 }

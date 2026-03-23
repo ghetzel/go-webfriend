@@ -2,7 +2,6 @@ package webfriend
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/fatih/color"
@@ -38,11 +37,6 @@ func NewEnvironment(b *browser.Browser) *Environment {
 
 	if b := environment.browser; b != nil {
 		b.SetScope(environment)
-
-		b.Tab().RegisterEventHandler(`Inspector.detached`, func(event *browser.Event) {
-			b.Stop()
-			os.Exit(0)
-		})
 	}
 
 	// add in our custom modules and module overrides
@@ -60,7 +54,7 @@ func NewEnvironment(b *browser.Browser) *Environment {
 	// add command context handlers
 	environment.RegisterContextHandler(func(ctx *scripting.Context, isCompleted bool) {
 		if browser := environment.Browser(); browser != nil {
-			params := map[string]interface{}{
+			params := map[string]any{
 				`command`: ctx.Label,
 				`offset`:  ctx.AbsoluteStartOffset,
 				`advance`: ctx.Length,
@@ -79,14 +73,6 @@ func NewEnvironment(b *browser.Browser) *Environment {
 
 			if err := ctx.Error; err != nil {
 				params[`error`] = err.Error()
-			}
-
-			browser.Tab().Emit(`Webfriend.scriptContextEvent`, params)
-
-			if isCompleted && ctx.Error == nil {
-				if delay := browser.Tab().AfterCommandDelay; delay > 0 {
-					time.Sleep(delay)
-				}
 			}
 		}
 	})
