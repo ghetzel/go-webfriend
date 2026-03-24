@@ -4,7 +4,7 @@ import (
 	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/log"
+	"github.com/ghetzel/go-stockutil/stringutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/playwright-community/playwright-go"
@@ -12,16 +12,27 @@ import (
 
 type SelectArgs struct {
 	// The timeout before we stop waiting for the element to appear.
-	Timeout time.Duration `json:"timeout" default:"30s"`
+	Timeout time.Duration `json:"timeout" default:"1s"`
 
 	// Waits for matching elements to be in a particular state. Values are "visible", "hidden", "attached", "detached". Default is "visible".
 	State string `json:"state" default:"visible"`
 }
 
-// Polls the DOM for an element that matches the given selector. Either the
-// element will be found and returned within the given timeout, or a
-// TimeoutError will be returned.
-func (self *Commands) Select(selector dom.Selector, args *SelectArgs) ([]*dom.Element, error) {
+// Retrieve the first element matching the given selector.
+func (self *Commands) Select(selector dom.Selector, args *SelectArgs) (*dom.Element, error) {
+	if matches, err := self.SelectAll(selector, args); err == nil {
+		if len(matches) > 0 {
+			return matches[0], nil
+		} else {
+			return nil, nil
+		}
+	} else {
+		return nil, err
+	}
+}
+
+// Retrieve all elements matching the given selector.
+func (self *Commands) SelectAll(selector dom.Selector, args *SelectArgs) ([]*dom.Element, error) {
 	if args == nil {
 		args = new(SelectArgs)
 	}
@@ -42,14 +53,34 @@ func (self *Commands) Select(selector dom.Selector, args *SelectArgs) ([]*dom.El
 			state = playwright.WaitForSelectorStateVisible
 		}
 
-		var query = pg.Locator(string(selector))
+		var query playwright.Locator
+		var syntax, expr = stringutil.SplitPairTrailing(string(selector), `=`)
 
-		query.WaitFor(playwright.LocatorWaitForOptions{
+		switch syntax {
+		case `alt`:
+			query = pg.GetByAltText(expr)
+		case `label`:
+			query = pg.GetByLabel(expr)
+		case `placeholder`:
+			query = pg.GetByPlaceholder(expr)
+		case `role`:
+			query = pg.GetByRole(playwright.AriaRole(expr))
+		case `test`:
+			query = pg.GetByTestId(expr)
+		case `text`:
+			query = pg.GetByText(expr)
+		case `title`:
+			query = pg.GetByTitle(expr)
+		default:
+			query = pg.Locator(string(selector))
+		}
+
+		if err := query.WaitFor(playwright.LocatorWaitForOptions{
 			State:   state,
 			Timeout: playwright.Float(float64(args.Timeout.Milliseconds())),
-		})
-
-		log.Debugf("%v (%d len)", selector, len(dom.FromPlaywright(query)))
+		}); err != nil {
+			return nil, nil
+		}
 
 		return dom.FromPlaywright(query), nil
 	} else {

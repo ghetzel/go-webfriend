@@ -1,13 +1,18 @@
 package browser
 
 import (
+	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"syscall"
 
 	"github.com/ghetzel/friendscript/utils"
 	"github.com/ghetzel/go-stockutil/executil"
 	"github.com/ghetzel/go-stockutil/log"
+	"github.com/ghetzel/go-stockutil/sliceutil"
+	"github.com/ghetzel/go-stockutil/stringutil"
+	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/pkg/errors"
 	"github.com/playwright-community/playwright-go"
 )
@@ -50,12 +55,34 @@ func StopAllActiveBrowsers() {
 
 type Browser struct {
 	utils.Runtime
-	Engine     string
-	URL        string
-	playwright *playwright.Playwright
-	browser    playwright.Browser
-	pages      []*Page
-	activePage int
+	Accuracy        float64
+	AuthOrigin      string
+	AuthPassword    string
+	AuthUsername    string
+	BaseURL         string
+	DisableCSP      bool
+	DisableNetwork  bool
+	DisableScripts  bool
+	EmulateTouch    bool
+	Engine          string
+	Height          int
+	IgnoreTLSErrors bool
+	Latitude        float64
+	Locale          string
+	Longitude       float64
+	ProxyBypass     []string
+	ProxyPassword   string
+	ProxyURL        string
+	ProxyUsername   string
+	Scale           float64
+	StartURL        string
+	Timezone        string
+	UserAgent       string
+	Width           int
+	playwright      *playwright.Playwright
+	browser         playwright.Browser
+	pages           []*Page
+	activePage      int
 }
 
 func NewBrowser() *Browser {
@@ -72,34 +99,38 @@ func (self *Browser) SetScope(fsenv utils.Runtime) {
 }
 
 func (self *Browser) Launch() error {
-	if pw, err := playwright.Run(); err == nil {
+	if pw, err := playwright.Run(&playwright.RunOptions{}); err == nil {
 		self.playwright = pw
 	} else {
 		return err
 	}
 
-	var err error
+	var lerr error
 
-	switch self.Engine {
-	case ``, `chromium`:
-		self.browser, err = self.playwright.Chromium.Launch()
-	case `firefox`:
-		self.browser, err = self.playwright.Firefox.Launch()
-	case `webkit`:
-		self.browser, err = self.playwright.WebKit.Launch()
+	if opts, err := self.browserLaunchOptions(); err == nil {
+		switch self.Engine {
+		case ``, `chromium`:
+			self.browser, lerr = self.playwright.Chromium.Launch(*opts)
+		case `firefox`:
+			self.browser, lerr = self.playwright.Firefox.Launch(*opts)
+		case `webkit`:
+			self.browser, lerr = self.playwright.WebKit.Launch(*opts)
+		}
+	} else {
+		return errors.Wrap(err, "bad options")
 	}
 
-	if err != nil {
-		return errors.Wrap(err, "failed launch")
+	if lerr != nil {
+		return errors.Wrap(lerr, "failed launch")
 	}
 
-	if self.URL == `` {
-		self.URL = DefaultStartURL
+	if self.StartURL == `` {
+		self.StartURL = DefaultStartURL
 	}
 
 	if p, err := NewPage(self); err == nil {
-		if self.URL != `` {
-			if _, err := p.Goto(self.URL, playwright.PageGotoOptions{
+		if self.StartURL != `` {
+			if _, err := p.Goto(self.StartURL, playwright.PageGotoOptions{
 				WaitUntil: playwright.WaitUntilStateDomcontentloaded,
 			}); err == nil {
 				self.pages = append(self.pages, p)
@@ -112,6 +143,137 @@ func (self *Browser) Launch() error {
 	}
 
 	return nil
+}
+
+func (self *Browser) browserLaunchOptions() (*playwright.BrowserTypeLaunchOptions, error) {
+	var opts = new(playwright.BrowserTypeLaunchOptions)
+
+	// webfriend will handle the signals itself
+	opts.HandleSIGHUP = playwright.Bool(false)
+	opts.HandleSIGINT = playwright.Bool(false)
+	opts.HandleSIGTERM = playwright.Bool(false)
+
+	return opts, nil
+}
+
+func (self *Browser) newPageOptions() []playwright.BrowserNewPageOptions {
+	var opt playwright.BrowserNewPageOptions
+
+	// simple options
+	opt.BaseURL = playwright.String(self.BaseURL)
+	opt.BypassCSP = playwright.Bool(self.DisableCSP)
+	opt.HasTouch = playwright.Bool(self.EmulateTouch)
+	opt.IgnoreHttpsErrors = playwright.Bool(self.IgnoreTLSErrors)
+	opt.JavaScriptEnabled = playwright.Bool(!self.DisableScripts)
+	opt.Offline = playwright.Bool(self.DisableNetwork)
+
+	// scale
+	if s := self.Scale; s > 0 {
+		opt.DeviceScaleFactor = playwright.Float(s)
+	}
+
+	// locale
+	if locale := self.Locale; locale != `` {
+		opt.Locale = playwright.String(locale)
+	}
+
+	// geolocation. my apologies to Null Island
+	if lat := self.Latitude; lat != 0 {
+		if lon := self.Longitude; lon != 0 {
+			opt.Geolocation = &playwright.Geolocation{
+				Latitude:  lat,
+				Longitude: lon,
+				Accuracy:  playwright.Float(self.Accuracy),
+			}
+		}
+	}
+
+	// viewport size
+	if w := self.Width; w > 0 {
+		if h := self.Height; h > 0 {
+			opt.Screen = &playwright.Size{
+				Width:  w,
+				Height: h,
+			}
+
+			opt.Viewport = &playwright.Size{
+				Width:  w,
+				Height: h,
+			}
+		}
+	}
+
+	// user agent
+	switch ua := self.UserAgent; ua {
+	case ``:
+		break
+	case `random`:
+		opt.UserAgent = playwright.String(stringutil.UUID().Base58())
+	default:
+		opt.UserAgent = playwright.String(ua)
+	}
+
+	// timezone
+	if tz := self.Timezone; tz != `` {
+		opt.TimezoneId = playwright.String(tz)
+	} else if tz := os.Getenv(`TZ`); tz != `` {
+		opt.TimezoneId = playwright.String(tz)
+	}
+
+	// credentials
+	if self.AuthUsername != `` {
+		var creds = &playwright.HttpCredentials{
+			Username: self.AuthUsername,
+			Password: self.AuthPassword,
+		}
+
+		if origin := self.AuthOrigin; origin != `` {
+			creds.Origin = playwright.String(origin)
+		}
+
+		opt.HttpCredentials = creds
+	}
+
+	// proxy server
+	var proxyURL *url.URL
+
+	if pu := self.ProxyURL; pu != `` {
+		proxyURL, _ = url.Parse(pu)
+	} else if pu := os.Getenv(`HTTP_PROXY`); pu != `` {
+		proxyURL, _ = url.Parse(pu)
+	}
+
+	if proxyURL != nil {
+		var uu string
+		var up string
+
+		if user := proxyURL.User; user != nil {
+			uu = user.Username()
+			up, _ = user.Password()
+		}
+
+		opt.Proxy = &playwright.Proxy{
+			Server: proxyURL.String(),
+		}
+
+		if np := os.Getenv(`NO_PROXY`); np != `` {
+			self.ProxyBypass = sliceutil.SplitTrimSpaceCompact(np, `,`)
+		}
+
+		if bypass := self.ProxyBypass; len(bypass) > 0 {
+			opt.Proxy.Bypass = playwright.String(strings.Join(bypass, `, `))
+		}
+
+		if u := typeutil.OrString(self.ProxyUsername, uu); u != `` {
+			opt.Proxy.Username = playwright.String(u)
+		}
+
+		if p := typeutil.OrString(self.ProxyPassword, up); p != `` {
+			opt.Proxy.Password = playwright.String(p)
+		}
+	}
+
+	return []playwright.BrowserNewPageOptions{opt}
 }
 
 func (self *Browser) Page(index ...int) *Page {
@@ -138,6 +300,11 @@ func (self *Browser) Stop() (merr error) {
 	if pw := self.playwright; pw != nil {
 		merr = log.AppendError(merr, pw.Stop())
 	}
+
+	self.browser = nil
+	self.playwright = nil
+	self.pages = nil
+	self.activePage = 0
 
 	return
 }

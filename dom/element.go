@@ -10,10 +10,11 @@ type Dimensions struct {
 }
 
 type Element struct {
-	ID         string         `json:"id"`
-	Name       string         `json:"name"`
+	ID         string         `json:"id,omitempty"`
+	Name       string         `json:"name,omitempty"`
 	Namespace  string         `json:"namespace,omitempty"`
-	Attributes map[string]any `json:"attributes"`
+	Attributes map[string]any `json:"attributes,omitempty"`
 	Text       string         `json:"text,omitempty"`
+	HTML       string         `json:"html,omitempty"`
 	Children   []*Element     `json:"children,omitempty"`
 }

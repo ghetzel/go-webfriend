@@ -4,6 +4,7 @@ import (
 	"time"
 
 	defaults "github.com/ghetzel/go-defaults"
+	"github.com/ghetzel/go-stockutil/typeutil"
 	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/ghetzel/go-webfriend/utils"
@@ -82,9 +83,18 @@ type ClickAtArgs struct {
 
 	// The Y-coordinate to click at
 	Y int `json:"y"`
+
+	// Number of steps to interpolate when moving.
+	Steps int `json:"steps"`
 }
 
 // Click the page at the given X, Y coordinates.
-func (self *Commands) ClickAt(args *ClickAtArgs) ([]dom.Element, error) {
-	return nil, browser.NotImplemented
+func (self *Commands) ClickAt(args *ClickAtArgs) error {
+	if pg := self.browser.Page(); pg != nil {
+		return pg.Mouse().Move(float64(args.X), float64(args.Y), playwright.MouseMoveOptions{
+			Steps: playwright.Int(typeutil.OrNInt(args.Steps, 1)),
+		})
+	} else {
+		return browser.NoActivePage
+	}
 }

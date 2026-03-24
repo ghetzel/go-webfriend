@@ -17,15 +17,24 @@ func elementTreeFrom(locator playwright.Locator, depth int) (elements []*Element
 			var element = new(Element)
 
 			element.ID, _ = child.GetAttribute(`id`)
+
+			// var x, _ = child.Evaluate(`this.attributes`, nil)
+			// element.Name = typeutil.String(x)
+
+			var grandchildren = child.Locator(`*:nth-child(1n)`)
+
+			if cnt, err := grandchildren.Count(); err == nil && cnt > 0 {
+				if gc := elementTreeFrom(grandchildren, depth+1); len(gc) > 0 {
+					element.Children = gc
+				}
+			}
+
 			element.Text, _ = child.InnerText()
+			element.HTML, _ = child.InnerHTML()
 
-			// var grandchildren = child.Locator(`*:nth-child(1n)`)
-
-			// if cnt, err := grandchildren.Count(); err == nil && cnt > 0 {
-			// 	element.Children = elementTreeFrom(grandchildren, depth+1)
-			// }
-
-			elements = append(elements, element)
+			if element.Text != `` || len(element.Children) > 0 {
+				elements = append(elements, element)
+			}
 		}
 	}
 

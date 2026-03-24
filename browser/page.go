@@ -20,7 +20,9 @@ func NewPage(browser *Browser) (*Page, error) {
 		browser: browser,
 	}
 
-	if pg, err := page.browser.browser.NewPage(); err == nil {
+	if pg, err := page.browser.browser.NewPage(
+		page.browser.newPageOptions()...,
+	); err == nil {
 		page.Page = pg
 		return page, nil
 	} else {

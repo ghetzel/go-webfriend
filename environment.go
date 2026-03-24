@@ -58,7 +58,7 @@ func NewEnvironment(b *browser.Browser) *Environment {
 	// add command context handlers
 	environment.RegisterContextHandler(func(ctx *scripting.Context, isCompleted bool) {
 		if browser := environment.Browser(); browser != nil {
-			params := map[string]any{
+			var params = map[string]any{
 				`command`: ctx.Label,
 				`offset`:  ctx.AbsoluteStartOffset,
 				`advance`: ctx.Length,
@@ -104,7 +104,9 @@ func (self *Environment) handleReplHelp(ctx *friendscript.InteractiveContext, en
 	// ( .. ) hi black w/ blue bg
 	// < .. > hi green w/ default bg
 
-	lines := []string{}
+	var output string
+	var lines []string
+
 	lines = append(lines, "")
 	lines = append(lines, fmt.Sprintf("[Web]<friend> v%s - %q", Version, Slogan))
 	lines = append(lines, "")
@@ -130,11 +132,9 @@ func (self *Environment) handleReplHelp(ctx *friendscript.InteractiveContext, en
 	lines = append(lines, "                   [░▓▓███████████████]{▜█▓}[▓░]")
 	lines = append(lines, "                       [░░▓▓▓▓▓▓▓▓▓▓▓▓░░]")
 
-	output := ``
-
 	for i, line := range lines {
-		outline := ``
-		state := 0
+		var outline string
+		var state int
 
 		for _, c := range line {
 			switch c {

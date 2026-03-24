@@ -5,15 +5,6 @@ import (
 	"github.com/ghetzel/go-webfriend/browser"
 )
 
-type Orientation string
-
-const (
-	Portrait           Orientation = `portraitPrimary`
-	Landscape                      = `landscapePrimary`
-	PortraitSecondary              = `portraitSecondary`
-	LandscapeSecondary             = `landscapeSecondary`
-)
-
 type ResizeArgs struct {
 	// The width of the screen.
 	Width int `json:"width"`
@@ -71,6 +62,16 @@ func (self *Commands) Back() error {
 func (self *Commands) Forward() error {
 	if pg := self.browser.Page(); pg != nil {
 		var _, err = pg.GoForward()
+		return err
+	} else {
+		return browser.NoActivePage
+	}
+}
+
+// Reload the current tab.
+func (self *Commands) Reload() error {
+	if pg := self.browser.Page(); pg != nil {
+		var _, err = pg.Reload()
 		return err
 	} else {
 		return browser.NoActivePage

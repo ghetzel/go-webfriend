@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -49,14 +50,22 @@ func main() {
 			EnvVar: `WEBFRIEND_SERVER`,
 		},
 		cli.StringFlag{
-			Name:   `address, a`,
-			Usage:  `If running the Webfriend Debugging Server, this specifies the [address]:port to listen on.`,
-			Value:  `:19222`,
-			EnvVar: `WEBFRIEND_SERVER_ADDR`,
+			Name:   `url, u`,
+			Usage:  `Navigate to a URL after starting the browser.`,
+			EnvVar: `WEBFRIEND_INIT_URL`,
+		},
+		cli.StringFlag{
+			Name:   `base-url`,
+			Usage:  `A default URL to use when navigating to relative paths.`,
+			EnvVar: `WEBFRIEND_BASE_URL`,
 		},
 		cli.BoolFlag{
-			Name:  `print-vars, P`,
+			Name:  `dump-vars`,
 			Usage: `Print the final state of all variables upon script completion.`,
+		},
+		cli.StringSliceFlag{
+			Name:  `print-var, P`,
+			Usage: `Print the final state of the named variable upon script completion.`,
 		},
 		cli.StringSliceFlag{
 			Name:  `var, V`,
@@ -84,9 +93,10 @@ func main() {
 		go handleSignals(browser.StopAllActiveBrowsers)
 		defer browser.StopAllActiveBrowsers()
 
-		log.Infof("Starting %s %s...", c.App.Name, c.App.Version)
+		log.Debugf("Starting %s %s...", c.App.Name, c.App.Version)
 		instance = browser.NewBrowser()
-		instance.URL = `https://gary.cool`
+		instance.StartURL = c.String(`url`)
+		instance.BaseURL = c.String(`base-url`)
 
 		if err := instance.Launch(); err == nil {
 			// evaluate Friendscript / run the REPL
@@ -151,8 +161,22 @@ func main() {
 					}
 
 					if scope, err := script.EvaluateReader(input); err == nil {
-						if c.Bool(`print-vars`) {
+						if c.Bool(`dump-vars`) {
 							fmt.Println(scope)
+						} else if prints := c.StringSlice(`print-var`); len(prints) > 0 {
+							var out = make(map[string]any)
+
+							for _, pv := range prints {
+								if vv := scope.Get(pv); vv != nil {
+									out[pv] = vv
+								}
+							}
+
+							if data, err := json.MarshalIndent(out, ``, `  `); err == nil {
+								fmt.Println(string(data))
+							} else {
+								wferr = err
+							}
 						}
 					} else {
 						wferr = fmt.Errorf("runtime error: %v", err)

@@ -20,5 +20,9 @@ func (self *Commands) Source(selector dom.Selector) (string, error) {
 
 // Return the text content for the given element, or for the whole page.
 func (self *Commands) Text(selector dom.Selector) (string, error) {
-	return ``, browser.NotImplemented
+	if pg := self.browser.Page(); pg != nil {
+		return pg.Locator(string(selector)).InnerText()
+	} else {
+		return ``, browser.NoActivePage
+	}
 }

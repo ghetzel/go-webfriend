@@ -13,7 +13,7 @@ type RemoveArgs struct {
 // Remove all occurrences of the element(s) matching the given selector.
 func (self *Commands) Remove(selector dom.Selector, args *RemoveArgs) (int, error) {
 	if args == nil {
-		args = &RemoveArgs{}
+		args = new(RemoveArgs)
 	}
 
 	defaults.SetDefaults(args)
