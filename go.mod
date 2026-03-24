@@ -6,7 +6,7 @@ require (
 	github.com/antchfx/xmlquery v1.5.1
 	github.com/fatih/color v1.19.0
 	github.com/ghetzel/cli v1.17.0
-	github.com/ghetzel/friendscript v0.9.1
+	github.com/ghetzel/friendscript v0.9.4
 	github.com/ghetzel/go-defaults v1.2.0
 	github.com/ghetzel/go-stockutil v1.14.0
 	github.com/jdxcode/netrc v1.0.0

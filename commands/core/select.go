@@ -1,7 +1,7 @@
 package core
 
 import (
-	"time"
+	"fmt"
 
 	defaults "github.com/ghetzel/go-defaults"
 	"github.com/ghetzel/go-stockutil/stringutil"
@@ -11,11 +11,11 @@ import (
 )
 
 type SelectArgs struct {
-	// The timeout before we stop waiting for the element to appear.
-	Timeout time.Duration `json:"timeout" default:"1s"`
+	// The timeout before we stop waiting for the element to appear (in milliseconds.)
+	Timeout int `json:"timeout" default:"1000"`
 
 	// Waits for matching elements to be in a particular state. Values are "visible", "hidden", "attached", "detached". Default is "visible".
-	State string `json:"state" default:"visible"`
+	State string `json:"state"`
 }
 
 // Retrieve the first element matching the given selector.
@@ -40,19 +40,6 @@ func (self *Commands) SelectAll(selector dom.Selector, args *SelectArgs) ([]*dom
 	defaults.SetDefaults(args)
 
 	if pg := self.browser.Page(); pg != nil {
-		var state *playwright.WaitForSelectorState
-
-		switch args.State {
-		case `hidden`:
-			state = playwright.WaitForSelectorStateHidden
-		case `attached`:
-			state = playwright.WaitForSelectorStateAttached
-		case `detached`:
-			state = playwright.WaitForSelectorStateDetached
-		default:
-			state = playwright.WaitForSelectorStateVisible
-		}
-
 		var query playwright.Locator
 		var syntax, expr = stringutil.SplitPairTrailing(string(selector), `=`)
 
@@ -75,11 +62,28 @@ func (self *Commands) SelectAll(selector dom.Selector, args *SelectArgs) ([]*dom
 			query = pg.Locator(string(selector))
 		}
 
-		if err := query.WaitFor(playwright.LocatorWaitForOptions{
-			State:   state,
-			Timeout: playwright.Float(float64(args.Timeout.Milliseconds())),
-		}); err != nil {
-			return nil, nil
+		if args.State != `` {
+			var state *playwright.WaitForSelectorState
+
+			switch args.State {
+			case `hidden`:
+				state = playwright.WaitForSelectorStateHidden
+			case `attached`:
+				state = playwright.WaitForSelectorStateAttached
+			case `detached`:
+				state = playwright.WaitForSelectorStateDetached
+			case `visible`:
+				state = playwright.WaitForSelectorStateVisible
+			default:
+				return nil, fmt.Errorf("invalid state %q", state)
+			}
+
+			if err := query.WaitFor(playwright.LocatorWaitForOptions{
+				State:   state,
+				Timeout: playwright.Float(float64(args.Timeout)),
+			}); err != nil {
+				return nil, nil
+			}
 		}
 
 		return dom.FromPlaywright(query), nil
