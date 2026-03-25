@@ -75,7 +75,7 @@ func (self *Commands) SelectAll(selector dom.Selector, args *SelectArgs) ([]*dom
 			case `visible`:
 				state = playwright.WaitForSelectorStateVisible
 			default:
-				return nil, fmt.Errorf("invalid state %q", state)
+				return nil, fmt.Errorf("invalid state %v", state)
 			}
 
 			if err := query.WaitFor(playwright.LocatorWaitForOptions{

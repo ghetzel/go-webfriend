@@ -24,7 +24,7 @@ autodoc:
 $(WEBFRIEND_BIN):
 	go build -o bin/$(WEBFRIEND_BIN) cmd/webfriend/*.go
 	GOARCH=amd64 go build -tags nocgo --ldflags '-extldflags "-static"' -ldflags '-s' -o bin/webfriend-$(shell go env GOOS)-amd64 cmd/webfriend/*.go
-#	@which webfriend && cp -v bin/$(WEBFRIEND_BIN) `which webfriend` || true
+	@which webfriend && cp -v bin/$(WEBFRIEND_BIN) `which webfriend` || true
 
 build: $(WEBFRIEND_BIN)
 
