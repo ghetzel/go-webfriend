@@ -3,11 +3,11 @@ package core
 import (
 	"fmt"
 
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/stringutil"
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/playwright-community/playwright-go"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-stockutil/stringutil"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/dom"
 )
 
 type SelectArgs struct {

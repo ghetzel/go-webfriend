@@ -1,17 +1,18 @@
-module github.com/ghetzel/go-webfriend
+module go.gary.cool/go-webfriend
 
-go 1.25.0
+go 1.27.0
 
 require (
 	github.com/antchfx/xmlquery v1.5.1
 	github.com/fatih/color v1.19.0
-	github.com/ghetzel/cli v1.17.0
-	github.com/ghetzel/friendscript v0.9.9
-	github.com/ghetzel/go-defaults v1.2.0
-	github.com/ghetzel/go-stockutil v1.14.0
 	github.com/jdxcode/netrc v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/playwright-community/playwright-go v0.5700.1
+	go.gary.cool/cli v1.18.0
+	go.gary.cool/friendscript v0.10.0
+	go.gary.cool/go-defaults v1.3.0
+	go.gary.cool/go-stockutil v1.15.0
+	golang.org/x/term v0.41.0
 )
 
 require (
@@ -22,7 +23,6 @@ require (
 	github.com/deckarep/golang-set/v2 v2.8.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
-	github.com/ghetzel/uuid v0.0.0-20171129191014-dec09d789f3d // indirect
 	github.com/go-jose/go-jose/v3 v3.0.4 // indirect
 	github.com/go-stack/stack v1.8.1 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
@@ -50,10 +50,10 @@ require (
 	github.com/pkg/sftp v1.13.10 // indirect
 	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/urfave/negroni v1.0.1-0.20191011213438-f4316798d5d3 // indirect
+	go.gary.cool/uuid v0.0.0-20171129191014-dec09d789f3d // indirect
 	golang.org/x/crypto v0.49.0 // indirect
 	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/sys v0.42.0 // indirect
-	golang.org/x/term v0.41.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 	gopkg.in/neurosnap/sentences.v1 v1.0.7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect

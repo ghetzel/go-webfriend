@@ -4,8 +4,8 @@ package core
 import (
 	"fmt"
 
-	"github.com/ghetzel/friendscript/commands/core"
-	"github.com/ghetzel/go-webfriend/browser"
+	"go.gary.cool/friendscript/commands/core"
+	"go.gary.cool/go-webfriend/browser"
 )
 
 type Commands struct {

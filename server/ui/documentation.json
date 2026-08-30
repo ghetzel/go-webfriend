@@ -628,6 +628,64 @@
     "summary": "Commonly used commands for basic browser interaction.",
     "commands": [
       {
+        "name": "back",
+        "description": "Navigate back in the current tab's history."
+      },
+      {
+        "name": "click",
+        "description": "Click on HTML element(s) matches by selector.  If multiple is true, then all\nelements matched by selector will be clicked in the order they are returned.\nOtherwise, an error is returned unless selector matches exactly one element.\n\n#### Examples\n\n##### Click on the element with id \"login\"\n```\nclick \"#login\"\n```\n\n##### Click on all `\u003ca\u003e` elements on the page, waiting 150ms between each click.\n```\n\n\tclick \"a\" {\n\t  multiple: true,\n\t  delay:    \"150ms\",\n\t}\n\n```",
+        "argument": {
+          "name": "selector",
+          "types": "Selector"
+        },
+        "options": [
+          {
+            "name": "count",
+            "types": "int",
+            "description": "Number of clicks to perform.",
+            "default": 1
+          },
+          {
+            "name": "delay",
+            "types": "Duration",
+            "description": "Time to waith between mousedown and mouseup events.",
+            "default": "\"20ms\""
+          },
+          {
+            "name": "button",
+            "types": "string",
+            "description": "Which mouse button to simulate during click. Values are \"left\", \"right\", \"middle\". Default \"left\".",
+            "default": "\"left\""
+          },
+          {
+            "name": "match_text",
+            "types": "string",
+            "description": "If provided, this represents a regular expression that the text value of matching elements must match to be clicked."
+          }
+        ]
+      },
+      {
+        "name": "click_at",
+        "description": "Click the page at the given X, Y coordinates.",
+        "options": [
+          {
+            "name": "x",
+            "types": "int",
+            "description": "The X-coordinate to click at"
+          },
+          {
+            "name": "y",
+            "types": "int",
+            "description": "The Y-coordinate to click at"
+          },
+          {
+            "name": "steps",
+            "types": "int",
+            "description": "Number of steps to interpolate when moving."
+          }
+        ]
+      },
+      {
         "name": "env",
         "description": "Retrieves a system environment variable and returns the value of it, or a\nfallback value if the variable does not exist or (optionally) is empty.\n\n#### Examples\n\n##### Get the value of the `USER` environment variable and store it\n```\nenv 'USER' -\u003e $user\n```\n\n##### Require the `LANG`, `USER`, and `CI` environment variables; and fail they are not set.\n```\nenv 'LANG' { required: true }\nenv 'USER' { required: true }\nenv 'CI'   { required: true }\n```",
         "argument": {
@@ -663,11 +721,190 @@
         }
       },
       {
+        "name": "exit",
+        "description": "Immediately close the browser without error or delay."
+      },
+      {
+        "name": "export",
+        "description": "Specify a variable that should be exported to external Javascripts.",
+        "argument": {
+          "name": "name",
+          "types": "string"
+        }
+      },
+      {
         "name": "fail",
         "description": "Immediately exit the script in an error-like fashion with a specific message.",
         "argument": {
           "name": "message",
           "types": "string"
+        }
+      },
+      {
+        "name": "field",
+        "description": "Locate and enter data into a form input field.\n\n#### Examples\n\n##### Type in a username and password, then hit Enter to submit.\n```\n\n\tfield '#username' {\n\t  value: 'myuser',\n\t}\n\n\tfield '#password' {\n\t  value: 'p@ssw0rd!',\n\t  enter: true,\n\t}\n\n```",
+        "argument": {
+          "name": "selector",
+          "types": "Selector"
+        },
+        "options": [
+          {
+            "name": "value",
+            "types": "any",
+            "description": "The value to enter into the field."
+          },
+          {
+            "name": "autoclear",
+            "types": "bool",
+            "description": "Whether to clear the existing contents of the field before entering new data.",
+            "default": true
+          },
+          {
+            "name": "enter",
+            "types": "bool",
+            "description": "Whether to automatically send an \"Enter\" keystroke after typing in the given value"
+          }
+        ]
+      },
+      {
+        "name": "focus",
+        "description": "Focuses the given HTML element described by selector. One and only one element may match the selector.",
+        "argument": {
+          "name": "selector",
+          "types": "Selector"
+        },
+        "options": [
+          {
+            "name": "timeout",
+            "types": "Duration",
+            "description": "The amount of time to wait for the element to focus.",
+            "default": "\"30s\""
+          }
+        ]
+      },
+      {
+        "name": "forward",
+        "description": "Navigate forward in the current tab's history."
+      },
+      {
+        "name": "go",
+        "description": "Navigate to a URL.\n\n#### Examples\n\n##### Go to Google.\n```\ngo \"google.com\"\n```\n\n##### Go to www.example.com, only wait for the first network response, and don't fail if the request times out.\n```\n\n\tgo \"https://www.example.com\" {\n\t  timeout:             '10s',\n\t  continue_on_timeout: true,\n\t  load_event_name:     'Network.responseReceived',\n\t}\n\n```",
+        "argument": {
+          "name": "uri",
+          "types": "string"
+        },
+        "options": [
+          {
+            "name": "referrer",
+            "types": "string",
+            "description": "If a URL is specified, it will be used as the HTTP Referer [sic] header\nfield when going to the given page. If the URL of the currently-loaded\npage and the referrer are the same, the page will no change.\n\nFor this reason, you may specify the special value 'random', which will\ngenerate a URL with a randomly generated path component to ensure that\nit is always different from the current page. Specifying None will omit\nthe field from the request."
+          },
+          {
+            "name": "wait_for_load",
+            "types": "bool",
+            "description": "Whether to block until the page has finished loading.",
+            "default": true
+          },
+          {
+            "name": "timeout",
+            "types": "Duration",
+            "description": "The amount of time to wait for the page to load.",
+            "default": "\"30s\""
+          },
+          {
+            "name": "clear_requests",
+            "types": "bool",
+            "description": "Whether the resources stack that is queried in page::resources and\npage::resource is cleared before navigating. Set this to false to\npreserve the ability to retrieve data that was loaded on previous pages.",
+            "default": false
+          },
+          {
+            "name": "require_originating_request",
+            "types": "bool",
+            "description": "Whether the originating network request is required in the return value.  If this is\nfalse, the response may be missing status, headers, and timing details.",
+            "default": true
+          },
+          {
+            "name": "continue_on_error",
+            "types": "bool",
+            "description": "Whether to continue execution if an error is encountered during page\nload (e.g.: HTTP 4xx/5xx, SSL, TCP connection errors)."
+          },
+          {
+            "name": "continue_statuses",
+            "types": "[]int",
+            "description": "These HTTP status codes are not considered errors."
+          },
+          {
+            "name": "load_event_name",
+            "types": "string",
+            "description": "The RPC event to wait for before proceeding to the next command.",
+            "default": "\"load\""
+          },
+          {
+            "name": "username",
+            "types": "string",
+            "description": "Provide a username if one is requested via HTTP Basic authentication."
+          },
+          {
+            "name": "password",
+            "types": "string",
+            "description": "Provide a password if one is requested via HTTP Basic authentication."
+          },
+          {
+            "name": "realm",
+            "types": "string",
+            "description": "Only provide credentials if the HTTP Basic Authentication Realm matches this one."
+          }
+        ],
+        "return": {
+          "types": "GoResponse",
+          "parameters": [
+            {
+              "name": "url",
+              "types": "string",
+              "description": "The final URL of the page that was loaded."
+            },
+            {
+              "name": "status",
+              "types": "int",
+              "description": "The HTTP status code of the loaded page."
+            },
+            {
+              "name": "timing_details",
+              "types": "map",
+              "description": "A map of durations (in milliseconds) that various phases of the page load took."
+            },
+            {
+              "name": "headers",
+              "types": "map",
+              "description": "Map of HTTP response headers."
+            },
+            {
+              "name": "mime_type",
+              "types": "string",
+              "description": "The MIME type of the response content."
+            },
+            {
+              "name": "remote_address",
+              "types": "string",
+              "description": "The remote address of the loaded page."
+            },
+            {
+              "name": "protocol",
+              "types": "string",
+              "description": "The protocol that was negotiated and used to load the page."
+            }
+          ]
+        }
+      },
+      {
+        "name": "javascript",
+        "description": "Inject Javascript into the current page, evaluate it, and return the results.\nThe script is wrapped in an anonymous function whose return value will be\nreturned from this command as a native data type.\n\nScripts will have access to all exported variables in the calling script (exported with the\n\"export\" command). They are available to injected script as a plain object accessible using\nthe \"webfriend\" variable.\n\n#### Examples\n\n##### Use the `webfriend` local variable to access Friendscript data from JavaScript, make a change, then pass it back.\n```\n$pi = 3.0\n\njavascript \"return webfriend.pi + 0.14\" -\u003e $pi\n# $pi is now 3.14\n```\n\n##### Inject a script that will retrieve all `\u003ca\u003e` tags on a page and return their \"href\" attributes (if present).\n```\njavascript begin\n\n\tvar as = document.querySelectorAll('a');\n\tvar hrefs = [];\n\n\tfor(var i = 0; i \u003c as.length; i++) {\n\t    var a = as[i];\n\t    var href = a.getAttribute('href');\n\n\t    if (href \u0026\u0026 href.length) {\n\t        hrefs.push(href);\n\t    }\n\t}\n\n\treturn hrefs;\n\nend -\u003e $result\n\n# $result now contains an array of zero or more strings as returned from JavaScript.\n```",
+        "argument": {
+          "name": "script",
+          "types": "string"
+        },
+        "return": {
+          "types": "any"
         }
       },
       {
@@ -679,6 +916,57 @@
         }
       },
       {
+        "name": "netrc",
+        "description": "Retrieve a username and password from a .netrc-formatted file.",
+        "argument": {
+          "name": "machine",
+          "types": "string"
+        },
+        "options": [
+          {
+            "name": "filename",
+            "types": "string",
+            "description": "The path to the .netrc file to load values from.",
+            "default": "\"~/.netrc\""
+          },
+          {
+            "name": "extra_fields",
+            "types": "[]string",
+            "description": "A list of additional, non-standard fields to retrieve from the .netrc entry"
+          }
+        ],
+        "return": {
+          "types": "NetrcResponse",
+          "parameters": [
+            {
+              "name": "ok",
+              "types": "bool",
+              "description": "Whether there was a match or not."
+            },
+            {
+              "name": "machine",
+              "types": "string",
+              "description": "The machine name that matched."
+            },
+            {
+              "name": "login",
+              "types": "string",
+              "description": "The login name."
+            },
+            {
+              "name": "password",
+              "types": "string",
+              "description": "The password."
+            },
+            {
+              "name": "fields",
+              "types": "map",
+              "description": "Any additional values retrieved from the entry"
+            }
+          ]
+        }
+      },
+      {
         "name": "put",
         "description": "Store a value in the current scope. Strings will be automatically converted\ninto the appropriate data types (float, int, bool) if possible.",
         "argument": {
@@ -687,6 +975,41 @@
         },
         "return": {
           "types": "any"
+        }
+      },
+      {
+        "name": "reload",
+        "description": "Reload the current tab."
+      },
+      {
+        "name": "resize",
+        "description": "Resizes the active viewport of the current page using the Chrome Device\nEmulation API. This does not resize the window itself, but rather the area\nthe current page interprets the window to be.\n\nThis is useful for setting the size of the area that will be rendered for\nscreenshots and screencasts, or for testing responsive design elements.",
+        "options": [
+          {
+            "name": "width",
+            "types": "int",
+            "description": "The width of the screen."
+          },
+          {
+            "name": "height",
+            "types": "int",
+            "description": "The height of the screen."
+          }
+        ],
+        "return": {
+          "types": "ResizeResponse",
+          "parameters": [
+            {
+              "name": "width",
+              "types": "int",
+              "description": "The final width of the page after resize."
+            },
+            {
+              "name": "height",
+              "types": "int",
+              "description": "The final height of the page after resize."
+            }
+          ]
         }
       },
       {
@@ -719,6 +1042,135 @@
         }
       },
       {
+        "name": "scroll_to",
+        "description": "Scroll the viewport to the location of the first element matched by selector.",
+        "argument": {
+          "name": "selector",
+          "types": "Selector"
+        }
+      },
+      {
+        "name": "scroll_to_coords",
+        "description": "Scroll the viewport to the given X,Y coordinates relative to the top-left of\nthe current page.",
+        "argument": {
+          "name": "x",
+          "types": "int"
+        },
+        "options": [
+          {
+            "name": "y",
+            "types": "int"
+          }
+        ]
+      },
+      {
+        "name": "select",
+        "description": "Retrieve the first element matching the given selector.",
+        "argument": {
+          "name": "selector",
+          "types": "Selector"
+        },
+        "options": [
+          {
+            "name": "timeout",
+            "types": "int",
+            "description": "The timeout before we stop waiting for the element to appear (in milliseconds.)",
+            "default": 1000
+          },
+          {
+            "name": "state",
+            "types": "string",
+            "description": "Waits for matching elements to be in a particular state. Values are \"visible\", \"hidden\", \"attached\", \"detached\". Default is \"visible\"."
+          }
+        ],
+        "return": {
+          "types": "Element"
+        }
+      },
+      {
+        "name": "select_all",
+        "description": "Retrieve all elements matching the given selector.",
+        "argument": {
+          "name": "selector",
+          "types": "Selector"
+        },
+        "options": [
+          {
+            "name": "timeout",
+            "types": "int",
+            "description": "The timeout before we stop waiting for the element to appear (in milliseconds.)",
+            "default": 1000
+          },
+          {
+            "name": "state",
+            "types": "string",
+            "description": "Waits for matching elements to be in a particular state. Values are \"visible\", \"hidden\", \"attached\", \"detached\". Default is \"visible\"."
+          }
+        ],
+        "return": {
+          "types": "[]Element"
+        }
+      },
+      {
+        "name": "toggle",
+        "description": "Make a checkbox or radio button active or inactive.\n\n#### Examples\n\n##### Type in a username and password, then hit Enter to submit.\n```\n\n\tfield '#username' {\n\t  value: 'myuser',\n\t}\n\n\tfield '#password' {\n\t  value: 'p@ssw0rd!',\n\t  enter: true,\n\t}\n\n```",
+        "argument": {
+          "name": "selector",
+          "types": "Selector"
+        },
+        "options": [
+          {
+            "name": "active",
+            "types": "any",
+            "description": "Whether the field should be made active or inactive.",
+            "default": true
+          }
+        ]
+      },
+      {
+        "name": "type",
+        "description": "Input the given textual data as keyboard input into the currently focused\npage element.  The input text contains raw unicode characters that will be typed\nliterally, as well as key names (in accordance with the DOM pre-defined keynames\ndescribed at https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values).\nThese sequences appear between square brackets \"[\" \"]\".\n\nExample: Type in the Konami code\n\n\ttype \"[ArrowUp][ArrowUp][ArrowDown][ArrowDown][ArrowLeft][ArrowRight][ArrowLeft][ArrowRight]BA\"",
+        "argument": {
+          "name": "input",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "key_down_time",
+            "types": "Duration",
+            "description": "How long that each individual keystroke will remain down for.",
+            "default": "\"30ms\""
+          },
+          {
+            "name": "key_down_jitter",
+            "types": "Duration",
+            "description": "An amount of time to randomly vary the `key_down_time` duration from within each keystroke."
+          },
+          {
+            "name": "delay",
+            "types": "Duration",
+            "description": "How long to wait between issuing individual keystrokes.",
+            "default": "\"30ms\""
+          },
+          {
+            "name": "delay_jitter",
+            "types": "Duration",
+            "description": "An amount of time to randomly vary the delay duration from between keystrokes."
+          }
+        ],
+        "return": {
+          "types": "string"
+        }
+      },
+      {
+        "name": "unexport",
+        "description": "Specify a variable that should be unexported.",
+        "argument": {
+          "name": "name",
+          "types": "string"
+        }
+      },
+      {
         "name": "wait",
         "description": "Pauses execution of the current script for the given duration.",
         "argument": {
@@ -729,9 +1181,67 @@
     ]
   },
   {
+    "display_name": "encode",
+    "name": "encode",
+    "commands": [
+      {
+        "name": "base64",
+        "description": "Encode the given data into base64",
+        "argument": {
+          "name": "value",
+          "types": "any"
+        },
+        "return": {
+          "types": "string"
+        }
+      },
+      {
+        "name": "json",
+        "description": "Encode the given data into a JSON document.",
+        "argument": {
+          "name": "value",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "indent",
+            "types": "int",
+            "description": "Indent output with the given number of spaces.",
+            "default": 2
+          }
+        ],
+        "return": {
+          "types": "string"
+        }
+      },
+      {
+        "name": "yaml",
+        "description": "Encode the given data into a YAML document.",
+        "argument": {
+          "name": "value",
+          "types": "any"
+        },
+        "return": {
+          "types": "string"
+        }
+      }
+    ]
+  },
+  {
     "display_name": "file",
     "name": "file",
     "commands": [
+      {
+        "name": "exists",
+        "description": "Return whether the given file exists or not",
+        "argument": {
+          "name": "fileOrReader",
+          "types": "any"
+        },
+        "return": {
+          "types": "bool"
+        }
+      },
       {
         "name": "write",
         "description": "Write a value or a stream of data to a file at the given path.  The destination path can be a local\nfilesystem path, a URI that uses a custom scheme registered outside of the application, or the string\n\"temporary\", which will write to a temporary file whose path will be returned in the response.",
@@ -835,6 +1345,17 @@
         }
       },
       {
+        "name": "is_empty",
+        "description": "Rether the given value is null or zero-length.",
+        "argument": {
+          "name": "value",
+          "types": "any"
+        },
+        "return": {
+          "types": "bool"
+        }
+      },
+      {
         "name": "join",
         "description": "Join an array of inputs into a single string, with each item separated by a given joiner string.",
         "argument": {
@@ -912,6 +1433,17 @@
         }
       },
       {
+        "name": "snakeify",
+        "description": "Return the given string converted to snake-case.",
+        "argument": {
+          "name": "input",
+          "types": "any"
+        },
+        "return": {
+          "types": "string"
+        }
+      },
+      {
         "name": "split",
         "description": "Split a given string by a given delimiter.",
         "argument": {
@@ -938,6 +1470,51 @@
         },
         "return": {
           "types": "string"
+        }
+      },
+      {
+        "name": "test",
+        "description": "Return whether the given string matches the given criteria.",
+        "argument": {
+          "name": "value",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "has_prefix",
+            "types": "string"
+          },
+          {
+            "name": "has_suffix",
+            "types": "string"
+          },
+          {
+            "name": "contains",
+            "types": "string"
+          },
+          {
+            "name": "is_numeric",
+            "types": "bool"
+          },
+          {
+            "name": "is_integer",
+            "types": "bool"
+          },
+          {
+            "name": "is_float",
+            "types": "bool"
+          },
+          {
+            "name": "is_time",
+            "types": "bool"
+          },
+          {
+            "name": "is_duration",
+            "types": "bool"
+          }
+        ],
+        "return": {
+          "types": "bool"
         }
       },
       {
@@ -2210,6 +2787,31 @@
         ],
         "return": {
           "types": "any"
+        }
+      }
+    ]
+  },
+  {
+    "display_name": "xml",
+    "name": "xml",
+    "summary": "Commands for interacting with XML documents",
+    "commands": [
+      {
+        "name": "query",
+        "description": "List all cookies, either for the given set of URLs or for the current tab (if omitted).",
+        "argument": {
+          "name": "xmldoc",
+          "types": "any"
+        },
+        "options": [
+          {
+            "name": "xpath",
+            "types": "string",
+            "description": "Return a list of nodes matching the given XPath expression."
+          }
+        ],
+        "return": {
+          "types": "[]Element"
         }
       }
     ]

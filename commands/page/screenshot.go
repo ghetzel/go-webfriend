@@ -3,10 +3,10 @@ package page
 import (
 	"io"
 
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/pkg/errors"
 	"github.com/playwright-community/playwright-go"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-webfriend/browser"
 )
 
 type ScreenshotArgs struct {

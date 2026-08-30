@@ -1,9 +1,9 @@
 package page
 
 import (
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/dom"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/dom"
 )
 
 type RemoveArgs struct {

@@ -5,15 +5,15 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/ghetzel/friendscript"
-	"github.com/ghetzel/friendscript/commands/file"
-	"github.com/ghetzel/friendscript/scripting"
-	"github.com/ghetzel/go-stockutil/typeutil"
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/commands/cookies"
-	"github.com/ghetzel/go-webfriend/commands/core"
-	"github.com/ghetzel/go-webfriend/commands/page"
-	"github.com/ghetzel/go-webfriend/commands/xml"
+	"go.gary.cool/friendscript"
+	"go.gary.cool/friendscript/commands/file"
+	"go.gary.cool/friendscript/scripting"
+	"go.gary.cool/go-stockutil/typeutil"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/commands/cookies"
+	"go.gary.cool/go-webfriend/commands/core"
+	"go.gary.cool/go-webfriend/commands/page"
+	"go.gary.cool/go-webfriend/commands/xml"
 )
 
 var MaxReaderWait = time.Duration(5) * time.Second

@@ -3,9 +3,9 @@ package core
 import (
 	"time"
 
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/playwright-community/playwright-go"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-webfriend/browser"
 )
 
 type MouseArgs struct {

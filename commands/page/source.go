@@ -1,8 +1,8 @@
 package page
 
 import (
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/dom"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/dom"
 )
 
 // Return the source for the given element, or for the whole page.

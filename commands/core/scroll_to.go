@@ -3,8 +3,8 @@ package core
 import (
 	"fmt"
 
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/dom"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/dom"
 )
 
 // Scroll the viewport to the location of the first element matched by selector.

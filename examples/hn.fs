@@ -1,7 +1,8 @@
-log "Hello"
+#!/usr/bin/env webfriend
+log "[[208:237]]HackerNews                                                                      [[reset]]"
 
 go "https://news.ycombinator.com"
 
-loop $sub in select "tr.submission .title" {
-    log $sub.text
+loop $sub in selectAll "tr.submission .title" {
+    log "[[208:237]]{sub.text}[[reset]]"
 }

@@ -8,7 +8,7 @@
 ## ALPHA ALERT
 
 This software is under _heavy_ development and should not be considered production-ready. Much of it works, but much is still yet to
-be implemented. It is a ground-up rewrite of my [Python version](https://github.com/ghetzel/webfriend) of this project.
+be implemented. It is a ground-up rewrite of my [Python version](https://go.gary.cool/webfriend) of this project.
 Documentation and examples are missing and incomplete at this time, but I am working on it as I am able.
 
 I welcome polite feedback, comments, and suggestions.
@@ -40,7 +40,7 @@ Using [Friendscript](docs/intro.md), straightforward and composable scripts can 
 ## Installation
 
 ```
-go install github.com/ghetzel/go-webfriend/webfriend
+go install go.gary.cool/go-webfriend/webfriend
 ```
 
 ## Documentation

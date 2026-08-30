@@ -3,12 +3,12 @@ package core
 import (
 	"time"
 
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/typeutil"
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/dom"
-	"github.com/ghetzel/go-webfriend/utils"
 	"github.com/playwright-community/playwright-go"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-stockutil/typeutil"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/dom"
+	"go.gary.cool/go-webfriend/utils"
 )
 
 type ClickArgs struct {

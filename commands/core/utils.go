@@ -1,10 +1,10 @@
 package core
 
 import (
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/pathutil"
-	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/jdxcode/netrc"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-stockutil/pathutil"
+	"go.gary.cool/go-webfriend/browser"
 )
 
 // Immediately close the browser without error or delay.

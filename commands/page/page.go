@@ -6,9 +6,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/ghetzel/friendscript"
-	"github.com/ghetzel/go-stockutil/typeutil"
-	"github.com/ghetzel/go-webfriend/browser"
+	"go.gary.cool/friendscript"
+	"go.gary.cool/go-stockutil/typeutil"
+	"go.gary.cool/go-webfriend/browser"
 )
 
 type Commands struct {

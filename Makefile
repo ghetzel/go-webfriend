@@ -17,7 +17,7 @@ deps:
 test: fmt deps
 	@go test ./...
 
-autodoc:
+docs:
 	@go build -o bin/webfriend-autodoc cmd/webfriend-autodoc/*.go
 	@go generate -x ./...
 

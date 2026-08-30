@@ -11,13 +11,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ghetzel/cli"
-	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-stockutil/stringutil"
-	"github.com/ghetzel/go-stockutil/typeutil"
-	webfriend "github.com/ghetzel/go-webfriend"
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/server"
+	"go.gary.cool/cli"
+	"go.gary.cool/go-stockutil/log"
+	"go.gary.cool/go-stockutil/stringutil"
+	"go.gary.cool/go-stockutil/typeutil"
+	webfriend "go.gary.cool/go-webfriend"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/server"
+	"golang.org/x/term"
 )
 
 func main() {
@@ -103,6 +104,8 @@ func main() {
 			var script = webfriend.NewEnvironment(instance)
 			var wferr error
 
+			script.Name = `webfriend`
+
 			// pre-populate initial variables
 			for _, pair := range c.StringSlice(`var`) {
 				k, v := stringutil.SplitPair(pair, `=`)
@@ -113,8 +116,14 @@ func main() {
 				if c.Bool(`server`) {
 					wferr = server.NewServer(script).ListenAndServe(c.String(`address`))
 				} else if c.Bool(`interactive`) {
-					if scope, err := script.REPL(); err == nil {
-						fmt.Println(scope)
+					if state, err := term.GetState(int(os.Stdin.Fd())); err == nil {
+						defer term.Restore(int(os.Stdin.Fd()), state)
+						if scope, err := script.REPL(); err == nil {
+							fmt.Println(scope)
+						} else {
+							wferr = fmt.Errorf("runtime error: %v", err)
+							break
+						}
 					} else {
 						wferr = fmt.Errorf("runtime error: %v", err)
 						break

@@ -20,7 +20,7 @@
 ## Installation
 
 ```
-go get github.com/ghetzel/go-webfriend/cmd/webfriend
+go get go.gary.cool/go-webfriend/cmd/webfriend
 ```
 
 <!--

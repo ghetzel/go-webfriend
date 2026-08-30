@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/ghetzel/go-stockutil/log"
-	"github.com/ghetzel/go-stockutil/sliceutil"
-	webfriend "github.com/ghetzel/go-webfriend"
+	"go.gary.cool/go-stockutil/log"
+	"go.gary.cool/go-stockutil/sliceutil"
+	webfriend "go.gary.cool/go-webfriend"
 )
 
 func main() {

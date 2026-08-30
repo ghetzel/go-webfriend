@@ -3,7 +3,7 @@ package server
 import (
 	"embed"
 
-	webfriend "github.com/ghetzel/go-webfriend"
+	webfriend "go.gary.cool/go-webfriend"
 )
 
 //go:embed ui/*

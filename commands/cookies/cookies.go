@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ghetzel/friendscript"
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/sliceutil"
-	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/playwright-community/playwright-go"
+	"go.gary.cool/friendscript"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-stockutil/sliceutil"
+	"go.gary.cool/go-webfriend/browser"
 )
 
 type Cookie struct {

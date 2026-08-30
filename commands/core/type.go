@@ -5,12 +5,12 @@ import (
 	"regexp"
 	"time"
 
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/rxutil"
-	"github.com/ghetzel/go-stockutil/stringutil"
-	"github.com/ghetzel/go-stockutil/typeutil"
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/utils"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-stockutil/rxutil"
+	"go.gary.cool/go-stockutil/stringutil"
+	"go.gary.cool/go-stockutil/typeutil"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/utils"
 )
 
 var rxKeyCodes = regexp.MustCompile(`(\[[^\]]*?\]|.)`)

@@ -6,12 +6,12 @@ import (
 	"io"
 
 	"github.com/antchfx/xmlquery"
-	"github.com/ghetzel/friendscript"
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/typeutil"
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/dom"
 	"github.com/pkg/errors"
+	"go.gary.cool/friendscript"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-stockutil/typeutil"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/dom"
 )
 
 type Commands struct {

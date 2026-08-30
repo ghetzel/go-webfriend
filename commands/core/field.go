@@ -1,10 +1,10 @@
 package core
 
 import (
-	defaults "github.com/ghetzel/go-defaults"
-	"github.com/ghetzel/go-stockutil/typeutil"
-	"github.com/ghetzel/go-webfriend/browser"
-	"github.com/ghetzel/go-webfriend/dom"
+	defaults "go.gary.cool/go-defaults"
+	"go.gary.cool/go-stockutil/typeutil"
+	"go.gary.cool/go-webfriend/browser"
+	"go.gary.cool/go-webfriend/dom"
 )
 
 type FieldArgs struct {

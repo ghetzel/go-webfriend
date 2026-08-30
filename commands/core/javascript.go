@@ -1,9 +1,9 @@
 package core
 
 import (
-	"github.com/ghetzel/go-stockutil/sliceutil"
-	"github.com/ghetzel/go-webfriend/browser"
 	"github.com/playwright-community/playwright-go"
+	"go.gary.cool/go-stockutil/sliceutil"
+	"go.gary.cool/go-webfriend/browser"
 )
 
 // Inject Javascript into the current page, evaluate it, and return the results.
